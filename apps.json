@@ -1,0 +1,507 @@
+[
+  {
+    "Name": ".NET Desktop Runtime 6.0.1",
+    "ChocolateyName": "dotnet-desktopruntime",
+    "WingetName": "",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": ".NET Framework 4.8",
+    "ChocolateyName": "dotnetfx",
+    "WingetName": "Microsoft.dotNetFramework",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "7-Zip",
+    "ChocolateyName": "7zip.install",
+    "WingetName": "7zip.7zip",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Audacity",
+    "ChocolateyName": "audacity",
+    "WingetName": "Audacity.Audacity",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "AutoHotkey",
+    "ChocolateyName": "autohotkey",
+    "WingetName": "Lexikos.AutoHotkey",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "AzCopy",
+    "ChocolateyName": "azcopy10",
+    "WingetName": "",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Azure CLI",
+    "ChocolateyName": "azure-cli",
+    "WingetName": "Microsoft.AzureCLI",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Beyond Compare",
+    "ChocolateyName": "beyondcompare",
+    "WingetName": "ScooterSoftware.BeyondCompare4",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Bicep CLI",
+    "ChocolateyName": "bicep",
+    "WingetName": "Microsoft.Bicep",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Cascadia Font Family",
+    "ChocolateyName": "cascadiafonts",
+    "WingetName": "",
+    "Groups": [
+    ],
+	"Notes": ""
+  },
+  {
+    "Name": "CPU-Z",
+    "ChocolateyName": "cpu-z.portable",
+    "WingetName": "CPUID.CPU-Z",
+    "Groups": [
+	    "VM"
+    ],
+	"Notes": "Winget doesn't have a portable one, only CPUID.CPU-Z"
+  },
+  {
+    "Name": "CrystalDiskMark",
+    "ChocolateyName": "crystaldiskmark",
+    "WingetName": "CrystalDewWorld.CrystalDiskMark",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Discord",
+    "ChocolateyName": "discord",
+    "WingetName": "Discord.Discord",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Draw.io Desktop",
+    "ChocolateyName": "",
+    "WingetName": "JGraph.Draw",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "EA Desktop",
+    "ChocolateyName": "",
+    "WingetName": "ElectronicArts.EADesktop",
+    "Groups": [
+      "PC"
+    ],
+    "Notes": "EA Desktop replaces Origin"
+  },
+  {
+    "Name": "Epic Games Launcher",
+    "ChocolateyName": "epicgameslauncher",
+    "WingetName": "EpicGames.EpicGamesLauncher",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Everything",
+    "ChocolateyName": "everything",
+    "WingetName": "voidtools.Everything",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Fiddler",
+    "ChocolateyName": "fiddler",
+    "WingetName": "Telerik.Fiddler",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "ffmpeg",
+    "ChocolateyName": "ffmpeg",
+    "WingetName": "",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "foobar2000",
+    "ChocolateyName": "foobar2000",
+    "WingetName": "PeterPawlowski.foobar2000",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "GeForce Experience",
+    "ChocolateyName": "geforce-experience",
+    "WingetName": "Nvidia.GeForceExperience",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "GeForce Game Ready Driver",
+    "ChocolateyName": "geforce-game-ready-driver",
+    "WingetName": "",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Git",
+    "ChocolateyName": "git",
+    "WingetName": "Git.Git",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Google Chrome",
+    "ChocolateyName": "googlechrome",
+    "WingetName": "Google.Chrome",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "Graphviz",
+    "ChocolateyName": "graphviz",
+    "WingetName": "Graphviz.Graphviz",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Greenshot",
+    "ChocolateyName": "greenshot",
+    "WingetName": "Greenshot.Greenshot",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "GPU-Z",
+    "ChocolateyName": "gpu-z",
+    "WingetName": "TechPowerUp.GPU-Z",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "ImDisk Toolkit",
+    "ChocolateyName": "ImDisk-Toolkit",
+    "WingetName": "",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "iPerf3",
+    "ChocolateyName": "iperf3",
+    "WingetName": "",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "iTunes",
+    "ChocolateyName": "iTunes",
+    "WingetName": "Apple.iTunes",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "Lenovo System Update",
+    "ChocolateyName": "lenovo-thinkvantage-system-update",
+    "WingetName": "Lenovo.SystemUpdate",
+    "Groups": [
+      "LAPTOP"
+    ]
+  },
+  {
+    "Name": "LessMSI",
+    "ChocolateyName": "lessmsi",
+    "WingetName": "",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Microsoft 365 Apps for enterprise",
+    "ChocolateyName": "microsoft-office-deployment",
+    "WingetName": "Microsoft.Office",
+    "Groups": [
+      "PC"
+    ],
+	"Notes": "The winget package is Microsoft 365 Apps for enterprise, which is what I want. The chocolatey package does have a way to install that SKU"
+  },
+  {
+    "Name": "Microsoft Edge",
+    "ChocolateyName": "microsoft-edge",
+    "WingetName": "Microsoft.Edge",
+    "Groups": [
+      "VM"
+    ],
+    "Notes": "Edge is still supported on Win7+ https://docs.microsoft.com/en-us/deployedge/microsoft-edge-supported-operating-systems"
+  },
+  {
+    "Name": "Microsoft Teams",
+    "ChocolateyName": "microsoft-teams",
+    "WingetName": "Microsoft.Teams",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Nmap",
+    "ChocolateyName": "",
+    "WingetName": "Insecure.Nmap",
+    "Groups": [
+      "VM"
+    ],
+    "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent."
+  },
+  {
+    "Name": "Notepad++",
+    "ChocolateyName": "notepadplusplus",
+    "WingetName": "Notepad++.Notepad++",
+    "Groups": [
+      "PC",
+      "VM",
+      "VSAW"
+    ]
+  },
+  {
+    "Name": "Power BI Desktop",
+    "ChocolateyName": "powerbi",
+    "WingetName": "Microsoft.PowerBI",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "PowerShell 7",
+    "ChocolateyName": "powershell-core",
+    "WingetName": "Microsoft.PowerShell",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "PowerShell 7 Preview",
+    "ChocolateyName": "powershell-preview",
+    "WingetName": "Microsoft.PowerShell.Preview",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "PowerToys",
+    "ChocolateyName": "",
+    "ChocolateyParams": "--silent",
+    "WingetName": "Microsoft.PowerToys",
+    "Groups": [
+      "PC",
+      "VM"
+    ],
+    "Notes": "The chocolatey package - powertoys - waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
+  },
+  {
+    "Name": "Python",
+    "ChocolateyName": "python",
+    "WingetName": "Python.Python.3",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Rufus",
+    "ChocolateyName": "rufus.portable",
+    "WingetName": "",
+    "Groups": [
+      "VM"
+    ],
+	"Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
+  },
+  {
+    "Name": "ScreenToGif",
+    "ChocolateyName": "screentogif",
+    "WingetName": "NickeManarin.ScreenToGif",
+    "Groups": [
+      "VM"
+    ],
+    "Notes": "ScreenToGif requires .NET Desktop Runtime 6.0.1+ https://download.visualstudio.microsoft.com/download/pr/bf058765-6f71-4971-aee1-15229d8bfb3e/c3366e6b74bec066487cd643f915274d/windowsdesktop-runtime-6.0.1-win-x64.exe"
+  },
+  {
+    "Name": "Steam",
+    "ChocolateyName": "steam-client",
+    "WingetName": "Valve.Steam",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Storage Explorer",
+    "ChocolateyName": "microsoftazurestorageexplorer",
+    "WingetName": "Microsoft.AzureStorageExplorer",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Sysinternals Suite",
+    "ChocolateyName": "sysinternals",
+	  "ChocolateyParams": "\/InstallDir:TOOLSPATH",
+    "WingetName": "9P7KNL5RWT25",
+    "Groups": [
+      "PC",
+      "VM",
+      "VSAW"
+    ],
+    "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
+  },
+  {
+    "Name": "Ubisoft Connect",
+    "ChocolateyName": "ubisoft-connect",
+    "WingetName": "Ubisoft.Connect",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Visual Studio Code",
+    "ChocolateyName": "vscode",
+    "WingetName": "Microsoft.VisualStudioCode",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Visual Studio 2022 Enterprise",
+    "ChocolateyName": "visualstudio2022enterprise",
+    "WingetName": "Microsoft.VisualStudio.2022.Enterprise",
+    "Groups": [
+    ]
+  },
+  {
+    "Name": "WinDbg",
+    "ChocolateyName": "windbg",
+    "WingetName": "9PGJGD53TN86",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Windows Admin Center",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.WindowsAdminCenter",
+    "Groups": [
+      "PC",
+      "VM"
+    ]
+  },
+  {
+    "Name": "Windows Driver Kit 11",
+    "ChocolateyName": "windowsdriverkit11",
+    "WingetName": "",
+    "Groups": [
+    ],
+	"Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
+  },
+  {
+    "Name": "Windows Management Framework and PowerShell",
+    "ChocolateyName": "powershell",
+    "WingetName": "",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Windows Terminal",
+    "ChocolateyName": "",
+    "WingetName": "9N0DX20HK701",
+    "Groups": [
+      "PC",
+      "VM"
+    ],
+    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview"
+  },
+  {
+    "Name": "Windows Terminal Preview",
+    "ChocolateyName": "",
+    "WingetName": "9N8G5RFZ9XK3",
+    "Groups": [
+      "PC"
+    ],
+    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Currently no choco package for terminal preview (choco find *windows*terminal* only returns microsoft-windows-terminal"
+  },
+  {
+    "Name": "WinSCP",
+    "ChocolateyName": "winscp",
+    "WingetName": "WinSCP.WinSCP",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Wireshark",
+    "ChocolateyName": "wireshark",
+    "WingetName": "WiresharkFoundation.Wireshark",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "WizTree",
+    "ChocolateyName": "wiztree",
+    "WingetName": "AntibodySoftware.WizTree",
+    "Groups": [
+      "VM"
+    ]
+  },
+  {
+    "Name": "Zoom",
+    "ChocolateyName": "zoom",
+    "WingetName": "Zoom.Zoom",
+    "Groups": [
+      "PC"
+    ]
+  }
+]
