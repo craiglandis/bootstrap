@@ -36,7 +36,7 @@ DynamicParam
     $appsJsonFilePath = "$PSScriptRoot\apps.json"
     if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
     {
-        $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/apps.json'
+        $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
         (New-Object Net.Webclient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     }
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
@@ -64,7 +64,7 @@ process
 
     function Get-AppList
     {
-        $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/apps.json'
+        $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
         $appsJsonFilePath = "$env:TEMP\apps.json"
         if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
         {
@@ -220,6 +220,16 @@ process
         Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
     }
 
+    $profileFile = $profile.CurrentUserCurrentHost
+    if (Test-Path -Path $profileFile -PathType Leaf)
+    {
+        Write-PSFMessage "$profileFile already exists, don't need to create it"
+    }
+    else
+    {
+        Invoke-ExpressionWithLogging -command "New-Item -Path $profileFile -Type File -Force | Out-Null"
+    }
+
     $ErrorActionPreference = 'SilentlyContinue'
     $chocoVersion = choco -v
     $ErrorActionPreference = 'Continue'
@@ -233,7 +243,7 @@ process
         # Chocolatey install requires at least PS3. Clean install of 2008R2/Win7 only have PS2, so need to manually get PS5.1 installed on those
         if ($PSVersionTable.PSVersion -lt [Version]'3.0')
         {
-            $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/install-wmf.ps1'
+            $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-WMF.ps1'
             $installWmfScriptFilePath = "$env:TEMP\$($installWmfScriptUrl.Split('/')[-1])"
             Start-BitsTransfer -Source $installWmfScriptUrl -Destination $installWmfScriptFilePath
             (New-Object System.Net.WebClient).DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
@@ -298,6 +308,12 @@ process
         {
             Write-PSFMessage "Nuget $($nuget.Version) already installed"
         }
+
+        Import-Module -Name Appx
+    }
+    else
+    {
+        Import-Module -Name Appx -UseWindowsPowerShell
     }
 
     # https://psframework.org/
@@ -318,17 +334,7 @@ process
     if ($psframework)
     {
         Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
-        Write-PSFMessage "PSFramework module $($psframework.Version)"
-    }
-
-    $profileFile = $profile.CurrentUserCurrentHost
-    if (Test-Path -Path $profileFile -PathType Leaf)
-    {
-        Write-PSFMessage "$profileFile already exists, don't need to create it"
-    }
-    else
-    {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $profileFile -Type File -Force | Out-Null"
+        Write-PSFMessage "PSFramework $($psframework.Version)"
     }
 
     $ErrorActionPreference = 'SilentlyContinue'
@@ -373,11 +379,24 @@ process
         exit
     }
 
-    if ($isWin11 -or $isWin10)
+    # Install preview versions of winget and Windows Terminal
+    if ($isWS22 -or $isWin11 -or $isWin10)
     {
+        # This alternate way to install Windows Terminal is only needed on WS22. For Win11/Win10, it's easier to use winget to install Windows Terminal
+        # But using this same approach on WS22/Win11/Win10 simplifies the script
+        # "choco install microsoft-windows-terminal -y" does work on WS22/Win11/Win10, but there's no Windows Terminal Preview chocolatey package, only that package for the release version
+        # So use the "download msixbundle + run Add-AppxPackage" approach instead to install Windows Terminal Preview
+        # $windowsTerminalPreviewMsixBundleUri = 'https://github.com/microsoft/terminal/releases/download/v1.12.3472.0/Microsoft.WindowsTerminalPreview_1.12.3472.0_8wekyb3d8bbwe.msixbundle'
+        # v1.13.10336.0 below released 2022-02-03
+        $windowsTerminalPreviewMsixBundleUri = 'https://github.com/microsoft/terminal/releases/download/v1.13.10336.0/Microsoft.WindowsTerminalPreview_1.13.10336.0_8wekyb3d8bbwe.msixbundle'
+        $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
+        $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
+        (New-Object System.Net.WebClient).DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
+        Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath
+
         # Install winget since it is not installed by default. It is supported on Win10/Win11 but not WS22 although you can get it working on WS22
         # Preview version didn't work, said it needed Microsoft.UI.Xaml 2.7.0 even after I installed Microsoft.UI.Xaml 2.7.0
-        # $wingetAppXPackageUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.3411-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+        # $wingetMsixBundleUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.3411-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
         $vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
         $vcLibsFileName = $vcLibsUrl.Split('/')[-1]
         $vcLibsFilePath = "$env:TEMP\$vcLibsFileName"
@@ -387,28 +406,41 @@ process
             Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
         }
 
-        $wingetAppXPackageUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.1.12653/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
-        $wingetAppXPackageFileName = $wingetAppXPackageUrl.Split('/')[-1]
-        $wingetAppXPackageFilePath = "$env:TEMP\$wingetAppXPackageFileName"
-        (New-Object System.Net.WebClient).DownloadFile($wingetAppXPackageUrl, $wingetAppXPackageFilePath)
+        $microsoftUiXamlPackageUri = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
+        $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUri.Split('/')[-1]
+        $microsoftUiXamlPackageFolderPath = "$env:TEMP\$microsoftUiXamlPackageFileName"
+        $microsoftUiXamlPackageFilePath = "$env:TEMP\$microsoftUiXamlPackageFileName.zip"
+        (New-Object System.Net.WebClient).DownloadFile($microsoftUiXamlPackageUri, $microsoftUiXamlPackageFilePath)
+        Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force
+        $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
+        Add-AppxPackage -Path $microsoftUiXamlAppXFilePath
 
-        if (Test-Path -Path $wingetAppXPackageFilePath -PathType Leaf)
+        $wingetMsixBundleUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+        $wingetMsixBundleFileName = $wingetMsixBundleUrl.Split('/')[-1]
+        $wingetMsixBundleFilePath = "$env:TEMP\$wingetMsixBundleFileName"
+        (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleUrl, $wingetMsixBundleFilePath)
+        $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/b0a0692da1034339b76dce1c298a1e42_License1.xml'
+        $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
+        $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
+        (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
+        if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $wingetAppXPackageFilePath"
+            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
         }
 
         <#
+        winget install --id 9N8G5RFZ9XK3 --exact --silent --accept-package-agreements --accept-source-agreements
         winget install --id Microsoft.Office --exact --silent --accept-package-agreements --accept-source-agreements
         Install-Package Microsoft.UI.Xaml -Version 2.7.1-prerelease.211026002
 
         # didn't need the license file but keeping it here just in case
-        # $wingetAppXPackageLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.1.12653/9c0fe2ce7f8e410eb4a8f417de74517e_License1.xml'
-        # $wingetAppXPackageLicenseFileName = $wingetAppXPackageLicenseUrl.Split('/')[-1]
-        # $wingetAppXPackageLicenseFilePath = "$env:TEMP\$wingetAppXPackageLicenseFileName"
-        # (New-Object System.Net.WebClient).DownloadFile($wingetAppXPackageLicenseUrl, $wingetAppXPackageLicenseFilePath)
-        #if ((Test-Path -Path $wingetAppXPackageFilePath -PathType Leaf) -and (Test-Path -Path $wingetAppXPackageLicenseFilePath -PathType Leaf))
+        # $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.1.12653/9c0fe2ce7f8e410eb4a8f417de74517e_License1.xml'
+        # $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
+        # $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
+        # (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
+        #if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
         #{
-        #    Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetAppXPackageFilePath -LicensePath $wingetAppXPackageLicenseFilePath"
+        #    Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
         #}
 
         #Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
@@ -510,9 +542,9 @@ process
     $webClient = New-Object System.Net.WebClient
 
     $scriptFileUrls = @(
-        'https://raw.githubusercontent.com/craiglandis/ps/master/Set-Cursor.ps1',
-        'https://raw.githubusercontent.com/craiglandis/ps/master/Set-Console.ps1',
-        'https://raw.githubusercontent.com/craiglandis/ps/master/Add-ScheduledTasks.ps1'
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Add-ScheduledTasks.ps1'
     )
 
     $scriptFileUrls | ForEach-Object {
@@ -520,8 +552,8 @@ process
     }
 
     $regFileUrls = @(
-        'https://raw.githubusercontent.com/craiglandis/ps/master/7-zip_auto_extract_downloaded_zip.reg',
-        'https://raw.githubusercontent.com/craiglandis/ps/master/7-zip_double-click_extract_to_folder.reg'
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_auto_extract_downloaded_zip.reg',
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_double-click_extract_to_folder.reg'
     )
 
     $regFileUrls | ForEach-Object {
@@ -534,7 +566,7 @@ process
         }
     }
 
-    $windowsTerminalSettingsUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/windows-terminal-settings.json'
+    $windowsTerminalSettingsUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/windows-terminal-settings.json'
 
     $windowsTerminalSettingsFilePaths = @(
         "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
@@ -585,7 +617,7 @@ process
     # Taskbar on left instead of center
     reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f
 
-    $nppSettingsZipUrl = 'https://github.com/craiglandis/ps/raw/master/npp-settings.zip'
+    $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
     $nppSettingsZipFileName = $nppSettingsZipUrl.Split('/')[-1]
     $nppSettingsZipFilePath = "$env:temp\$nppSettingsZipFileName"
     $nppSettingsTempFolderPath = "$env:TEMP\$($nppSettingsZipFileName.Replace('.zip',''))"
@@ -628,7 +660,7 @@ process
     (New-Object System.Net.WebClient).DownloadFile($esZipUrl, $esZipFilePath)
     Expand-Archive -Path $esZipFilePath -DestinationPath $toolsPath -Force
 
-    $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/es.ini'
+    $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
     $esIniFilePath = "$toolsPath\$esIniFileName"
     (New-Object System.Net.WebClient).DownloadFile($esIniUrl, $esIniFilePath)
@@ -636,7 +668,7 @@ process
     if ($group -eq 'PC' -or $group -eq 'VM')
     {
         # Download some Nirsoft tools into the tools path
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/craiglandis/ps/master/Get-NirsoftTools.ps1'))"
+        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
@@ -649,7 +681,7 @@ process
     $vsCodeUserPath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
     if ((Test-Path -Path $vsCodeSystemPath -PathType Leaf) -or (Test-Path -Path $vsCodeUserPath -PathType Leaf))
     {
-        $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/vscode_settings.json'
+        $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         Write-PSFMessage "Downloading $vsCodeSettingsJsonUrl"
         (New-Object System.Net.WebClient).DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)
@@ -678,7 +710,7 @@ process
         #(Get-Item -Path "$env:SystemDrive\bin").Delete()
     }
 
-    $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/Install-Modules.ps1'
+    $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
     $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
     $installModulesFilePath = "$env:TEMP\$installModulesFileName"
     (New-Object System.Net.WebClient).DownloadFile($installModulesFileUrl,$installModulesFilePath)
@@ -717,43 +749,8 @@ process
         }
     }
 
-
-   <#
-
-    S C:\> $a = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose
-    VERBOSE: ws19 (1/22/2022 7:47:16 PM): Connecting to Windows Update server. Please wait...
-    VERBOSE: Found [1] Updates in pre search criteria
-    VERBOSE: Found [1] Updates in post search criteria
-    VERBOSE: Accepted [1] Updates ready to Download
-    VERBOSE: Downloaded [1] Updates ready to Install
-    VERBOSE: Installed [1] Updates
-    PS C:\> $a
-
-    X ComputerName Result     KB          Size Title
-    - ------------ ------     --          ---- -----
-    3 ws19         Installed  KB2267602    1GB Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.355.2340.0)
-    3 ws19         Installed  KB2267602    1GB Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.355.2340.0)
-    3 ws19         Installed  KB2267602    1GB Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.355.2340.0)
-    function Set-WindowsUpdate {
-        [CmdletBinding()]
-        param(
-          [Parameter(Mandatory=$true)]
-          [string]$value
-        )
-        # 1 - Disable
-        # 4 - Enable
-        net stop wuauserv
-        $Key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
-        New-ItemProperty -Path $Key -Name "AUOptions" -Value $value -PropertyType "DWord" -Force -Confirm:$false
-        Set-ItemProperty -Path $Key -Name "AUOptions" -Value $value -Force -Confirm:$false
-        New-ItemProperty -Path $Key -Name "CachedAUOptions" -Value $value -PropertyType "DWord" -Force -Confirm:$false
-        Set-ItemProperty -Path $Key -Name "CachedAUOptions" -Value $value -Force -Confirm:$false
-        net start wuauserv
-    }
-    #>
-
     # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
-    $greenshotInstallerUrl = 'https://github.com/greenshot/greenshot/releases/download/v1.3.220/Greenshot-INSTALLER-1.3.220-UNSTABLE.exe'
+    $greenshotInstallerUrl = 'https://github.com/greenshot/greenshot/releases/download/v1.3.235/Greenshot-INSTALLER-1.3.235-UNSTABLE.exe'
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
     (New-Object System.Net.WebClient).DownloadFile($greenshotInstallerUrl,$greenshotInstallerFilePath)
