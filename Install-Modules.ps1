@@ -149,7 +149,9 @@ else
         Write-Output "$moduleName not installed, will install it since the script uses it for logging. Will uninstall it at end of script"
         $uninstallPSWriteColor = $true
     }
-    $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+    # Using -AllowClobber for all of these has already bit me once and is generally a bad idea
+    #$command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+    $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -Force"
     Invoke-Expression -Command $command
     if (Get-Module -Name $moduleName -ListAvailable)
     {
@@ -182,7 +184,9 @@ else
     }
     else
     {
-        $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+        # Using -AllowClobber for all of these has already bit me once and is generally a bad idea
+        # $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+        $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -Force"
         Write-Color "Running: ", $command -Color Gray, Cyan
         Invoke-Expression -Command $command
         $powerShellGetInstalledVersions = Get-Module -Name $moduleName -ListAvailable
@@ -200,7 +204,9 @@ else
         {
             Write-Color "Latest $moduleName release version is already installed $($powerShellGetLatestInstalledVersion.Version)"
             # Now that a version that supports -AllowPrerelease is installed, install it again with -AllowPrerelease to get latest prerelease version
-            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -AllowPrerelease -Force"
+            # Using -AllowClobber for all of these has already bit me once and is generally a bad idea
+            # $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -AllowPrerelease -Force"
+            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowPrerelease -Force"
             Write-Color "Running: ", $command -Color Gray, Cyan
             Invoke-Expression -Command $command
             $powerShellGetInstalledVersions = Get-Module -Name $moduleName -ListAvailable
@@ -246,6 +252,8 @@ else
 # The format is <moduleName>,<AllowPrerelease>,<SkipPublisherCheck>,<PSEditionDesktop>,<PSEditionCore>
 # TODO: Add a fourth property for the scenario - PC vs. VM vs. vSAW
 # Az.Tools.Predictor,True,False,False,True - leaving this out until bug is fixed post 0.5.0 release
+# PowerShellCookbook,False,False - leaving this out until I add special casing of -AllowClobber, since this module has a New-SelfSignedCertificate function that runs instead of the PKI module cmdlet New-SelfSignedCertificate if PowerShellCookbook is installed with -AllowClobber
+# pki/New-SelfSignedCertificate is a workaround, but to avoid confusion, don't want to -AllowClobber at all with that module
 $modules = @'
 Az.Accounts,False,False
 Az.Tools.Installer,True,False
@@ -261,7 +269,6 @@ Pester,False,True
 posh-git,False,False
 posh-gist,False,False
 PoshRSJob,False,False
-PowerShellCookbook,False,False
 Profiler,False,False
 PSDevOps,False,False
 PSFramework,False,False
@@ -438,7 +445,9 @@ $modules | Sort-Object | ForEach-Object {#$installedModules | Where-Object Name 
         else
         {
             Write-Color $moduleName, " is not installed. Installing latest PSGallery version ", $galleryVersion -Color Cyan, Gray, Cyan
-            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+            # Using -AllowClobber for all of these has already bit me once and is generally a bad idea
+            #$command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -Force"
             if ($allowPrerelease -eq 'True')
             {
                 $command = "$command -AllowPrerelease"
@@ -551,7 +560,9 @@ $modules | Sort-Object | ForEach-Object {#$installedModules | Where-Object Name 
         {
             Write-Color $moduleName, " Installed: ", $installedVersion, " PSGallery: ", $galleryVersion, "" -Color Green, Gray, Green, Gray, Cyan
             Write-Color "Updating ", $moduleName, " from ", $installedVersion, " to latest PSGallery version ", $galleryVersion -Color Gray, Green, Gray, Green, Gray, Cyan
-            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+            # Using -AllowClobber for all of these has already bit me once and is generally a bad idea
+            # $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -AllowClobber -Force"
+            $command = "Install-Module -Name $moduleName -Repository PSGallery -Scope CurrentUser -Force"
             if ($allowPrerelease -eq 'True')
             {
                 $command = "$command -AllowPrerelease"
