@@ -1,0 +1,121 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.7z]
+@="7-Zip.7z"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.cab]
+@="7-Zip.cab"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.gz]
+@="7-Zip.gz"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.gzip]
+@="7-Zip.gzip"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.rar]
+@="7-Zip.rar"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.tar]
+@="7-Zip.tar"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\.zip]
+@="7-Zip.zip"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.7z]
+@="7z Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.7z\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,0"
+[HKEY_CLASSES_ROOT\7-Zip.7z\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.7z\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.7z\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.7z\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.7z\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.cab]
+@="cab Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.cab\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,7"
+[HKEY_CLASSES_ROOT\7-Zip.cab\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.cab\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.cab\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.cab\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.cab\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gz]
+@="gz Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gz\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,14"
+[HKEY_CLASSES_ROOT\7-Zip.gz\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.gz\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.gz\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gz\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gz\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gzip]
+@="gzip Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gzip\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,14"
+[HKEY_CLASSES_ROOT\7-Zip.gzip\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.gzip\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.gzip\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gzip\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.gzip\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.rar]
+@="rar Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.rar\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,3"
+[HKEY_CLASSES_ROOT\7-Zip.rar\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.rar\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.rar\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.rar\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.rar\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.tar]
+@="tar Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.tar\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,13"
+[HKEY_CLASSES_ROOT\7-Zip.tar\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.tar\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.tar\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.tar\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.tar\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.zip]
+@="zip Archive"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.zip\DefaultIcon]
+@="C:\\Program Files\\7-Zip\\7z.dll,1"
+[HKEY_CLASSES_ROOT\7-Zip.zip\shell]
+@="extract"
+[HKEY_CLASSES_ROOT\7-Zip.zip\shell\extract]
+@="Extract to Folder"
+[HKEY_CLASSES_ROOT\7-Zip.zip\shell\extract\command]
+@="\"C:\\Program Files\\7-Zip\\7zG.exe\" x \"%1\" -o*"
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.zip\shell\open]
+@=""
+[HKEY_CURRENT_USER\SOFTWARE\Classes\7-Zip.zip\shell\open\command]
+@="\"C:\\Program Files\\7-Zip\\7zFM.exe\" \"%1\""
