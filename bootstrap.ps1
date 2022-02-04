@@ -82,6 +82,7 @@ process
 
     $scriptStartTime = Get-Date
     $scriptName = Split-Path -Path $PSCommandPath -Leaf
+    whoami | Out-File -FilePath "$PSScriptRoot\whoami.txt" -Force
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
     Set-Alias -Name Write-PSFMessage -Value Write-Output
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
