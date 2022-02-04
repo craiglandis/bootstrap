@@ -36,16 +36,19 @@ function Add-ScheduledTask
         Write-PSFMessage "Register-ScheduledTask -TaskName $taskName -InputObject (New-ScheduledTask -Action (New-ScheduledTaskAction -Execute $execute -Argument $argument) -Principal (New-ScheduledTaskPrincipal -UserId $env:userdomain\$env:username -RunLevel $runLevel -LogonType Interactive) -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Compatibility Win8))"
         $userId = "$env:userdomain\$env:username"
         $action = New-ScheduledTaskAction -Execute $execute -Argument $argument
-        if ($triggerType = 8)
+        if ($triggerType -eq $TASK_TRIGGER_BOOT)
         {
             $trigger = New-ScheduledTaskTrigger -AtStartup
         }
-        elseif ($triggerType = 9)
+        elseif ($triggerType -eq $TASK_TRIGGER_LOGON)
         {
             $trigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
         }
         $principal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel $runLevel -LogonType Interactive
-        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Compatibility Win8
+        # 'Win8' is the highest compatibility level even in Win11, setting that makes "Configure for" show Windows 10 in the UI for the task
+        # And in the export XMl for the task, version="1.4" is on the second line if the task was created as -Compatibility Win8
+        $compatibility = 'Win8'
+        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Compatibility $compatibility
         $task = New-ScheduledTask -Action $action -Principal $principal -Trigger $trigger -Settings $settings
         Register-ScheduledTask -TaskName $taskName -InputObject $task -Force | Out-Null
 
