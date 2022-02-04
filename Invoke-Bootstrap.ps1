@@ -11,8 +11,8 @@ $bootstrapScriptFilePath = "$env:TEMP\$bootstrapScriptFileName"
 if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
 {
     $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
-    Enable-PSRemoting -Force
+    $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)    
+    Enable-PSRemoting -SkipNetworkProfileCheck -Force
     Invoke-Command -FilePath $bootstrapScriptFilePath -Credential $credential -ComputerName localhost #$env:COMPUTERNAME
     Disable-PSRemoting -Force
 }
