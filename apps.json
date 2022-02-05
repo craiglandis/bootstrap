@@ -76,11 +76,10 @@
   },
   {
     "Name": "Cascadia Font Family",
-    "ChocolateyName": "cascadiafonts",
+    "ChocolateyName": "cascadia-code-nerd-font",
     "WingetName": "",
     "Groups": [
-    ],
-	"Notes": ""
+    ]
   },
   {
     "Name": "CPU-Z",
@@ -209,9 +208,8 @@
     "ChocolateyName": "greenshot",
     "WingetName": "Greenshot.Greenshot",
     "Groups": [
-      "PC",
-      "VM"
-    ]
+    ],
+    "Notes": "Not using choco or winget to install it since neither have the prerelease version"
   },
   {
     "Name": "GPU-Z",
@@ -233,7 +231,6 @@
     "ChocolateyName": "iperf3",
     "WingetName": "",
     "Groups": [
-      "VM"
     ]
   },
   {
@@ -256,7 +253,6 @@
     "ChocolateyName": "lessmsi",
     "WingetName": "",
     "Groups": [
-      "VM"
     ]
   },
   {
@@ -317,17 +313,16 @@
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
     "Groups": [
-      "PC",
-      "VM"
-    ]
+    ],
+    "Notes": "Scripting this install instead of using choco/winget since those packages can be stale"
   },
   {
     "Name": "PowerShell 7 Preview",
     "ChocolateyName": "powershell-preview",
     "WingetName": "Microsoft.PowerShell.Preview",
     "Groups": [
-      "PC"
-    ]
+    ],
+    "Notes": "This package was stale (had 7.2.0-preview.4 when 7.3.0-preview.1 was latest, and since it's easy to get the MSI, just installing it manually instead of with "
   },
   {
     "Name": "PowerToys",
@@ -335,8 +330,7 @@
     "ChocolateyParams": "--silent",
     "WingetName": "Microsoft.PowerToys",
     "Groups": [
-      "PC",
-      "VM"
+      "PC"
     ],
     "Notes": "The chocolatey package - powertoys - waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
   },
@@ -354,7 +348,6 @@
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
     "Groups": [
-      "VM"
     ],
 	"Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
@@ -443,7 +436,7 @@
     "WingetName": "",
     "Groups": [
     ],
-	"Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
+	  "Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
   },
   {
     "Name": "Windows Management Framework and PowerShell",
@@ -458,8 +451,7 @@
     "ChocolateyName": "",
     "WingetName": "9N0DX20HK701",
     "Groups": [
-      "PC",
-      "VM"
+      "PC"
     ],
     "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview"
   },
