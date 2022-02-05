@@ -13,7 +13,7 @@ C:\>powershell -noprofile -nologo -command Uninstall-Module -Name Az.Tools.Predi
 
 https://github.com/Azure/azure-powershell/issues/16586
 
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\install-modules.ps1
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; pwsh -NoLogo -NoProfile -NoExit -File \\tsclient\c\onedrive\my\install-modules.ps1
 
 #>
 
@@ -265,10 +265,6 @@ Microsoft.PowerShell.FileUtility,True,False,False,True
 Microsoft.PowerShell.SecretManagement,False,False
 NTFSSecurity,False,False
 oh-my-posh,True,False
-Pester,False,True
-posh-git,False,False
-posh-gist,False,False
-PoshRSJob,False,False
 Profiler,False,False
 PSDevOps,False,False
 PSFramework,False,False
@@ -287,6 +283,10 @@ $modules = $modules.Split("`n").Trim()
 
 <#
 AzurePSDrive,False,False
+Pester,False,True
+posh-git,False,False
+posh-gist,False,False
+PoshRSJob,False,False
 #>
 
 if ($name)
