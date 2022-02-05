@@ -777,9 +777,9 @@ process
     }
 
     exit
-
+    
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
-    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:SystemRoot\Temp\PSWindowsUpdate$timestamp.log"
+    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:USERPROFILE\Desktop\PSWindowsUpdate$timestamp.log"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
