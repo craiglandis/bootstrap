@@ -382,24 +382,24 @@ process
         exit
     }
 
-    # Install latest PS7 and PS7 Preview
-    $releases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
-
-    $release = $releases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellx64MsiUrl = ($release.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url
-    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
-    $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
-    $webClient.DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
-    msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
-
-    $prerelease = $releases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellPreviewx64MsiUrl = ($prerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url
+    # Install PS7 Preview
+    $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
+    $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
     $webClient.DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
     msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
+    <# Release version
+    $powershellRelease = $powershellReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
+    $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
+    $webClient.DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
+    msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
+    #>
 
-    # Install preview versions of winget and Windows Terminal
+    # Install Windows Terminal and winget
     if ($isWS22 -or $isWin11 -or $isWin10)
     {
         # This alternate way to install Windows Terminal is only needed on WS22. For Win11/Win10, it's easier to use winget to install Windows Terminal
@@ -408,11 +408,22 @@ process
         # So use the "download msixbundle + run Add-AppxPackage" approach instead to install Windows Terminal Preview
         # $windowsTerminalPreviewMsixBundleUri = 'https://github.com/microsoft/terminal/releases/download/v1.12.3472.0/Microsoft.WindowsTerminalPreview_1.12.3472.0_8wekyb3d8bbwe.msixbundle'
         # v1.13.10336.0 below released 2022-02-03
-        $windowsTerminalPreviewMsixBundleUri = 'https://github.com/microsoft/terminal/releases/download/v1.13.10336.0/Microsoft.WindowsTerminalPreview_1.13.10336.0_8wekyb3d8bbwe.msixbundle'
+
+        $windowsTerminalReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/terminal/releases'
+        $windowsTerminalPreviewRelease = $windowsTerminalReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $windowsTerminalPreviewMsixBundleUri = ($windowsTerminalPreviewRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
         $webClient.DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
         Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath
+        <# Release version
+        $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
+        $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $windowsTerminalMsixBundleFileName = $windowsTerminalMsixBundleUri.Split('/')[-1]
+        $windowsTerminalMsixBundleFilePath = "$env:TEMP\$windowsTerminalMsixBundleFileName"
+        $webClient.DownloadFile($windowsTerminalMsixBundleUri, $windowsTerminalMsixBundleFilePath)
+        Add-AppxPackage -Path $windowsTerminalMsixBundleFilePath
+        #>
 
         # Install winget since it is not installed by default. It is supported on Win10/Win11 but not WS22 although you can get it working on WS22
         # Preview version didn't work, said it needed Microsoft.UI.Xaml 2.7.0 even after I installed Microsoft.UI.Xaml 2.7.0
@@ -425,48 +436,45 @@ process
         {
             Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
         }
+        $webClient = (New-Object System.Net.WebClient)
 
-        $microsoftUiXamlPackageUri = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
-        $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUri.Split('/')[-1]
+        $microsoftUiXamlPackageUrl = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
+        $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUrl.Split('/')[-1]
         $microsoftUiXamlPackageFolderPath = "$env:TEMP\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$env:TEMP\$microsoftUiXamlPackageFileName.zip"
-        $webClient.DownloadFile($microsoftUiXamlPackageUri, $microsoftUiXamlPackageFilePath)
+        $webClient.DownloadFile($microsoftUiXamlPackageUrl, $microsoftUiXamlPackageFilePath)
         Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Add-AppxPackage -Path $microsoftUiXamlAppXFilePath
 
-        $wingetMsixBundleUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
-        $wingetMsixBundleFileName = $wingetMsixBundleUrl.Split('/')[-1]
-        $wingetMsixBundleFilePath = "$env:TEMP\$wingetMsixBundleFileName"
-        $webClient.DownloadFile($wingetMsixBundleUrl, $wingetMsixBundleFilePath)
-        $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/b0a0692da1034339b76dce1c298a1e42_License1.xml'
-        $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
-        $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
-        $webClient.DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
-        if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
+        $wingetReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases'
+        $wingetPrerelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $wingetPrereleaseMsixBundleUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $wingetPrereleaseMsixBundleFileName = $wingetPrereleaseMsixBundleUrl.Split('/')[-1]
+        $wingetPrereleaseMsixBundleFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleFileName"
+        $webClient.DownloadFile($wingetPrereleaseMsixBundleUrl, $wingetPrereleaseMsixBundleFilePath)
+        $wingetPrereleaseMsixBundleLicenseUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $wingetPrereleaseMsixBundleLicenseFileName = $wingetPrereleaseMsixBundleLicenseUrl.Split('/')[-1]
+        $wingetPrereleaseMsixBundleLicenseFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleLicenseFileName"
+        $webClient.DownloadFile($wingetPrereleaseMsixBundleLicenseUrl, $wingetPrereleaseMsixBundleLicenseFilePath)
+        if ((Test-Path -Path $wingetPrereleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetPrereleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
+            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath"
         }
-
-        <#
-        winget install --id 9N8G5RFZ9XK3 --exact --silent --accept-package-agreements --accept-source-agreements
-        winget install --id Microsoft.Office --exact --silent --accept-package-agreements --accept-source-agreements
-        Install-Package Microsoft.UI.Xaml -Version 2.7.1-prerelease.211026002
-
-        # didn't need the license file but keeping it here just in case
-        # $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.1.12653/9c0fe2ce7f8e410eb4a8f417de74517e_License1.xml'
-        # $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
-        # $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
-        # $webClient.DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
-        #if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
-        #{
-        #    Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
-        #}
-
-        #Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
-        #Install-Package Microsoft.UI.Xaml -Force
-        # Install-Package Microsoft.VCLibs.140.00.UWPDesktop -Force
-        #Get-Package Microsoft.UI.Xaml
+        <# Release version
+        $wingetrelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $wingetreleaseMsixBundleUrl = ($wingetrelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $wingetreleaseMsixBundleFileName = $wingetreleaseMsixBundleUrl.Split('/')[-1]
+        $wingetreleaseMsixBundleFilePath = "$env:TEMP\$wingetreleaseMsixBundleFileName"
+        $webClient.DownloadFile($wingetreleaseMsixBundleUrl, $wingetreleaseMsixBundleFilePath)
+        $wingetreleaseMsixBundleLicenseUrl = ($wingetrelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $wingetreleaseMsixBundleLicenseFileName = $wingetreleaseMsixBundleLicenseUrl.Split('/')[-1]
+        $wingetreleaseMsixBundleLicenseFilePath = "$env:TEMP\$wingetreleaseMsixBundleLicenseFileName"
+        $webClient.DownloadFile($wingetreleaseMsixBundleLicenseUrl, $wingetreleaseMsixBundleLicenseFilePath)
+        if ((Test-Path -Path $wingetreleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetreleaseMsixBundleLicenseFilePath -PathType Leaf))
+        {
+            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath"
+        }
         #>
     }
 
@@ -598,8 +606,12 @@ process
         if (Test-Path -Path $windowsTerminalSettingsFilePath -PathType Leaf)
         {
             Rename-Item -Path $windowsTerminalSettingsFilePath -NewName "$($windowsTerminalSettingsFilePath.Split('\')[-1]).original"
-            $webClient.DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
         }
+        else
+        {
+            New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force
+        }
+        $webClient.DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
     }
 
     if ($isWin11 -and $group -eq 'PC')
@@ -769,15 +781,15 @@ process
         $scheduleService = New-Object -ComObject Schedule.Service
         $scheduleService.Connect()
         $rootFolder = $scheduleService.GetFolder('\')
-        if ($rootFolder.GetTask($taskName))
+        $tasks = $rootFolder.GetTasks(1) | Select Name,Path,State
+        $bootstrapTask = $tasks | Where-Object {$_.Name -eq $taskName}
+        if ($bootstrapTask)
         {
             Write-PSFMessage "Found $taskName scheduled task from previous script run, deleting it"
             $rootFolder.DeleteTask($taskName, 0)
         }
     }
 
-    exit
-    
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
     $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:USERPROFILE\Desktop\PSWindowsUpdate$timestamp.log"
 
