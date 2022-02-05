@@ -1,4 +1,4 @@
-﻿# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Set-Console.ps1
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Set-Console.ps1
 param(
 	[switch]$UpdateShortcuts = $true, # Change to $true for shortcuts (.lnk) to be updated in addition to the registry changes. Creates backups (*.lnk.bak) before changing the existing shortcut.
 	[switch]$KeepBackupShortcuts = $false # If $true, keeps the backup *.lnk.bak. If $false, removes the backup *.lnk.bak file.
@@ -139,32 +139,53 @@ if (Test-Path -Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe" -PathType L
 
 $faceName = 'Lucida Console'
 
-if ($isPC)
+if ($isPC -or $isVM)
 {
-	$cascadiaCodeZipUrl = 'https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/CascadiaCode.zip'
-	$cascadiaCodeZipFileName = $cascadiaCodeZipUrl.Split('/')[-1]
-	$cascadiaCodeZipFilePath = "$env:temp\$cascadiaCodeZipFileName"
-	$cascadiaCodeExtractedFolderPath = "$env:temp\CascadiaCode"
-	(New-Object System.Net.WebClient).DownloadFile($cascadiaCodeZipUrl, $cascadiaCodeZipFilePath)
-	Expand-Archive -Path $cascadiaCodeZipFilePath -DestinationPath $cascadiaCodeExtractedFolderPath -Force
-
-	# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
-	$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
-	Get-ChildItem -Path $cascadiaCodeExtractedFolderPath | ForEach-Object {
-		$fontPath = $_.FullName
-		if (Test-Path -Path $fontPath -PathType Leaf)
-		{
-			Write-PSFMessage "$fontPath already present"
-		}
-		else
-		{
-			$userFontsFolder.CopyHere($_.FullName, 16)
-		}
-	}
-
 	$systemFontsPath = "$env:SystemRoot\Fonts"
 	$userFontsPath = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
 	$fontFileName = "Caskaydia Cove Nerd Font Complete.ttf"
+	if ((Test-Path -Path "$systemFontsPath\$fontFileName" -PathType Leaf) -or (Test-Path -Path "$userFontsPath\$fontFileName" -PathType Leaf))
+	{
+		Write-PSFMessage "$fontFileName already installed, don't need to install it"
+	}
+	else
+	{
+		Write-PSFMessage "$fontFileName not installed, installing it now"
+		$ErrorActionPreference = 'SilentlyContinue'
+		$chocoVersion = choco -v
+		$ErrorActionPreference = 'Continue'
+
+		if ($chocoVersion)
+		{
+			Write-PSFMessage "Using Chocolatey to install it since Chocolatey itself is already installed"
+			choco install cascadia-code-nerd-font -y
+		}
+		else
+		{
+			$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
+			$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
+			$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+			$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
+			$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
+			$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
+			(New-Object System.Net.WebClient).DownloadFile($cascadiaCodeNerdFontZipUrl, $cascadiaCodeNerdFontZipFilePath)
+			Expand-Archive -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath -Force
+
+			# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
+			$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
+			Get-ChildItem -Path $cascadiaCodeNerdFontExtractedFolderPath | ForEach-Object {
+				$fontPath = $_.FullName
+				if (Test-Path -Path $fontPath -PathType Leaf)
+				{
+					Write-PSFMessage "$fontPath already present"
+				}
+				else
+				{
+					$userFontsFolder.CopyHere($_.FullName, 16)
+				}
+			}
+		}
+	}
 
 	if ((Test-Path -Path "$systemFontsPath\$fontFileName" -PathType Leaf) -or (Test-Path -Path "$userFontsPath\$fontFileName" -PathType Leaf))
 	{
