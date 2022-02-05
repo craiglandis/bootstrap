@@ -10,9 +10,9 @@ Install Visio
 # reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 # netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 # Download and run from CMD
-# @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "(New-Object System.Net.WebClient).DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1');iex 'c:\my\bootstrap.ps1 -sysinternals'"
+# @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "$webClient.DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1');iex 'c:\my\bootstrap.ps1 -sysinternals'"
 # Download and run from PS
-# (New-Object System.Net.WebClient).DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1'); iex 'c:\my\bootstrap.ps1 -sysinternals'
+# $webClient.DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1'); iex 'c:\my\bootstrap.ps1 -sysinternals'
 # Run from RDP client
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
 #>
@@ -37,7 +37,7 @@ DynamicParam
     if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-        (New-Object Net.Webclient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
+        (New-Object System.Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     }
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
     $appNames = $apps.Name
@@ -74,7 +74,7 @@ process
             }
             else
             {
-                (New-Object Net.Webclient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
+                $webClient.DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
             }
         }
         Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
@@ -83,6 +83,8 @@ process
     $scriptStartTime = Get-Date
     $scriptName = Split-Path -Path $PSCommandPath -Leaf
     whoami | Out-File -FilePath "$PSScriptRoot\whoami.txt" -Force
+    $webClient = New-Object System.Net.WebClient
+
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
     Set-Alias -Name Write-PSFMessage -Value Write-Output
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
@@ -107,7 +109,7 @@ process
         # https://devblogs.microsoft.com/powershell/when-powershellget-v1-fails-to-install-the-nuget-provider/
         #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-       <# 2008R2/Win7 don't support TLS1.2 until PS5.1/WMF are installed, before then this will result in error:
+        <# 2008R2/Win7 don't support TLS1.2 until PS5.1/WMF are installed, before then this will result in error:
         PS C:\> [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         Exception setting "SecurityProtocol": "Cannot convert value "3312" to type "System.Net.SecurityProtocolType" due to invalid enumeration values. Specify one of the following enumeration values and try again. The possible enumeration values are "Ssl3, Tls"."
         #>
@@ -247,14 +249,14 @@ process
             $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-WMF.ps1'
             $installWmfScriptFilePath = "$env:TEMP\$($installWmfScriptUrl.Split('/')[-1])"
             Start-BitsTransfer -Source $installWmfScriptUrl -Destination $installWmfScriptFilePath
-            (New-Object System.Net.WebClient).DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
+            $webClient.DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
             Invoke-ExpressionWithLogging -command $installWmfScriptFilePath
             # The install WMF script will issue a retart on its own
             exit
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
@@ -285,14 +287,14 @@ process
     {
         # 14393+ definitely have PS5.1, 10240 and 10586 may not, but nobody uses those early days Win10 builds anymore anyway.
         # The chocolatey package checks if PowerShell 5.1 is installed, if so, it does not try to install it
-        Invoke-ExpressionWithLogging -command "choco install powershell -y"
+        Invoke-ExpressionWithLogging -command 'choco install powershell -y'
         if ($LASTEXITCODE -eq 3010)
         {
-            Write-PSFMessage "Creating onstart scheduled task to run script again at startup"
+            Write-PSFMessage 'Creating onstart scheduled task to run script again at startup'
             $scriptPath = "$env:SystemRoot\Temp\$scriptName"
             Invoke-ExpressionWithLogging -command "Copy-Item -Path $PSCommandPath -Destination $scriptPath"
             Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $scriptPath`" /f"
-            Invoke-ExpressionWithLogging -command "Restart-Computer -Force"
+            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
         }
     }
 
@@ -355,7 +357,7 @@ process
             New-Item -Path $installDir -ItemType Directory | Out-Null
         }
 
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+        Invoke-ExpressionWithLogging -command "Invoke-Expression ($webClient.DownloadString('https://chocolatey.org/install.ps1'))"
         $ErrorActionPreference = 'SilentlyContinue'
         $chocoVersion = choco -v
         $ErrorActionPreference = 'Continue'
@@ -380,6 +382,23 @@ process
         exit
     }
 
+    # Install latest PS7 and PS7 Preview
+    $releases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
+
+    $release = $releases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellx64MsiUrl = ($release.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url
+    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
+    $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
+    $webClient.DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
+    msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
+
+    $prerelease = $releases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellPreviewx64MsiUrl = ($prerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url
+    $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
+    $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
+    $webClient.DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
+    msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
+
     # Install preview versions of winget and Windows Terminal
     if ($isWS22 -or $isWin11 -or $isWin10)
     {
@@ -392,7 +411,7 @@ process
         $windowsTerminalPreviewMsixBundleUri = 'https://github.com/microsoft/terminal/releases/download/v1.13.10336.0/Microsoft.WindowsTerminalPreview_1.13.10336.0_8wekyb3d8bbwe.msixbundle'
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
-        (New-Object System.Net.WebClient).DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
+        $webClient.DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
         Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath
 
         # Install winget since it is not installed by default. It is supported on Win10/Win11 but not WS22 although you can get it working on WS22
@@ -401,7 +420,7 @@ process
         $vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
         $vcLibsFileName = $vcLibsUrl.Split('/')[-1]
         $vcLibsFilePath = "$env:TEMP\$vcLibsFileName"
-        (New-Object System.Net.WebClient).DownloadFile($vcLibsUrl, $vcLibsFilePath)
+        $webClient.DownloadFile($vcLibsUrl, $vcLibsFilePath)
         if (Test-Path -Path $vcLibsFilePath -PathType Leaf)
         {
             Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
@@ -411,7 +430,7 @@ process
         $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUri.Split('/')[-1]
         $microsoftUiXamlPackageFolderPath = "$env:TEMP\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$env:TEMP\$microsoftUiXamlPackageFileName.zip"
-        (New-Object System.Net.WebClient).DownloadFile($microsoftUiXamlPackageUri, $microsoftUiXamlPackageFilePath)
+        $webClient.DownloadFile($microsoftUiXamlPackageUri, $microsoftUiXamlPackageFilePath)
         Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Add-AppxPackage -Path $microsoftUiXamlAppXFilePath
@@ -419,11 +438,11 @@ process
         $wingetMsixBundleUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
         $wingetMsixBundleFileName = $wingetMsixBundleUrl.Split('/')[-1]
         $wingetMsixBundleFilePath = "$env:TEMP\$wingetMsixBundleFileName"
-        (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleUrl, $wingetMsixBundleFilePath)
+        $webClient.DownloadFile($wingetMsixBundleUrl, $wingetMsixBundleFilePath)
         $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/b0a0692da1034339b76dce1c298a1e42_License1.xml'
         $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
         $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
-        (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
+        $webClient.DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
         if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
         {
             Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
@@ -438,7 +457,7 @@ process
         # $wingetMsixBundleLicenseUrl = 'https://github.com/microsoft/winget-cli/releases/download/v1.1.12653/9c0fe2ce7f8e410eb4a8f417de74517e_License1.xml'
         # $wingetMsixBundleLicenseFileName = $wingetMsixBundleLicenseUrl.Split('/')[-1]
         # $wingetMsixBundleLicenseFilePath = "$env:TEMP\$wingetMsixBundleLicenseFileName"
-        # (New-Object System.Net.WebClient).DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
+        # $webClient.DownloadFile($wingetMsixBundleLicenseUrl, $wingetMsixBundleLicenseFilePath)
         #if ((Test-Path -Path $wingetMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetMsixBundleLicenseFilePath -PathType Leaf))
         #{
         #    Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetMsixBundleFilePath -LicensePath $wingetMsixBundleLicenseFilePath"
@@ -455,6 +474,8 @@ process
     {
         $apps = $apps | Where-Object {$_.Groups -contains $group}
     }
+
+    $wingetVersion = winget -v
 
     Write-PSFMessage "Mode: $group"
     Write-PSFMessage "$($apps.Count) apps to be installed"
@@ -498,7 +519,7 @@ process
             }
             Invoke-ExpressionWithLogging -command $command
         }
-        elseif ($appName -and !$useChocolatey)
+        elseif ($appName -and !$useChocolatey -and $wingetVersion)
         {
             $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements"
             Invoke-ExpressionWithLogging -command $command
@@ -540,8 +561,6 @@ process
     Invoke-ExpressionWithLogging -command 'Remove-Item "$env:public\Desktop\*.lnk" -Force'
     Invoke-ExpressionWithLogging -command 'Remove-Item "$env:userprofile\desktop\*.lnk" -Force'
 
-    $webClient = New-Object System.Net.WebClient
-
     $scriptFileUrls = @(
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
@@ -579,7 +598,7 @@ process
         if (Test-Path -Path $windowsTerminalSettingsFilePath -PathType Leaf)
         {
             Rename-Item -Path $windowsTerminalSettingsFilePath -NewName "$($windowsTerminalSettingsFilePath.Split('\')[-1]).original"
-            (New-Object System.Net.WebClient).DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
+            $webClient.DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
         }
     }
 
@@ -636,7 +655,7 @@ process
         Invoke-ExpressionWithLogging -command "New-Item -Path $nppSettingsFolderPath -Type Directory -Force | Out-Null"
     }
 
-    (New-Object System.Net.WebClient).DownloadFile($nppSettingsZipUrl, $nppSettingsZipFilePath)
+    $webClient.DownloadFile($nppSettingsZipUrl, $nppSettingsZipFilePath)
     Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force
     Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath
     Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath
@@ -658,18 +677,18 @@ process
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.21.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
     $esZipFilePath = "$env:TEMP\$esZipFileName"
-    (New-Object System.Net.WebClient).DownloadFile($esZipUrl, $esZipFilePath)
+    $webClient.DownloadFile($esZipUrl, $esZipFilePath)
     Expand-Archive -Path $esZipFilePath -DestinationPath $toolsPath -Force
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
     $esIniFilePath = "$toolsPath\$esIniFileName"
-    (New-Object System.Net.WebClient).DownloadFile($esIniUrl, $esIniFilePath)
+    $webClient.DownloadFile($esIniUrl, $esIniFilePath)
 
     if ($group -eq 'PC' -or $group -eq 'VM')
     {
         # Download some Nirsoft tools into the tools path
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
+        Invoke-ExpressionWithLogging -command "Invoke-Expression ($webClient.DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
@@ -684,15 +703,16 @@ process
     {
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
+        New-Item -Path $vsCodeSettingsJsonPath -Force
         Write-PSFMessage "Downloading $vsCodeSettingsJsonUrl"
-        (New-Object System.Net.WebClient).DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)
+        $webClient.DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)
     }
     else
     {
         Write-PSFMessage "VSCode not installed, skipping download of $vsCodeSettingsJsonUrl"
     }
 
-    Invoke-ExpressionWithLogging -command "Update-Help -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging -command 'Update-Help -Force -ErrorAction SilentlyContinue'
     $pwshFilePath = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
     if (Test-Path -Path $pwshFilePath -PathType Leaf)
     {
@@ -714,19 +734,19 @@ process
     $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
     $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
     $installModulesFilePath = "$env:TEMP\$installModulesFileName"
-    (New-Object System.Net.WebClient).DownloadFile($installModulesFileUrl,$installModulesFilePath)
+    $webClient.DownloadFile($installModulesFileUrl, $installModulesFilePath)
 
     if (Test-Path -Path $installModulesFilePath -PathType Leaf)
     {
-        Invoke-Expression -command "powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
-        Invoke-Expression -command "powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
-        Invoke-Expression -command "powershell -nologo -noprofile -file $installModulesFilePath"
+        Invoke-Expression -Command 'powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
+        Invoke-Expression -Command 'powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
+        Invoke-Expression -Command "powershell -nologo -noprofile -file $installModulesFilePath"
 
         if (Test-Path -Path $pwshFilePath -PathType Leaf)
         {
-            Invoke-Expression -command "pwsh -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
-            Invoke-Expression -command "pwsh -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
-            Invoke-Expression -command "pwsh -nologo -noprofile -file $installModulesFilePath"
+            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
+            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
+            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
         }
     }
     else
@@ -734,28 +754,32 @@ process
         Write-PSFMessage "File not found: $installModulesFilePath"
     }
 
-    $timestamp = Get-Date -Format yyyyMMddHHmmssff
-    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:SystemRoot\Temp\PSWindowsUpdate$timestamp.log"
+    # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
+    $releases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/greenshot/greenshot/releases'
+    $prerelease = $releases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
+    $greenshotInstallerUrl = ($prerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
+    $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
+    $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
+    $webClient.DownloadFile($greenshotInstallerUrl, $greenshotInstallerFilePath)
+    Invoke-ExpressionWithLogging "$greenshotInstallerFilePath /VERYSILENT /NORESTART"
 
     if ($isPC -or $isVM)
     {
         $taskName = 'bootstrap'
         $scheduleService = New-Object -ComObject Schedule.Service
         $scheduleService.Connect()
-        $rootFolder = $scheduleService.GetFolder("\")
+        $rootFolder = $scheduleService.GetFolder('\')
         if ($rootFolder.GetTask($taskName))
         {
             Write-PSFMessage "Found $taskName scheduled task from previous script run, deleting it"
-            $rootFolder.DeleteTask($taskName,0)
+            $rootFolder.DeleteTask($taskName, 0)
         }
     }
 
-    # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
-    $greenshotInstallerUrl = 'https://github.com/greenshot/greenshot/releases/download/v1.3.235/Greenshot-INSTALLER-1.3.235-UNSTABLE.exe'
-    $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
-    $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
-    (New-Object System.Net.WebClient).DownloadFile($greenshotInstallerUrl,$greenshotInstallerFilePath)
-    Invoke-ExpressionWithLogging "$greenshotInstallerFilePath /VERYSILENT /NORESTART"
+    exit
+
+    $timestamp = Get-Date -Format yyyyMMddHHmmssff
+    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:SystemRoot\Temp\PSWindowsUpdate$timestamp.log"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
