@@ -81,7 +81,24 @@ process
     }
 
     $scriptStartTime = Get-Date
+    $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
     $scriptName = Split-Path -Path $PSCommandPath -Leaf
+    $scriptBaseName = $scriptName.TrimEnd('.ps1')
+
+    $logPath = "$env:SystemDrive\logs"
+    if (Test-Path -Path $logPath -PathType Container)
+    {
+        Write-PSFMessage "Log path $logPath already exists, don't need to create it"
+    }
+    else
+    {
+        Write-PSFMessage "Creating log path $logPath "
+        New-Item -Path $logPath -ItemType Directory -Force | Out-Null
+    }
+    $runCount = (Get-ChildItem -Path "$logPath\$scriptBaseName-Run*" -File | Measure-Object).Count
+    $runCount++
+
+
     whoami | Out-File -FilePath "$PSScriptRoot\whoami.txt" -Force
     $webClient = New-Object System.Net.WebClient
 
@@ -337,6 +354,14 @@ process
     if ($psframework)
     {
         Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
+        $logFilePath = "$logPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
+        $paramSetPSFLoggingProvider = @{
+            Name = 'logfile'
+            #InstanceName = $scriptBaseName
+            FilePath = $logFilePath
+            Enabled = $true
+        }
+        Set-PSFLoggingProvider @paramSetPSFLoggingProvider
         Write-PSFMessage "PSFramework $($psframework.Version)"
     }
 
@@ -790,8 +815,57 @@ process
         }
     }
 
+    if ($isVM)
+    {
+        # Set file type associations (FTAs) with SetUserFTA, which works around how Win8+ protects certain FTAs from being configure the old way in the registry
+        # https://kolbi.cz/blog/2017/10/25/setuserfta-userchoice-hash-defeated-set-file-type-associations-per-user/
+        # HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\<extension>\OpenWithList
+        choco install SetUserFTA -y
+        # Browser
+        SetUserFTA http MSEdgeHTM
+        SetUserFTA https MSEdgeHTM
+        SetUserFTA microsoft-edge MSEdgeHTM
+        SetUserFTA .htm MSEdgeHTM
+        SetUserFTA .html MSEdgeHTM
+        SetUserFTA .pdf MSEdgeHTM
+        # Logs/config
+        SetUserFTA .bas applications\notepad++.exe
+        SetUserFTA .cfg applications\notepad++.exe
+        SetUserFTA .conf applications\notepad++.exe
+        SetUserFTA .config applications\notepad++.exe
+        SetUserFTA .csv applications\notepad++.exe
+        SetUserFTA .inf applications\notepad++.exe
+        SetUserFTA .ini applications\notepad++.exe
+        SetUserFTA .json applications\notepad++.exe
+        SetUserFTA .log applications\notepad++.exe
+        SetUserFTA .rdp applications\notepad++.exe
+        SetUserFTA .reg applications\notepad++.exe
+        SetUserFTA .settings applications\notepad++.exe
+        SetUserFTA .status applications\notepad++.exe
+        SetUserFTA .txt applications\notepad++.exe
+        SetUserFTA .xml applications\notepad++.exe
+        # Code
+        SetUserFTA .bat applications\code.exe
+        SetUserFTA .cmd applications\code.exe
+        SetUserFTA .ps1 applications\code.exe
+        SetUserFTA .ps1xml applications\code.exe
+        SetUserFTA .psd1 applications\code.exe
+        SetUserFTA .psm1 applications\code.exe
+        SetUserFTA .py applications\code.exe
+        SetUserFTA .sh applications\code.exe
+        SetUserFTA .vbs applications\code.exe
+        SetUserFTA .wsf applications\code.exe
+        SetUserFTA .xaml applications\code.exe
+        SetUserFTA .xls applications\code.exe
+        SetUserFTA .xlsm applications\code.exe
+        SetUserFTA .xsl applications\code.exe
+        SetUserFTA .xslt applications\code.exe
+        SetUserFTA .yaml applications\code.exe
+        SetUserFTA .yml applications\code.exe
+    }
+
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
-    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$env:USERPROFILE\Desktop\PSWindowsUpdate$timestamp.log"
+    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$logPath\Get-WindowsUpdate-$timestamp.log"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
@@ -799,8 +873,7 @@ process
     $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
     $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
     $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
-    Copy-Item -Path $psFrameworkLogFilePath -Destination "$env:USERPROFILE\Desktop"
-    Copy-Item -Path "$env:ProgramData\chocolatey\logs\chocolatey.log" -Destination "$env:USERPROFILE\Desktop"
+    Copy-Item -Path "$env:ProgramData\chocolatey\logs\chocolatey.log" -Destination $logPath
 
     Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
 }
