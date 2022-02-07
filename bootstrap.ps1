@@ -9,10 +9,6 @@ Install Visio
 # wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
 # reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 # netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
-# Download and run from CMD
-# @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "$webClient.DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1');iex 'c:\my\bootstrap.ps1 -sysinternals'"
-# Download and run from PS
-# $webClient.DownloadFile('https://aka.ms/bootstrap','c:\my\bootstrap.ps1'); iex 'c:\my\bootstrap.ps1 -sysinternals'
 # Run from RDP client
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
 #>
@@ -37,7 +33,7 @@ DynamicParam
     if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-        (New-Object System.Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
+        (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     }
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
     $appNames = $apps.Name
@@ -62,6 +58,20 @@ process
         Invoke-Expression -Command $command
     }
 
+    function Set-PSFramework
+    {
+        Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
+        $logFilePath = "$bsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
+        $paramSetPSFLoggingProvider = @{
+            Name = 'logfile'
+            FilePath = $logFilePath
+            Enabled = $true
+        }
+        Set-PSFLoggingProvider @paramSetPSFLoggingProvider
+        Write-PSFMessage "PSFramework $($psframework.Version)"
+        Write-PSFMessage "Log path: $bsPath"
+    }
+
     function Get-AppList
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
@@ -74,36 +84,39 @@ process
             }
             else
             {
-                $webClient.DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
+                (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
             }
         }
         Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
     }
 
+    $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+    $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
+
     $scriptStartTime = Get-Date
     $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
-    $scriptName = Split-Path -Path $PSCommandPath -Leaf
+    #$scriptName = Split-Path -Path $PSCommandPath -Leaf
+    $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
     $scriptBaseName = $scriptName.TrimEnd('.ps1')
 
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
     Set-Alias -Name Write-PSFMessage -Value Write-Output
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
 
-    $logPath = "$env:SystemDrive\logs"
-    if (Test-Path -Path $logPath -PathType Container)
+    $bsPath = "$env:SystemDrive\bs"
+    if (Test-Path -Path $bsPath -PathType Container)
     {
-        Write-PSFMessage "Log path $logPath already exists, don't need to create it"
+        Write-PSFMessage "Log path $bsPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating log path $logPath"
-        New-Item -Path $logPath -ItemType Directory -Force | Out-Null
+        Write-PSFMessage "Creating log path $bsPath"
+        New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
     }
-    $runCount = (Get-ChildItem -Path "$logPath\$scriptBaseName-Run*" -File | Measure-Object).Count
+    $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-    whoami | Out-File -FilePath "$logPath\whoami.txt" -Force
-    $webClient = New-Object System.Net.WebClient
+    whoami | Out-File -FilePath "$bsPath\whoami.txt" -Force
 
     $ProgressPreference = 'SilentlyContinue'
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
@@ -266,14 +279,14 @@ process
             $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-WMF.ps1'
             $installWmfScriptFilePath = "$env:TEMP\$($installWmfScriptUrl.Split('/')[-1])"
             Start-BitsTransfer -Source $installWmfScriptUrl -Destination $installWmfScriptFilePath
-            $webClient.DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
+            (New-Object Net.WebClient).DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
             Invoke-ExpressionWithLogging -command $installWmfScriptFilePath
             # The install WMF script will issue a retart on its own
             exit
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
@@ -339,30 +352,25 @@ process
     # https://psframework.org/
     Import-Module -Name PSFramework -ErrorAction SilentlyContinue
     $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-    if (!$psframework)
+    if ($psframework)
+    {
+        Set-PSFramework
+    }
+    else
     {
         Write-PSFMessage 'PSFramework module not found, installing it'
         Install-Module -Name PSFramework -Repository PSGallery -Scope CurrentUser -AllowClobber -Force -ErrorAction SilentlyContinue
         Import-Module -Name PSFramework -ErrorAction SilentlyContinue
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-        if (!$psframework)
+        if ($psframework)
         {
-            Write-PSFMessage 'PSFramework module failed to install'
+            Set-PSFramework
         }
-    }
-
-    if ($psframework)
-    {
-        Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
-        $logFilePath = "$logPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
-        $paramSetPSFLoggingProvider = @{
-            Name = 'logfile'
-            #InstanceName = $scriptBaseName
-            FilePath = $logFilePath
-            Enabled = $true
+        else
+        {
+            Write-PSFMessage 'PSFramework module failed to install' -Level
+            exit
         }
-        Set-PSFLoggingProvider @paramSetPSFLoggingProvider
-        Write-PSFMessage "PSFramework $($psframework.Version)"
     }
 
     $ErrorActionPreference = 'SilentlyContinue'
@@ -382,7 +390,7 @@ process
             New-Item -Path $installDir -ItemType Directory | Out-Null
         }
 
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ($webClient.DownloadString('https://chocolatey.org/install.ps1'))"
+        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
         $ErrorActionPreference = 'SilentlyContinue'
         $chocoVersion = choco -v
         $ErrorActionPreference = 'Continue'
@@ -413,14 +421,14 @@ process
     $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
-    $webClient.DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
+    (New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
     msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
     <# Release version
     $powershellRelease = $powershellReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
     $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
-    $webClient.DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
+    (New-Object Net.WebClient).DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
     msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
     #>
 
@@ -439,14 +447,14 @@ process
         $windowsTerminalPreviewMsixBundleUri = ($windowsTerminalPreviewRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
-        $webClient.DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
+        (New-Object Net.WebClient).DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
         Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath
         <# Release version
         $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleFileName = $windowsTerminalMsixBundleUri.Split('/')[-1]
         $windowsTerminalMsixBundleFilePath = "$env:TEMP\$windowsTerminalMsixBundleFileName"
-        $webClient.DownloadFile($windowsTerminalMsixBundleUri, $windowsTerminalMsixBundleFilePath)
+        (New-Object Net.WebClient).DownloadFile($windowsTerminalMsixBundleUri, $windowsTerminalMsixBundleFilePath)
         Add-AppxPackage -Path $windowsTerminalMsixBundleFilePath
         #>
 
@@ -456,18 +464,17 @@ process
         $vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
         $vcLibsFileName = $vcLibsUrl.Split('/')[-1]
         $vcLibsFilePath = "$env:TEMP\$vcLibsFileName"
-        $webClient.DownloadFile($vcLibsUrl, $vcLibsFilePath)
+        (New-Object Net.WebClient).DownloadFile($vcLibsUrl, $vcLibsFilePath)
         if (Test-Path -Path $vcLibsFilePath -PathType Leaf)
         {
             Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
         }
-        $webClient = (New-Object System.Net.WebClient)
 
         $microsoftUiXamlPackageUrl = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
         $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUrl.Split('/')[-1]
         $microsoftUiXamlPackageFolderPath = "$env:TEMP\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$env:TEMP\$microsoftUiXamlPackageFileName.zip"
-        $webClient.DownloadFile($microsoftUiXamlPackageUrl, $microsoftUiXamlPackageFilePath)
+        (New-Object Net.WebClient).DownloadFile($microsoftUiXamlPackageUrl, $microsoftUiXamlPackageFilePath)
         Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Add-AppxPackage -Path $microsoftUiXamlAppXFilePath
@@ -477,11 +484,11 @@ process
         $wingetPrereleaseMsixBundleUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleFileName = $wingetPrereleaseMsixBundleUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleFileName"
-        $webClient.DownloadFile($wingetPrereleaseMsixBundleUrl, $wingetPrereleaseMsixBundleFilePath)
+        (New-Object Net.WebClient).DownloadFile($wingetPrereleaseMsixBundleUrl, $wingetPrereleaseMsixBundleFilePath)
         $wingetPrereleaseMsixBundleLicenseUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleLicenseFileName = $wingetPrereleaseMsixBundleLicenseUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleLicenseFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleLicenseFileName"
-        $webClient.DownloadFile($wingetPrereleaseMsixBundleLicenseUrl, $wingetPrereleaseMsixBundleLicenseFilePath)
+        (New-Object Net.WebClient).DownloadFile($wingetPrereleaseMsixBundleLicenseUrl, $wingetPrereleaseMsixBundleLicenseFilePath)
         if ((Test-Path -Path $wingetPrereleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetPrereleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
             Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath"
@@ -491,11 +498,11 @@ process
         $wingetreleaseMsixBundleUrl = ($wingetrelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetreleaseMsixBundleFileName = $wingetreleaseMsixBundleUrl.Split('/')[-1]
         $wingetreleaseMsixBundleFilePath = "$env:TEMP\$wingetreleaseMsixBundleFileName"
-        $webClient.DownloadFile($wingetreleaseMsixBundleUrl, $wingetreleaseMsixBundleFilePath)
+        (New-Object Net.WebClient).DownloadFile($wingetreleaseMsixBundleUrl, $wingetreleaseMsixBundleFilePath)
         $wingetreleaseMsixBundleLicenseUrl = ($wingetrelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetreleaseMsixBundleLicenseFileName = $wingetreleaseMsixBundleLicenseUrl.Split('/')[-1]
         $wingetreleaseMsixBundleLicenseFilePath = "$env:TEMP\$wingetreleaseMsixBundleLicenseFileName"
-        $webClient.DownloadFile($wingetreleaseMsixBundleLicenseUrl, $wingetreleaseMsixBundleLicenseFilePath)
+        (New-Object Net.WebClient).DownloadFile($wingetreleaseMsixBundleLicenseUrl, $wingetreleaseMsixBundleLicenseFilePath)
         if ((Test-Path -Path $wingetreleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetreleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
             Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath"
@@ -508,7 +515,14 @@ process
         $apps = $apps | Where-Object {$_.Groups -contains $group}
     }
 
-    $wingetVersion = winget -v
+    if (Get-ChildItem -Path $env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*\winget.exe)
+    {
+        $isWingetInstalled = $true
+    }
+    else
+    {
+        $isWingetInstalled = $false
+    }
 
     Write-PSFMessage "Mode: $group"
     Write-PSFMessage "$($apps.Count) apps to be installed"
@@ -552,7 +566,7 @@ process
             }
             Invoke-ExpressionWithLogging -command $command
         }
-        elseif ($appName -and !$useChocolatey -and $wingetVersion)
+        elseif ($appName -and !$useChocolatey -and $isWingetInstalled)
         {
             $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements"
             Invoke-ExpressionWithLogging -command $command
@@ -601,7 +615,11 @@ process
     )
 
     $scriptFileUrls | ForEach-Object {
-        Invoke-Expression ($webClient.DownloadString($_))
+        $scriptFileUrl = $_
+        $scriptFileName = $scriptFileUrl.Split('/')[-1]
+        $scriptFilePath = "$bsPath\$scriptFileName"
+        (New-Object Net.WebClient).DownloadFile($scriptFileUrl, $scriptFilePath)
+        Invoke-ExpressionWithLogging -command $scriptFilePath
     }
 
     $regFileUrls = @(
@@ -612,7 +630,7 @@ process
     $regFileUrls | ForEach-Object {
         $regFileUrl = $_
         $regFileName = $regFileUrl.Split('/')[-1]
-        $webClient.DownloadFile($regFileUrl, $regFileName)
+        (New-Object Net.WebClient).DownloadFile($regFileUrl, $regFileName)
         if (Test-Path -Path $regFileName -PathType Leaf)
         {
             Invoke-ExpressionWithLogging -command "reg import $regFileName"
@@ -636,7 +654,7 @@ process
         {
             New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force
         }
-        $webClient.DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
+        (New-Object Net.WebClient).DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)
     }
 
     if ($isWin11 -and $group -eq 'PC')
@@ -692,7 +710,7 @@ process
         Invoke-ExpressionWithLogging -command "New-Item -Path $nppSettingsFolderPath -Type Directory -Force | Out-Null"
     }
 
-    $webClient.DownloadFile($nppSettingsZipUrl, $nppSettingsZipFilePath)
+    (New-Object Net.WebClient).DownloadFile($nppSettingsZipUrl, $nppSettingsZipFilePath)
     Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force
     Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath
     Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath
@@ -709,23 +727,23 @@ process
 
     # The chocolatey package for Everything includes an old version (1.1.0.9) of the es.exe CLI tool
     # Delete that one, then download the latest (1.1.0.21) from the voidtools site
-    Remove-Item -Path "$env:ProgramData\chocolatey\bin\es.exe" -Force
-    Remove-Item -Path "$env:ProgramData\chocolatey\lib\Everything\tools\es.exe" -Force
+    Remove-Item -Path "$env:ProgramData\chocolatey\bin\es.exe" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$env:ProgramData\chocolatey\lib\Everything\tools\es.exe" -Force -Force -ErrorAction SilentlyContinue
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.21.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
     $esZipFilePath = "$env:TEMP\$esZipFileName"
-    $webClient.DownloadFile($esZipUrl, $esZipFilePath)
+    (New-Object Net.WebClient).DownloadFile($esZipUrl, $esZipFilePath)
     Expand-Archive -Path $esZipFilePath -DestinationPath $toolsPath -Force
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
     $esIniFilePath = "$toolsPath\$esIniFileName"
-    $webClient.DownloadFile($esIniUrl, $esIniFilePath)
+    (New-Object Net.WebClient).DownloadFile($esIniUrl, $esIniFilePath)
 
     if ($group -eq 'PC' -or $group -eq 'VM')
     {
         # Download some Nirsoft tools into the tools path
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ($webClient.DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
+        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
@@ -742,7 +760,7 @@ process
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         New-Item -Path $vsCodeSettingsJsonPath -Force
         Write-PSFMessage "Downloading $vsCodeSettingsJsonUrl"
-        $webClient.DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)
+        (New-Object Net.WebClient).DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)
     }
     else
     {
@@ -771,7 +789,7 @@ process
     $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
     $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
     $installModulesFilePath = "$env:TEMP\$installModulesFileName"
-    $webClient.DownloadFile($installModulesFileUrl, $installModulesFilePath)
+    (New-Object Net.WebClient).DownloadFile($installModulesFileUrl, $installModulesFilePath)
 
     if (Test-Path -Path $installModulesFilePath -PathType Leaf)
     {
@@ -797,7 +815,7 @@ process
     $greenshotInstallerUrl = ($prerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
-    $webClient.DownloadFile($greenshotInstallerUrl, $greenshotInstallerFilePath)
+    (New-Object Net.WebClient).DownloadFile($greenshotInstallerUrl, $greenshotInstallerFilePath)
     Invoke-ExpressionWithLogging "$greenshotInstallerFilePath /VERYSILENT /NORESTART"
 
     if ($isPC -or $isVM)
@@ -865,7 +883,7 @@ process
     }
 
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
-    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$logPath\Get-WindowsUpdate-$timestamp.log"
+    $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$bsPath\Get-WindowsUpdate-$timestamp.log"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
@@ -873,7 +891,8 @@ process
     $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
     $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
     $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
-    Copy-Item -Path "$env:ProgramData\chocolatey\logs\chocolatey.log" -Destination $logPath
+    Copy-Item -Path "$env:ProgramData\chocolatey\logs\chocolatey.log" -Destination $bsPath
+    Write-PSFMessage "Log path: $psFrameworkLogFilePath"
 
     Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
 }
