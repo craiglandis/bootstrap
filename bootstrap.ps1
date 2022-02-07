@@ -95,9 +95,9 @@ process
 
     $scriptStartTime = Get-Date
     $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
-    #$scriptName = Split-Path -Path $PSCommandPath -Leaf
-    $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
-    $scriptBaseName = $scriptName.TrimEnd('.ps1')
+    $scriptPath = $MyInvocation.MyCommand.Path
+    $scriptName = Split-Path -Path $scriptPath -Leaf
+    $scriptBaseName = $scriptName.Split('.')[0]
 
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
     Set-Alias -Name Write-PSFMessage -Value Write-Output
@@ -320,8 +320,15 @@ process
         if ($LASTEXITCODE -eq 3010)
         {
             Write-PSFMessage 'Creating onstart scheduled task to run script again at startup'
-            $scriptPath = "$env:SystemRoot\Temp\$scriptName"
-            Invoke-ExpressionWithLogging -command "Copy-Item -Path $PSCommandPath -Destination $scriptPath"
+            if (Test-Path -Path $bsPath\$scriptName -PathType Leaf)
+            {
+                Write-PSFMessage "Script already exists in $bsPath\$scriptName"
+            }
+            else
+            {
+                Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $bsPath\$scriptName"
+                $scriptPath = "$bsPath\$scriptName"
+            }
             Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $scriptPath`" /f"
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
         }
