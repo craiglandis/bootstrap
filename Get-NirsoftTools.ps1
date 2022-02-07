@@ -77,6 +77,9 @@ function Get-Download
     Remove-Item -Path $outFile -Force
 }
 
+$scriptStartTime = Get-Date
+#$scriptName = Split-Path -Path $PSCommandPath -Leaf
+$scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 
 # https://www.nirsoft.net/utils/index.html
 $uris = @'
