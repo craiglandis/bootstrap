@@ -1,3 +1,4 @@
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1
 param(
     [string]$userName,
     [string]$password,
