@@ -85,6 +85,10 @@ process
     $scriptName = Split-Path -Path $PSCommandPath -Leaf
     $scriptBaseName = $scriptName.TrimEnd('.ps1')
 
+    # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
+    Set-Alias -Name Write-PSFMessage -Value Write-Output
+    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
+
     $logPath = "$env:SystemDrive\logs"
     if (Test-Path -Path $logPath -PathType Container)
     {
@@ -92,19 +96,15 @@ process
     }
     else
     {
-        Write-PSFMessage "Creating log path $logPath "
+        Write-PSFMessage "Creating log path $logPath"
         New-Item -Path $logPath -ItemType Directory -Force | Out-Null
     }
     $runCount = (Get-ChildItem -Path "$logPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-
-    whoami | Out-File -FilePath "$PSScriptRoot\whoami.txt" -Force
+    whoami | Out-File -FilePath "$logPath\whoami.txt" -Force
     $webClient = New-Object System.Net.WebClient
 
-    # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
-    Set-Alias -Name Write-PSFMessage -Value Write-Output
-    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     $ProgressPreference = 'SilentlyContinue'
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     {
