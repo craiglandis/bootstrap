@@ -57,6 +57,9 @@ function Set-DefaultTerminalApp
 	}
 }
 
+$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+$PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
+
 $scriptStartTime = Get-Date
 #$scriptName = Split-Path -Path $PSCommandPath -Leaf
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
@@ -391,7 +394,7 @@ $regPaths | ForEach-Object {
 
 If ($UpdateShortcuts)
 {
-	$shell = New-Object -ComObject Wscript.Shell
+	$objShell = New-Object -ComObject Wscript.Shell
 	$shortcuts | ForEach-Object {
 
 		$shortcutPath = $_
@@ -404,7 +407,7 @@ If ($UpdateShortcuts)
 
 			# If $BackupShortcuts is true, check that the backup was created before removing the existing one
 			Write-Host "Remove: $shortcutPath"
-			Remove-Item -Path $shortcutPath -Force
+			Remove-Item -Path $shortcutPath -Force # -ErrorAction SilentlyContinue
 
 			Write-Host "Create: $shortcutPath"
 			$shortCut = $objShell.CreateShortCut($shortcutPath)
