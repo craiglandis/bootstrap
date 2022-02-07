@@ -253,14 +253,13 @@ process
         Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
     }
 
-    $profileFile = $profile.CurrentUserCurrentHost
-    if (Test-Path -Path $profileFile -PathType Leaf)
+    if (Test-Path -Path $profile.CurrentUserCurrentHost -PathType Leaf)
     {
-        Write-PSFMessage "$profileFile already exists, don't need to create it"
+        Write-PSFMessage "$($profile.CurrentUserCurrentHost) already exists, don't need to create it"
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $profileFile -Type File -Force | Out-Null"
+        Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.CurrentUserCurrentHost) -Type File -Force | Out-Null"
     }
 
     $ErrorActionPreference = 'SilentlyContinue'
@@ -648,7 +647,7 @@ process
         $windowsTerminalSettingsFilePath = $_
         if (Test-Path -Path $windowsTerminalSettingsFilePath -PathType Leaf)
         {
-            Rename-Item -Path $windowsTerminalSettingsFilePath -NewName "$($windowsTerminalSettingsFilePath.Split('\')[-1]).original"
+            Move-Item -Path $windowsTerminalSettingsFilePath -Destination "$windowsTerminalSettingsFilePath.original" -ErrorAction SilentlyContinue
         }
         else
         {
@@ -742,8 +741,12 @@ process
 
     if ($group -eq 'PC' -or $group -eq 'VM')
     {
-        # Download some Nirsoft tools into the tools path
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'))"
+        $getNirSoftToolsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'
+        $getNirSoftToolsScriptFileName = $getNirSoftToolsScriptUrl.Split('/')[-1]
+        $getNirSoftToolsScriptFilePath = "$bsPath\$getNirSoftToolsScriptFileName"
+        (New-Object Net.WebClient).DownloadFile($getNirSoftToolsScriptUrl, $getNirSoftToolsScriptFilePath)
+
+        Invoke-ExpressionWithLogging -command $getNirSoftToolsScriptFilePath
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
@@ -776,9 +779,9 @@ process
 
     if ($isPC -or $isVM)
     {
-        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\od" -Target "$env:SystemDrive\OneDrive"
-        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\my" -Target "$env:SystemDrive\OneDrive\My"
-        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\bin" -Target "$env:SystemDrive\OneDrive\Tools"
+        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\od" -Target "$env:SystemDrive\OneDrive" -ErrorAction SilentlyContinue
+        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\my" -Target "$env:SystemDrive\OneDrive\My" -ErrorAction SilentlyContinue
+        New-Item -ItemType SymbolicLink -Path "$env:SystemDrive\bin" -Target "$env:SystemDrive\OneDrive\Tools" -ErrorAction SilentlyContinue
 
         # To remove the symbolic links (Remove-Item won't do it):
         #(Get-Item -Path "$env:SystemDrive\od").Delete()
