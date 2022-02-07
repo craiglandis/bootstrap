@@ -103,7 +103,8 @@ function Add-ScheduledTask
 }
 
 $scriptStartTime = Get-Date
-$scriptName = Split-Path -Path $PSCommandPath -Leaf
+#$scriptName = Split-Path -Path $PSCommandPath -Leaf
+$scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 Set-Alias -Name Write-PSFMessage -Value Write-Output
 $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
 #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
