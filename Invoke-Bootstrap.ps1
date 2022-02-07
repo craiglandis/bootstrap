@@ -1,9 +1,25 @@
-# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
 param(
     [string]$userName,
     [string]$password,
     [string]$bootstrapScriptUrl
 )
+
+if (!$userName)
+{
+    Write-Error "Required parameter missing: -userName <userName>"
+    exit
+}
+elseif (!$password)
+{
+    Write-Error "Required parameter missing: -password <password>"
+    exit
+}
+elseif (!$bootstrapScriptUrl)
+{
+    Write-Error "Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>"
+    exit
+}
 
 $bsPath = "$env:SystemDrive\bs"
 if (Test-Path -Path $bsPath -PathType Container)
@@ -18,6 +34,7 @@ else
 
 $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
 $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
+Write-Output "Downloading $bootstrapScriptUrl to $bootstrapScriptFilePath"
 (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)
 
 if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
