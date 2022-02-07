@@ -425,11 +425,12 @@
   },
   {
     "Name": "WinDbg",
-    "ChocolateyName": "windbg",
+    "ChocolateyName": "",
     "WingetName": "9PGJGD53TN86",
     "Groups": [
       "VM"
-    ]
+    ],
+    "Notes": "The windbg chocolatey package doesn't work, returns 404, description says This package is likely not broken for licensed users - see https://docs.chocolatey.org/en-us/features/private-cdn"
   },
   {
     "Name": "Windows Admin Center",
