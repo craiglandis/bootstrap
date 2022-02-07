@@ -60,7 +60,10 @@ function out-log
 }
 
 $startTime = Get-Date
-$logFilePath = "$($PSCommandPath.Substring(0, $PSCommandPath.Length - 4))_$env:COMPUTERNAME.log"
+$scriptStartTime = $startTime
+#$scriptName = Split-Path -Path $PSCommandPath -Leaf
+$scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
+$logFilePath = "$($scriptName.Substring(0, $scriptName.Length - 4))_$env:COMPUTERNAME.log"
 $PSDefaultParameterValues = @{
     'Write-Color:LogFile' = $logFilePath
     'Write-Color:LogTime' = $true
@@ -626,6 +629,6 @@ else
 $installedModules = Get-InstalledModule | Where-Object {$_.Name -ne 'Az' -and !$_.Name.Startswith('Az.')} | Sort-Object -Property Name | Format-Table -AutoSize Name, Version, @{Name = 'IsPrerelease'; Expression = {$_.AdditionalMetadata.IsPrerelease}} | Out-String
 Write-Color $installedModules -Color Gray
 
-$scriptDuration = New-Timespan -Start $startTime -End (Get-Date)
+$scriptDuration = New-Timespan -Start $scriptStartTime -End (Get-Date)
 Write-Color "Script Duration: ", "$('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $scriptDuration)" -Color Gray, Cyan
 Write-Color "Log: ", $logFilePath -Color Gray, Cyan
