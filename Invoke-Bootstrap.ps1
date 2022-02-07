@@ -4,16 +4,27 @@ param(
     [string]$bootstrapScriptUrl
 )
 
+$bsPath = "$env:SystemDrive\bs"
+if (Test-Path -Path $bsPath -PathType Container)
+{
+    Write-Output "Log path $bsPath already exists, don't need to create it"
+}
+else
+{
+    Write-Output "Creating log path $bsPath"
+    New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
+}
+
 $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
-$bootstrapScriptFilePath = "$env:TEMP\$bootstrapScriptFileName"
+$bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
 (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)
 
 if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
 {
     $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)    
+    $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
     Enable-PSRemoting -SkipNetworkProfileCheck -Force
-    Invoke-Command -FilePath $bootstrapScriptFilePath -Credential $credential -ComputerName localhost #$env:COMPUTERNAME
+    Invoke-Command -FilePath $bootstrapScriptFilePath -Credential $credential -ComputerName localhost
     Disable-PSRemoting -Force
 }
 else
