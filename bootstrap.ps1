@@ -90,7 +90,7 @@ process
         Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
     }
 
-    $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+    #$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
 
     $scriptStartTime = Get-Date
@@ -374,7 +374,7 @@ process
         }
         else
         {
-            Write-PSFMessage 'PSFramework module failed to install' -Level
+            Write-Error 'PSFramework module failed to install'
             exit
         }
     }
@@ -454,7 +454,7 @@ process
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
         (New-Object Net.WebClient).DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
-        Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath
+        Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue
         <# Release version
         $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
