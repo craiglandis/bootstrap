@@ -407,7 +407,7 @@ If ($UpdateShortcuts)
 
 			# If $BackupShortcuts is true, check that the backup was created before removing the existing one
 			Write-Host "Remove: $shortcutPath"
-			Remove-Item -Path $shortcutPath -Force # -ErrorAction SilentlyContinue
+			Remove-Item -Path $shortcutPath -Force -ErrorAction SilentlyContinue
 
 			Write-Host "Create: $shortcutPath"
 			$shortCut = $objShell.CreateShortCut($shortcutPath)
