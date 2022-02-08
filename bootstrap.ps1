@@ -90,20 +90,24 @@ process
         Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
     }
 
+    # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
+    Set-Alias -Name Write-PSFMessage -Value Write-Output
+    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     #$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
 
     $scriptStartTime = Get-Date
     $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
+
+    # Since this script will be called via psremoting using Invoke-Command so that it runs in the context of a specific user instead of system,
+    # the $MyInvocation.MyCommand.Path, $PSScriptRoot, and $PSCommandPath automatic variables are not populated, because Invoke-Command is reading the script but executing it as a script block
+    $bsPath = "$env:SystemDrive\bs"
+    $scriptName = 'bootstrap.ps1'
+    $scriptBaseName = $scriptName.Split('.')[0]
+    $scriptPath = "$bsPath\$scriptName"
     $scriptPath = $MyInvocation.MyCommand.Path
     $scriptName = Split-Path -Path $scriptPath -Leaf
-    $scriptBaseName = $scriptName.Split('.')[0]
 
-    # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
-    Set-Alias -Name Write-PSFMessage -Value Write-Output
-    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
-
-    $bsPath = "$env:SystemDrive\bs"
     if (Test-Path -Path $bsPath -PathType Container)
     {
         Write-PSFMessage "Log path $bsPath already exists, don't need to create it"
@@ -320,14 +324,16 @@ process
         if ($LASTEXITCODE -eq 3010)
         {
             Write-PSFMessage 'Creating onstart scheduled task to run script again at startup'
-            if (Test-Path -Path $bsPath\$scriptName -PathType Leaf)
+            if (Test-Path -Path $scriptPath -PathType Leaf)
             {
-                Write-PSFMessage "Script already exists in $bsPath\$scriptName"
+                Write-PSFMessage "Script already exists in $scriptPath"
             }
             else
             {
-                Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $bsPath\$scriptName"
-                $scriptPath = "$bsPath\$scriptName"
+                $bootstrapScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1'
+                $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
+                Write-PSFMessage "Downloading $bootstrapScriptUrl to $scriptPath"
+                (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $scriptPath)
             }
             Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $scriptPath`" /f"
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
