@@ -5,12 +5,13 @@ Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections
 Install Visio
-
+s
 # wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
 # reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 # netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 # Run from RDP client
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
+24576
 #>
 [CmdletBinding()]
 param(
@@ -427,23 +428,6 @@ process
         exit
     }
 
-    # Install PS7 Preview
-    $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
-    $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-    $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
-    $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
-    (New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
-    msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
-    <# Release version
-    $powershellRelease = $powershellReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
-    $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
-    (New-Object Net.WebClient).DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
-    msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
-    #>
-
     # Install Windows Terminal and winget
     if ($isWS22 -or $isWin11 -or $isWin10)
     {
@@ -521,6 +505,23 @@ process
         }
         #>
     }
+
+    # Install PS7 release version
+    $powershellRelease = $powershellReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
+    $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
+    (New-Object Net.WebClient).DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)
+    msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
+
+    # Install PS7 preview version
+    $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
+    $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+    $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
+    $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
+    (New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)
+    msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null
 
     if ($group -ne 'All')
     {
@@ -897,6 +898,15 @@ process
         SetUserFTA .yaml applications\code.exe
         SetUserFTA .yml applications\code.exe
     }
+
+    $tssUrl = 'https://cesdiagtools.blob.core.windows.net/windows/TSSv2.zip' # 'https://aka.ms/getTSSv2'
+    $tssFileName = $tssUrl.Split('/')[-1]
+    $tssFolderPath = "$bsPath\$($tssFileName.Split('.')[0])"
+    $tssFilePath = "$bsPath\$tssFileName"
+    (New-Object Net.WebClient).DownloadFile($tssUrl, $tssFilePath)
+    Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force
+    invoke-expression -Command $tssFolderPath\TSSv2.ps1 -SDP
+
 
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
     $wuResult = Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File "$bsPath\Get-WindowsUpdate-$timestamp.log"
