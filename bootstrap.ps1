@@ -83,19 +83,20 @@ process
     function Get-AppList
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-        $appsJsonFilePath = "$env:TEMP\apps.json"
-        if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
+        $appsJsonFilePath = "$bsPath\apps.json"
+        if ($isWin7 -or $isWS08R2 -or $isWS12)
         {
-            if ($isWin7 -or $isWS08R2 -or $isWS12)
-            {
-                Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath
-            }
-            else
-            {
-                (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
-            }
+            Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath
         }
-        Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
+        else
+        {
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)"
+        }
+
+        if (Test-Path -Path $appsJsonFilePath -PathType Leaf)
+        {
+            Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
+        }
     }
 
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
@@ -561,6 +562,13 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
+    $apps = Get-AppList
+    if (!$apps)
+    {
+        Write-Error "Failed to get app list"
+        exit
+    }
+
     if ($group -ne 'All')
     {
         $apps = $apps | Where-Object {$_.Groups -contains $group}
@@ -576,7 +584,6 @@ process
         $isWingetInstalled = $false
     }
     Write-PSFMessage "`$isWingetInstalled: $isWingetInstalled"
-
     Write-PSFMessage "Mode: $group"
     Write-PSFMessage "$($apps.Count) apps to be installed"
     $apps | ForEach-Object {
