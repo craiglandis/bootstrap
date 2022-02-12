@@ -45,7 +45,7 @@ if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
     $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
     Enable-PSRemoting -SkipNetworkProfileCheck -Force
-    Invoke-Command -ScriptBlock { & $using:bootstrapScriptFilePath } -Credential $credential -ComputerName localhost
+    Invoke-Command -ScriptBlock {& $using:bootstrapScriptFilePath} -Credential $credential -ComputerName localhost
     Disable-PSRemoting -Force
 }
 else
