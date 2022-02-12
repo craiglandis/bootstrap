@@ -60,7 +60,7 @@ process
         }
         catch
         {
-            Write-PSFMessage -Level Warning -Message "Failed: $command" -ErrorRecord $_
+            Write-PSFMessage -Level Error -Message "Failed: $command" -ErrorRecord $_
         }
     }
 
@@ -552,22 +552,24 @@ process
     $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
     $powerShellx64MsiFilePath = "$bsPath\$powerShellx64MsiFileName"
+    $powerShellx64MsiLogFilePath = "$($powerShellx64MsiFilePath)$(Get-Date -Format yyyyMMddHHmmssff).log"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
-    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     # Install PS7 preview version
     $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$bsPath\$powerShellPreviewx64MsiFileName"
+    $powerShellPreviewx64MsiLogFilePath = "$($powerShellPreviewx64MsiFilePath)$(Get-Date -Format yyyyMMddHHmmssff).log"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
-    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
     if (!$apps)
     {
         $apps = Get-AppList
         if (!$apps)
         {
-            Write-Error "Failed to get app list"
+            Write-PSFMessage -Level Error -Message "Failed to get app list"
             exit
         }
     }
@@ -578,7 +580,17 @@ process
     }
 
     Write-PSFMessage "Checking if winget is installed"
-    if (Get-ChildItem -Path $env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*\winget.exe -ErrorAction SilentlyContinue)
+    try
+    {
+        $wingetVersion = winget -v
+    }
+    catch
+    {
+        Write-PSFMessage -Level InternalComment -Message "Winget is not installed" -ErrorRecord $_
+    }
+
+    #if (Get-ChildItem -Path $env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*\winget.exe -ErrorAction SilentlyContinue)
+    if ($wingetVersion)
     {
         $isWingetInstalled = $true
     }
