@@ -438,8 +438,6 @@
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsAdminCenter",
     "Groups": [
-      "PC",
-      "VM"
     ]
   },
   {
