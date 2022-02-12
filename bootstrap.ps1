@@ -11,7 +11,7 @@ s
 # netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 # Run from RDP client
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
-# ipcsv (gci *.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
+# ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 #>
 [CmdletBinding()]
 param(
@@ -89,7 +89,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)"
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$appsJsonFileUrl`', `'$appsJsonFilePath`')"
         }
 
         if (Test-Path -Path $appsJsonFilePath -PathType Leaf)
@@ -482,8 +482,8 @@ process
         $windowsTerminalPreviewMsixBundleUri = ($windowsTerminalPreviewRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
-        (New-Object Net.WebClient).DownloadFile($windowsTerminalPreviewMsixBundleUri, $windowsTerminalPreviewMsixBundleFilePath)
-        Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalPreviewMsixBundleUri`', `'$windowsTerminalPreviewMsixBundleFilePath`')"
+        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue"
         <# Release version
         $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
@@ -499,7 +499,7 @@ process
         $vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
         $vcLibsFileName = $vcLibsUrl.Split('/')[-1]
         $vcLibsFilePath = "$env:TEMP\$vcLibsFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($vcLibsUrl, $vcLibsFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vcLibsUrl`', `'$vcLibsFilePath`')"
         if (Test-Path -Path $vcLibsFilePath -PathType Leaf)
         {
             Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
@@ -509,7 +509,7 @@ process
         $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUrl.Split('/')[-1]
         $microsoftUiXamlPackageFolderPath = "$env:TEMP\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$env:TEMP\$microsoftUiXamlPackageFileName.zip"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($microsoftUiXamlPackageUrl, $microsoftUiXamlPackageFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
         Invoke-ExpressionWithLogging -command "Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force"
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath"
@@ -519,11 +519,11 @@ process
         $wingetPrereleaseMsixBundleUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleFileName = $wingetPrereleaseMsixBundleUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($wingetPrereleaseMsixBundleUrl, $wingetPrereleaseMsixBundleFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleUrl`', `'$wingetPrereleaseMsixBundleFilePath`')"
         $wingetPrereleaseMsixBundleLicenseUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleLicenseFileName = $wingetPrereleaseMsixBundleLicenseUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleLicenseFilePath = "$env:TEMP\$wingetPrereleaseMsixBundleLicenseFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($wingetPrereleaseMsixBundleLicenseUrl, $wingetPrereleaseMsixBundleLicenseFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleLicenseUrl`', `'$wingetPrereleaseMsixBundleLicenseFilePath`')"
         if ((Test-Path -Path $wingetPrereleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetPrereleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
             Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath"
@@ -551,14 +551,14 @@ process
     $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
     $powerShellx64MsiFilePath = "$env:TEMP\$powerShellx64MsiFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($powerShellx64MsiUrl, $powerShellx64MsiFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     # Install PS7 preview version
     $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$env:TEMP\$powerShellPreviewx64MsiFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
     if (!$apps)
@@ -687,7 +687,7 @@ process
         $scriptFileUrl = $_
         $scriptFileName = $scriptFileUrl.Split('/')[-1]
         $scriptFilePath = "$bsPath\$scriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($scriptFileUrl, $scriptFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
         Invoke-ExpressionWithLogging -command $scriptFilePath
     }
 
@@ -699,7 +699,7 @@ process
     $regFileUrls | ForEach-Object {
         $regFileUrl = $_
         $regFileName = $regFileUrl.Split('/')[-1]
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($regFileUrl, $regFileName)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$regFileUrl`', `'$regFileName`')"
         if (Test-Path -Path $regFileName -PathType Leaf)
         {
             Invoke-ExpressionWithLogging -command "reg import $regFileName"
@@ -723,7 +723,7 @@ process
         {
             Invoke-ExpressionWithLogging -command "New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force"
         }
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($windowsTerminalSettingsUrl, $windowsTerminalSettingsFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalSettingsUrl`', `'$windowsTerminalSettingsFilePath`')"
     }
 
     if ($isWin11 -and $group -eq 'PC')
@@ -749,7 +749,7 @@ process
         Invoke-ExpressionWithLogging -command "New-Item -Path $nppSettingsFolderPath -Type Directory -Force | Out-Null"
     }
 
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($nppSettingsZipUrl, $nppSettingsZipFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$nppSettingsZipUrl`', `'$nppSettingsZipFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath"
@@ -771,20 +771,20 @@ process
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.21.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
     $esZipFilePath = "$env:TEMP\$esZipFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($esZipUrl, $esZipFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $toolsPath -Force"
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
     $esIniFilePath = "$toolsPath\$esIniFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($esIniUrl, $esIniFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esIniUrl`', `'$esIniFilePath`')"
 
     if ($group -eq 'PC' -or $group -eq 'VM')
     {
         $getNirSoftToolsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'
         $getNirSoftToolsScriptFileName = $getNirSoftToolsScriptUrl.Split('/')[-1]
         $getNirSoftToolsScriptFilePath = "$bsPath\$getNirSoftToolsScriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($getNirSoftToolsScriptUrl, $getNirSoftToolsScriptFilePath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getNirSoftToolsScriptUrl`', `'$getNirSoftToolsScriptFilePath`')"
         Invoke-ExpressionWithLogging -command $getNirSoftToolsScriptFilePath
     }
 
@@ -802,7 +802,7 @@ process
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force"
         Write-PSFMessage "Downloading $vsCodeSettingsJsonUrl"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($vsCodeSettingsJsonUrl, $vsCodeSettingsJsonPath)"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
     }
     else
     {
@@ -831,7 +831,7 @@ process
     $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
     $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
     $installModulesFilePath = "$env:TEMP\$installModulesFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($installModulesFileUrl, $installModulesFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installModulesFileUrl`', `'$installModulesFilePath`')"
 
     if (Test-Path -Path $installModulesFilePath -PathType Leaf)
     {
@@ -857,7 +857,7 @@ process
     $greenshotInstallerUrl = ($greenshotPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($greenshotInstallerUrl, $greenshotInstallerFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
     Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART"
 
     if ($isPC -or $isVM)
@@ -927,7 +927,7 @@ process
     $tssFileName = $tssUrl.Split('/')[-1]
     $tssFolderPath = "$bsPath\$($tssFileName.Split('.')[0])"
     $tssFilePath = "$bsPath\$tssFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($tssUrl, $tssFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force"
     #Invoke-ExpressionWithLogging -command "$tssFolderPath\TSSv2.ps1 -SDP Perf"
 
