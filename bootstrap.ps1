@@ -31,11 +31,9 @@ DynamicParam
     $ParameterAttribute.Position = 1
     $AttributeCollection.Add($ParameterAttribute)
     $appsJsonFilePath = "$PSScriptRoot\apps.json"
-    if (!(Test-Path -Path $appsJsonFilePath -PathType Leaf))
-    {
-        $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-        (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
-    }
+    Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
+    $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
+    (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
     $appNames = $apps.Name
     $ValidateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($appNames)
@@ -84,9 +82,10 @@ process
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
         $appsJsonFilePath = "$bsPath\apps.json"
+        Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
         if ($isWin7 -or $isWS08R2 -or $isWS12)
         {
-            Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath
+            Invoke-ExpressionWithLogging -command "Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath"
         }
         else
         {
@@ -562,11 +561,14 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($powerShellPreviewx64MsiUrl, $powerShellPreviewx64MsiFilePath)"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
-    $apps = Get-AppList
     if (!$apps)
     {
-        Write-Error "Failed to get app list"
-        exit
+        $apps = Get-AppList
+        if (!$apps)
+        {
+            Write-Error "Failed to get app list"
+            exit
+        }
     }
 
     if ($group -ne 'All')
