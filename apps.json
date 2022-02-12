@@ -83,12 +83,13 @@
   },
   {
     "Name": "CPU-Z",
-    "ChocolateyName": "cpu-z.portable",
+    "ChocolateyName": "CPU-Z",
     "WingetName": "CPUID.CPU-Z",
     "Groups": [
-	    "VM"
+	    "PC",
+      "VM"
     ],
-	"Notes": "Winget doesn't have a portable one, only CPUID.CPU-Z"
+	"Notes": "Winget doesn't have a portable one, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
   },
   {
     "Name": "CrystalDiskMark",

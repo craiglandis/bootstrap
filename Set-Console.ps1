@@ -162,7 +162,7 @@ if ($isPC -or $isVM)
 		if ($chocoVersion)
 		{
 			Write-PSFMessage "Using Chocolatey to install it since Chocolatey itself is already installed"
-			choco install cascadia-code-nerd-font -y
+			choco install cascadia-code-nerd-font --limit-output --no-progress --no-color --confirm
 		}
 		else
 		{
