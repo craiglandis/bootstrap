@@ -952,7 +952,8 @@ process
 
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
     $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$timestamp.log"
-    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File $getWindowsUpdateLogFilePath"
+    #Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File $getWindowsUpdateLogFilePath"
+    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -Download -Install -IgnoreReboot -Verbose | Out-File $getWindowsUpdateLogFilePath"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
@@ -963,5 +964,10 @@ process
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
     Write-PSFMessage "Log path: $psFrameworkLogFilePath"
 
-    Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+    $isRebootNeeded = Get-WURebootStatus -Silent
+    Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
+    if ($isRebootNeeded)
+    {
+        Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+    }
 }
