@@ -360,7 +360,7 @@ process
         # The chocolatey package checks if PowerShell 5.1 is installed, if so, it does not try to install it
         $packageName = 'powershell'
         $chocoInstallLogFilePath = "$bsPath\choco_install_$packageName.log"
-        Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath"
+        Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
         if ($LASTEXITCODE -eq 3010)
         {
             Write-PSFMessage 'Creating onstart scheduled task to run script again at startup'
@@ -620,7 +620,7 @@ process
             Remove-Variable useChocolatey -Force
             # https://docs.chocolatey.org/en-us/choco/commands/install
             $chocoInstallLogFilePath = "$bsPath\choco_install_$appName.log"
-            $command = "choco install $appName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath"
+            $command = "choco install $appName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
             if ($chocolateyParams)
             {
                 # EXAMPLE: choco install sysinternals --params "/InstallDir:C:\your\install\path"
@@ -635,7 +635,7 @@ process
             # https://aka.ms/winget-command-install
             # winget log files will be in %temp%\AICLI\*.log unless redirected
             $wingetInstallLogFilePath = "$bsPath\winget_install_$appName.log"
-            $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements --log $wingetInstallLogFilePath"
+            $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements --log $wingetInstallLogFilePath | Out-Null"
             Invoke-ExpressionWithLogging -command $command
         }
     }
