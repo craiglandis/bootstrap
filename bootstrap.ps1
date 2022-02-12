@@ -577,7 +577,8 @@ process
         if ($appName -and $useChocolatey)
         {
             Remove-Variable useChocolatey -Force
-            $command = "choco install $appName -y"
+            # https://docs.chocolatey.org/en-us/choco/commands/install
+            $command = "choco install $appName --limit-output --no-progress --confirm"
             if ($chocolateyParams)
             {
                 # EXAMPLE: choco install sysinternals --params "/InstallDir:C:\your\install\path"
