@@ -11,7 +11,7 @@ s
 # netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 # Run from RDP client
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
-24576
+# ipcsv (gci *.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 #>
 [CmdletBinding()]
 param(
@@ -56,7 +56,14 @@ process
             [string]$command
         )
         Write-PSFMessage $command
-        Invoke-Expression -Command $command
+        try
+        {
+            Invoke-Expression -Command $command
+        }
+        catch
+        {
+            Write-PSFMessage -Level Warning -Message "Failed: $command" -ErrorRecord $_
+        }
     }
 
     function Set-PSFramework
