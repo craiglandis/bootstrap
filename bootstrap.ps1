@@ -358,8 +358,9 @@ process
     {
         # 14393+ definitely have PS5.1, 10240 and 10586 may not, but nobody uses those early days Win10 builds anymore anyway.
         # The chocolatey package checks if PowerShell 5.1 is installed, if so, it does not try to install it
+        $timestamp = Get-Date -Format yyyyMMddHHmmssff
         $packageName = 'powershell'
-        $chocoInstallLogFilePath = "$bsPath\choco_install_$packageName.log"
+        $chocoInstallLogFilePath = "$bsPath\choco_install_$($packageName)_$($timestamp).log"
         Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
         if ($LASTEXITCODE -eq 3010)
         {
@@ -483,7 +484,7 @@ process
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$env:TEMP\$windowsTerminalPreviewMsixBundleFileName"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalPreviewMsixBundleUri`', `'$windowsTerminalPreviewMsixBundleFilePath`')"
-        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue | Out-Null"
         <# Release version
         $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
@@ -502,7 +503,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vcLibsUrl`', `'$vcLibsFilePath`')"
         if (Test-Path -Path $vcLibsFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath"
+            Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath | Out-Null"
         }
 
         $microsoftUiXamlPackageUrl = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
@@ -512,7 +513,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
         Invoke-ExpressionWithLogging -command "Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force"
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
-        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath"
+        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath | Out-Null"
 
         $wingetReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases'
         $wingetPrerelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -526,7 +527,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleLicenseUrl`', `'$wingetPrereleaseMsixBundleLicenseFilePath`')"
         if ((Test-Path -Path $wingetPrereleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetPrereleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath"
+            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath | Out-Null"
         }
         <# Release version
         $wingetrelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -540,7 +541,7 @@ process
         (New-Object Net.WebClient).DownloadFile($wingetreleaseMsixBundleLicenseUrl, $wingetreleaseMsixBundleLicenseFilePath)
         if ((Test-Path -Path $wingetreleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetreleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath"
+            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath | Out-Null"
         }
         #>
     }
@@ -619,7 +620,8 @@ process
         {
             Remove-Variable useChocolatey -Force
             # https://docs.chocolatey.org/en-us/choco/commands/install
-            $chocoInstallLogFilePath = "$bsPath\choco_install_$appName.log"
+            $timestamp = Get-Date -Format yyyyMMddHHmmssff
+            $chocoInstallLogFilePath = "$bsPath\choco_install_$($appName)_$($timestamp).log"
             $command = "choco install $appName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
             if ($chocolateyParams)
             {
@@ -634,7 +636,8 @@ process
         {
             # https://aka.ms/winget-command-install
             # winget log files will be in %temp%\AICLI\*.log unless redirected
-            $wingetInstallLogFilePath = "$bsPath\winget_install_$appName.log"
+            $timestamp = Get-Date -Format yyyyMMddHHmmssff
+            $wingetInstallLogFilePath = "$bsPath\winget_install_$($appName)_$($timestamp).log"
             $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements --log $wingetInstallLogFilePath | Out-Null"
             Invoke-ExpressionWithLogging -command $command
         }
@@ -858,7 +861,7 @@ process
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$env:TEMP\$greenshotInstallerFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
-    Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART"
+    Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
 
     if ($isPC -or $isVM)
     {
