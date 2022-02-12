@@ -30,6 +30,37 @@ param(
     [string]$toolsPath = "$env:SystemDrive\OneDrive\Tools"
 )
 
+function Expand-Zip
+{
+    param
+    (
+        [CmdletBinding()]
+        [Parameter(Mandatory = $true)]
+        [System.IO.FileInfo]$Path,
+        [Parameter(Mandatory = $true)]
+        [System.IO.DirectoryInfo]$DestinationPath
+    )
+
+    $Path = $Path.FullName
+    $DestinationPath = $DestinationPath.FullName
+
+    $7z = 'C:\Program Files\7-Zip\7z.exe'
+    if (Test-Path -Path $7z -PathType Leaf)
+    {
+        (& $7z x "$Path" -o"$DestinationPath" -aoa -r) | Out-Null
+        $7zExitCode = $LASTEXITCODE
+        if ($7zExitCode -ne 0)
+        {
+            throw "Error $7zExitCode extracting $Path to $DestinationPath"
+        }
+    }
+    else
+    {
+        Add-Type -Assembly System.IO.Compression.Filesystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($Path, $DestinationPath)
+    }
+}
+
 function Get-Download
 {
     param(
@@ -40,7 +71,8 @@ function Get-Download
     $destinationPath = "$env:TEMP\$folderName"
     Write-Output "Downloading $uri to $outFile"
     Invoke-WebRequest -UseBasicParsing -Uri $uri -OutFile $outFile -ErrorAction Stop #-Verbose
-    Expand-Archive -LiteralPath $outFile -DestinationPath $destinationPath -Force
+    #Expand-Archive -LiteralPath $outFile -DestinationPath $destinationPath -Force
+    Expand-Zip -Path $outFile -DestinationPath $destinationPath
     $newExeFile = Get-ChildItem -Path $destinationPath\*.exe | Select-Object -First 1
     $newExeFileFullName = $newExeFile.FullName
     $newExeFileName = $newExeFile.Name
@@ -78,7 +110,6 @@ function Get-Download
 }
 
 $scriptStartTime = Get-Date
-#$scriptName = Split-Path -Path $PSCommandPath -Leaf
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 
 # https://www.nirsoft.net/utils/index.html

@@ -158,8 +158,9 @@ process
         New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
     }
     # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
+    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
     Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bsPath -Force"
-    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp\chocolatey -Force"
+    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
@@ -1027,8 +1028,9 @@ process
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
     Write-PSFMessage "Log path: $psFrameworkLogFilePath"
 
+    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
     Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
-    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp\chocolatey -Force"
+    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
 
     $isRebootNeeded = Get-WURebootStatus -Silent
     Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
