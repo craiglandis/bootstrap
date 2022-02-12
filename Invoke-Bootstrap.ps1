@@ -5,6 +5,9 @@ param(
     [string]$bootstrapScriptUrl
 )
 
+$PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
+$PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
+
 if (!$userName)
 {
     Write-Error "Required parameter missing: -userName <userName>"
