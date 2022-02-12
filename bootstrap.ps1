@@ -667,7 +667,7 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $toolsPath -Type File -Force | Out-Null"
+        Invoke-ExpressionWithLogging -command "New-Item -Path $toolsPath -Type Directory -Force | Out-Null"
     }
 
     Write-PSFMessage "Checking if $myPath exists"
@@ -785,9 +785,11 @@ process
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\lib\Everything\tools\es.exe -Force -ErrorAction SilentlyContinue"
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.21.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
+    $esZipFolderPath = "$bsPath\$($esZipFileName.Replace('.zip',''))"
     $esZipFilePath = "$bsPath\$esZipFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $toolsPath -Force"
+    Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $esZipFolderPath -Force"
+    Copy-Item -Path $esZipFolderPath\es.exe -Destination $toolsPath -Force
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
@@ -939,9 +941,8 @@ process
     }
 
     $tssUrl = 'https://aka.ms/getTSSv2'
-    $tssFileName = $tssUrl.Split('/')[-1]
-    $tssFolderPath = "$bsPath\$($tssFileName.Split('.')[0])"
-    $tssFilePath = "$bsPath\$tssFileName"
+    $tssFolderPath = "$bsPath\TSSv2"
+    $tssFilePath = "$bsPath\TSSv2.zip"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force"
     #Invoke-ExpressionWithLogging -command "$tssFolderPath\TSSv2.ps1 -SDP Perf"
