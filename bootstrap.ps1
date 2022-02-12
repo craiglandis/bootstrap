@@ -70,9 +70,9 @@ process
         Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
         $logFilePath = "$bsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
         $paramSetPSFLoggingProvider = @{
-            Name = 'logfile'
+            Name     = 'logfile'
             FilePath = $logFilePath
-            Enabled = $true
+            Enabled  = $true
         }
         Set-PSFLoggingProvider @paramSetPSFLoggingProvider
         Write-PSFMessage "PSFramework $($psframework.Version)"
@@ -96,6 +96,37 @@ process
         if (Test-Path -Path $appsJsonFilePath -PathType Leaf)
         {
             Get-Content -Path $appsJsonFilePath | ConvertFrom-Json
+        }
+    }
+
+    function Expand-Zip
+    {
+        param
+        (
+            [CmdletBinding()]
+            [Parameter(Mandatory = $true)]
+            [System.IO.FileInfo]$Path,
+            [Parameter(Mandatory = $true)]
+            [System.IO.DirectoryInfo]$DestinationPath
+        )
+
+        $Path = $Path.FullName
+        $DestinationPath = $DestinationPath.FullName
+
+        $7z = 'C:\Program Files\7-Zip\7z.exe'
+        if (Test-Path -Path $7z -PathType Leaf)
+        {
+            (& $7z x "$Path" -o"$DestinationPath" -aoa -r) | Out-Null
+            $7zExitCode = $LASTEXITCODE
+            if ($7zExitCode -ne 0)
+            {
+                throw "Error $7zExitCode extracting $Path to $DestinationPath"
+            }
+        }
+        else
+        {
+            Add-Type -Assembly System.IO.Compression.Filesystem
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($Path, $DestinationPath)
         }
     }
 
@@ -126,6 +157,9 @@ process
         Write-PSFMessage "Creating log path $bsPath"
         New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
     }
+    # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
+    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bsPath -Force"
+    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp\chocolatey -Force"
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
@@ -480,7 +514,7 @@ process
         # v1.13.10336.0 below released 2022-02-03
 
         $windowsTerminalReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/terminal/releases'
-        $windowsTerminalPreviewRelease = $windowsTerminalReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $windowsTerminalPreviewRelease = $windowsTerminalReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleUri = ($windowsTerminalPreviewRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$bsPath\$windowsTerminalPreviewMsixBundleFileName"
@@ -512,12 +546,13 @@ process
         $microsoftUiXamlPackageFolderPath = "$bsPath\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$bsPath\$microsoftUiXamlPackageFileName.zip"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
-        Invoke-ExpressionWithLogging -command "Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force"
+        #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force"
+        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath"
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath | Out-Null"
 
         $wingetReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases'
-        $wingetPrerelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $wingetPrerelease = $wingetReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleFileName = $wingetPrereleaseMsixBundleUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleFilePath = "$bsPath\$wingetPrereleaseMsixBundleFileName"
@@ -549,7 +584,7 @@ process
 
     $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
     # Install PS7 release version
-    $powershellRelease = $powershellReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
     $powerShellx64MsiFilePath = "$bsPath\$powerShellx64MsiFileName"
@@ -558,7 +593,7 @@ process
     #Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     # Install PS7 preview version
-    $powershellPrerelease = $powershellReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
+    $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$bsPath\$powerShellPreviewx64MsiFileName"
@@ -572,7 +607,7 @@ process
         $apps = Get-AppList
         if (!$apps)
         {
-            Write-PSFMessage -Level Error -Message "Failed to get app list"
+            Write-PSFMessage -Level Error -Message 'Failed to get app list'
             exit
         }
     }
@@ -582,14 +617,14 @@ process
         $apps = $apps | Where-Object {$_.Groups -contains $group}
     }
 
-    Write-PSFMessage "Checking if winget is installed"
+    Write-PSFMessage 'Checking if winget is installed'
     try
     {
         $wingetVersion = winget -v
     }
     catch
     {
-        Write-PSFMessage -Level InternalComment -Message "Winget is not installed" -ErrorRecord $_
+        Write-PSFMessage -Level InternalComment -Message 'Winget is not installed' -ErrorRecord $_
     }
 
     #if (Get-ChildItem -Path $env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*\winget.exe -ErrorAction SilentlyContinue)
@@ -768,7 +803,8 @@ process
     }
 
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$nppSettingsZipUrl`', `'$nppSettingsZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force"
+    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force"
+    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath"
 
@@ -791,7 +827,8 @@ process
     $esZipFolderPath = "$bsPath\$($esZipFileName.Replace('.zip',''))"
     $esZipFilePath = "$bsPath\$esZipFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $esZipFolderPath -Force"
+    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $esZipFolderPath -Force"
+    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $esZipFilePath -DestinationPath $esZipFolderPath"
     Copy-Item -Path $esZipFolderPath\es.exe -Destination $toolsPath -Force
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
@@ -886,7 +923,7 @@ process
         $scheduleService = New-Object -ComObject Schedule.Service
         $scheduleService.Connect()
         $rootFolder = $scheduleService.GetFolder('\')
-        $tasks = $rootFolder.GetTasks(1) | Select-Object Name,Path,State
+        $tasks = $rootFolder.GetTasks(1) | Select-Object Name, Path, State
         $bootstrapTask = $tasks | Where-Object {$_.Name -eq $taskName}
         if ($bootstrapTask)
         {
@@ -901,53 +938,79 @@ process
         # https://kolbi.cz/blog/2017/10/25/setuserfta-userchoice-hash-defeated-set-file-type-associations-per-user/
         # HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\<extension>\OpenWithList
         # Browser
-        Invoke-ExpressionWithLogging -command "SetUserFTA http MSEdgeHTM"
-        Invoke-ExpressionWithLogging -command "SetUserFTA https MSEdgeHTM"
-        Invoke-ExpressionWithLogging -command "SetUserFTA microsoft-edge MSEdgeHTM"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .htm MSEdgeHTM"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .html MSEdgeHTM"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .pdf MSEdgeHTM"
+        Invoke-ExpressionWithLogging -command 'SetUserFTA http MSEdgeHTM'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA https MSEdgeHTM'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA microsoft-edge MSEdgeHTM'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .htm MSEdgeHTM'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .html MSEdgeHTM'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .pdf MSEdgeHTM'
         # Logs/config
-        Invoke-ExpressionWithLogging -command "SetUserFTA .bas applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .cfg applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .conf applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .config applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .csv applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .inf applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .ini applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .json applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .log applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .rdp applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .reg applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .settings applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .status applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .txt applications\notepad++.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xml applications\notepad++.exe"
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .bas applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .cfg applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .conf applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .config applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .csv applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .inf applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .ini applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .json applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .log applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .rdp applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .reg applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .settings applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .status applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .txt applications\notepad++.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xml applications\notepad++.exe'
         # Code
-        Invoke-ExpressionWithLogging -command "SetUserFTA .bat applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .cmd applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .ps1 applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .ps1xml applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .psd1 applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .psm1 applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .py applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .sh applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .vbs applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .wsf applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xaml applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xls applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xlsm applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xsl applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .xslt applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .yaml applications\code.exe"
-        Invoke-ExpressionWithLogging -command "SetUserFTA .yml applications\code.exe"
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .bat applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .cmd applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .ps1 applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .ps1xml applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .psd1 applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .psm1 applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .py applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .sh applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .vbs applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .wsf applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xaml applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xls applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xlsm applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xsl applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .xslt applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .yaml applications\code.exe'
+        Invoke-ExpressionWithLogging -command 'SetUserFTA .yml applications\code.exe'
+    }
+
+    $runtimes = dotnet --list-runtimes
+    if ($runtimes | Select-String -SimpleMatch '6.0')
+    {
+        $netVersion = 6
+    }
+    else
+    {
+        $netVersion = 4
+    }
+
+    $getZimmermanToolsScriptZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/Get-ZimmermanTools.zip'
+    $getZimmermanToolsScriptZipFileName = $getZimmermanToolsScriptZipUrl.Split('/')[-1]
+    $getZimmermanToolsScriptZipFilePath = "$bsPath\$getZimmermanToolsScriptZipFileName"
+    $getZimmermanToolsScriptZipFolderPath = $getZimmermanToolsScriptZipFilePath.Replace('.zip', '')
+
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getZimmermanToolsScriptZipUrl`', `'$getZimmermanToolsScriptZipFilePath`')"
+    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $getZimmermanToolsScriptZipFilePath -DestinationPath $getZimmermanToolsScriptZipFolderPath"
+    $getZimmermanToolsScriptFilePath = (Get-ChildItem -Path $getZimmermanToolsScriptZipFolderPath\*.ps1 -File).FullName
+    Invoke-ExpressionWithLogging -command "$getZimmermanToolsScriptFilePath -Dest $toolsPath -NetVersion $netVersion"
+    if ($netVersion -eq 6)
+    {
+        Invoke-ExpressionWithLogging -command "Copy-Item -Path $toolsPath\net6\* -Destination $toolsPath"
+        Invoke-ExpressionWithLogging -command "Remove-Item -Path $toolsPath\net6 -Recurse -Force"
     }
 
     $tssUrl = 'https://aka.ms/getTSSv2'
     $tssFolderPath = "$bsPath\TSSv2"
     $tssFilePath = "$bsPath\TSSv2.zip"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force"
+    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force"
+    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
     #Invoke-ExpressionWithLogging -command "$tssFolderPath\TSSv2.ps1 -SDP Perf"
 
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
@@ -963,6 +1026,9 @@ process
     $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
     Write-PSFMessage "Log path: $psFrameworkLogFilePath"
+
+    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
+    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp\chocolatey -Force"
 
     $isRebootNeeded = Get-WURebootStatus -Silent
     Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"

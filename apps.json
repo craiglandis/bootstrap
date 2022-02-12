@@ -4,7 +4,8 @@
     "ChocolateyName": "dotnet-desktopruntime",
     "WingetName": "",
     "Groups": [
-      "PC"
+      "PC",
+      "VM"
     ]
   },
   {
