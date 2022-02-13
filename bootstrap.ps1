@@ -131,11 +131,55 @@ process
         }
     }
 
+    function Invoke-Schtasks
+    {
+        $taskRun = "powershell.exe -ExecutionPolicy Bypass -File $scriptPath"
+        Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
+    }
+
+    function Invoke-GetWindowsUpdate
+    {
+        $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$(Get-Date -Format yyyyMMddHHmmssff).log"
+        Invoke-Expression -command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
+        $isRebootNeeded = Get-WURebootStatus -Silent
+        Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
+        if ($isRebootNeeded)
+        {
+            Invoke-Schtasks
+            Complete-ScriptExecution
+            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+        }
+        else
+        {
+            Invoke-ExpressionWithLogging -command "schtasks /delete /tn bootstrap /f"
+        }
+    }
+
+    function Complete-ScriptExecution
+    {
+        if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
+        {
+            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
+            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
+            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
+        }
+
+        $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
+        Write-PSFMessage "$scriptName duration: $scriptDuration"
+
+        $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
+        $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
+        $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
+        Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
+        Write-PSFMessage "Log path: $psFrameworkLogFilePath"
+    }
+
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
     Set-Alias -Name Write-PSFMessage -Value Write-Output
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
+    $ProgressPreference = 'SilentlyContinue'
 
     $scriptStartTime = Get-Date
     $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
@@ -146,6 +190,7 @@ process
     $scriptPath = $MyInvocation.MyCommand.Path
     $scriptName = Split-Path -Path $scriptPath -Leaf
     $scriptBaseName = $scriptName.Split('.')[0]
+    Invoke-ExpressionWithLogging -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"
 
     if (Test-Path -Path $bsPath -PathType Container)
     {
@@ -156,6 +201,7 @@ process
         Write-PSFMessage "Creating log path $bsPath"
         New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
     }
+
     if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
     {
         # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
@@ -166,34 +212,17 @@ process
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-    Invoke-ExpressionWithLogging -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"
+    if (Test-Path -Path "$bsPath\Get-WindowsUpdate*.log" -PathType Leaf)
+    {
+        Invoke-GetWindowsUpdate
+        Complete-ScriptExecution
+        exit
+    }
 
-    $ProgressPreference = 'SilentlyContinue'
     if ($PSVersionTable.PSVersion -ge [Version]'5.1' -and $PSEdition -eq 'Desktop')
     {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
-        <#
-        Import-Module BitsTransfer
-        $url = 'http://download.windowsupdate.com/c/msdownload/update/software/updt/2016/04/windows6.1-kb3140245-x64_5b067ffb69a94a6e5f9da89ce88c658e52a0dec0.msu'
-        08R2 - http://download.windowsupdate.com/c/msdownload/update/software/updt/2016/04/windows6.1-kb3140245-x64_5b067ffb69a94a6e5f9da89ce88c658e52a0dec0.msu
-               http://download.windowsupdate.com/c/msdownload/update/software/updt/2016/04/windows8-rt-kb3140245-x64_b589173ad4afdb12b18606b5f84861fcf20010d0.msu
-               Start-BitsTransfer -source $url
-               wusa $kb32 /log:install.log
-
-               Path  = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp'
-               Name  = 'DefaultSecureProtocols'
-
-                reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp" /v DefaultSecureProtocols = (DWORD): 0xAA0
-    HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp\
-        DefaultSecureProtocols = (DWORD): 0xAA0
-        #>
         # https://devblogs.microsoft.com/powershell/when-powershellget-v1-fails-to-install-the-nuget-provider/
-        #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        <# 2008R2/Win7 don't support TLS1.2 until PS5.1/WMF are installed, before then this will result in error:
-        PS C:\> [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        Exception setting "SecurityProtocol": "Cannot convert value "3312" to type "System.Net.SecurityProtocolType" due to invalid enumeration values. Specify one of the following enumeration values and try again. The possible enumeration values are "Ssl3, Tls"."
-        #>
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
     }
 
     if ([string]::IsNullOrEmpty($group))
@@ -1016,34 +1045,6 @@ process
     $tssFilePath = "$bsPath\TSSv2.zip"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
-    #Invoke-ExpressionWithLogging -command "$tssFolderPath\TSSv2.ps1 -SDP Perf"
 
-    $timestamp = Get-Date -Format yyyyMMddHHmmssff
-    $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$timestamp.log"
-    #Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File $getWindowsUpdateLogFilePath"
-    # Get-WindowsUpdate | Select-Object Title,@{L="Category";E={$_.Categories[0]|Select Name}}| ft -a # to see categories
-    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -Download -Install -IgnoreReboot -Verbose -NotCategory 'Language packs' | Out-File $getWindowsUpdateLogFilePath"
-
-    $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
-    Write-PSFMessage "$scriptName duration: $scriptDuration"
-
-    $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
-    $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
-    $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
-    Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
-    Write-PSFMessage "Log path: $psFrameworkLogFilePath"
-
-    if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
-    {
-        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
-        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
-        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
-    }
-
-    $isRebootNeeded = Get-WURebootStatus -Silent
-    Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
-    if ($isRebootNeeded)
-    {
-        Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
-    }
+    Invoke-GetWindowsUpdate
 }
