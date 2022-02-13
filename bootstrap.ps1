@@ -166,7 +166,7 @@ process
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-    whoami | Out-File -FilePath "$bsPath\whoami.txt" -Force
+    Invoke-ExpressionWithLogging -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"
 
     $ProgressPreference = 'SilentlyContinue'
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
