@@ -1015,14 +1015,14 @@ process
     $tssFolderPath = "$bsPath\TSSv2"
     $tssFilePath = "$bsPath\TSSv2.zip"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
-    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $tssFilePath -DestinationPath $tssFolderPath -Force"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
     #Invoke-ExpressionWithLogging -command "$tssFolderPath\TSSv2.ps1 -SDP Perf"
 
     $timestamp = Get-Date -Format yyyyMMddHHmmssff
     $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$timestamp.log"
     #Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install -Verbose | Out-File $getWindowsUpdateLogFilePath"
-    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -Download -Install -IgnoreReboot -Verbose | Out-File $getWindowsUpdateLogFilePath"
+    # Get-WindowsUpdate | Select-Object Title,@{L="Category";E={$_.Categories[0]|Select Name}}| ft -a # to see categories
+    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -AcceptAll -Download -Install -IgnoreReboot -Verbose -NotCategory 'Language packs' | Out-File $getWindowsUpdateLogFilePath"
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-PSFMessage "$scriptName duration: $scriptDuration"
