@@ -396,7 +396,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
+            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
