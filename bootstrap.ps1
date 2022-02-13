@@ -169,8 +169,9 @@ process
     Invoke-ExpressionWithLogging -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"
 
     $ProgressPreference = 'SilentlyContinue'
-    if ($PSVersionTable.PSVersion -ge [Version]'5.1')
+    if ($PSVersionTable.PSVersion -ge [Version]'5.1' -and $PSEdition -eq 'Desktop')
     {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
         <#
         Import-Module BitsTransfer
         $url = 'http://download.windowsupdate.com/c/msdownload/update/software/updt/2016/04/windows6.1-kb3140245-x64_5b067ffb69a94a6e5f9da89ce88c658e52a0dec0.msu'
@@ -188,7 +189,7 @@ process
         #>
         # https://devblogs.microsoft.com/powershell/when-powershellget-v1-fails-to-install-the-nuget-provider/
         #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         <# 2008R2/Win7 don't support TLS1.2 until PS5.1/WMF are installed, before then this will result in error:
         PS C:\> [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         Exception setting "SecurityProtocol": "Cannot convert value "3312" to type "System.Net.SecurityProtocolType" due to invalid enumeration values. Specify one of the following enumeration values and try again. The possible enumeration values are "Ssl3, Tls"."
@@ -897,9 +898,9 @@ process
 
     if (Test-Path -Path $installModulesFilePath -PathType Leaf)
     {
-        Invoke-Expression -Command 'powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
-        Invoke-Expression -Command 'powershell -nologo -noprofile -command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
-        Invoke-Expression -Command "powershell -nologo -noprofile -file $installModulesFilePath"
+        Invoke-Expression -Command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
+        Invoke-Expression -Command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
+        Invoke-Expression -Command "powershell -nologo -noprofile -File $installModulesFilePath"
 
         if (Test-Path -Path $pwshFilePath -PathType Leaf)
         {

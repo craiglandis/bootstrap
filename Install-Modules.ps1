@@ -57,6 +57,8 @@ function out-log
     "$prefixString $text" | Out-File $logFilePath -Append
 }
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
+
 $startTime = Get-Date
 $scriptStartTime = $startTime
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
@@ -83,7 +85,8 @@ $PSDefaultParameterValues = @{
 
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
-    Invoke-Expression -Command "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072"
+    # [Net.ServicePointManager]::SecurityProtocol
+    Invoke-Expression -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
    <# 2008R2/Win7 don't support TLS1.2 until PS5.1/WMF are installed, before then this will result in error:
     PS C:\> [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
     Exception setting "SecurityProtocol": "Cannot convert value "3312" to type "System.Net.SecurityProtocolType" due to invalid enumeration values. Specify one of the following enumeration values and try again. The possible enumeration values are "Ssl3, Tls"."
