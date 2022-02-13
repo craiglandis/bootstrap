@@ -140,7 +140,7 @@ process
     function Invoke-GetWindowsUpdate
     {
         $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$(Get-Date -Format yyyyMMddHHmmssff).log"
-        Invoke-Expression -command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
+        Invoke-Expression -Command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
         $isRebootNeeded = Get-WURebootStatus -Silent
         Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
         if ($isRebootNeeded)
@@ -151,7 +151,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "schtasks /delete /tn bootstrap /f"
+            Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
         }
     }
 
@@ -190,7 +190,7 @@ process
     $scriptPath = $MyInvocation.MyCommand.Path
     $scriptName = Split-Path -Path $scriptPath -Leaf
     $scriptBaseName = $scriptName.Split('.')[0]
-    Invoke-ExpressionWithLogging -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"
+    Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
 
     if (Test-Path -Path $bsPath -PathType Container)
     {
@@ -396,7 +396,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+            Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
@@ -458,18 +458,18 @@ process
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
         if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
         {
-            Invoke-ExpressionWithLogging -command "Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force"
+            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
         }
         else
         {
             Write-PSFMessage "Nuget $($nuget.Version) already installed"
         }
 
-        Invoke-ExpressionWithLogging -command "Import-Module -Name Appx -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging -command 'Import-Module -Name Appx -ErrorAction SilentlyContinue'
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "Import-Module -Name Appx -UseWindowsPowerShell -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging -command 'Import-Module -Name Appx -UseWindowsPowerShell -ErrorAction SilentlyContinue'
     }
 
     # https://psframework.org/
