@@ -40,14 +40,12 @@ function out-log
     ElseIf ($prefix -eq 'Timespan' -and $startTime)
     {
         $timespan = New-TimeSpan -Start $startTime -End (Get-Date)
-        #$timespanString = '[{0:hh}:{0:mm}:{0:ss}.{0:ff}]' -F $timespan
         $prefixString = '[{0:mm}:{0:ss}.{0:ff}]' -F $timespan
     }
     ElseIf ($prefix -eq 'Both' -and $startTime)
     {
         $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
         $timespan = New-Timespan -Start $startTime -End (Get-Date)
-        #$timespanString = "$($timestamp) $('[{0:hh}:{0:mm}:{0:ss}.{0:ff}]' -F $timespan)"
         $prefixString = "$($timestamp) $('[{0:mm}:{0:ss}]' -F $timespan)"
     }
     else
@@ -61,9 +59,9 @@ function out-log
 
 $startTime = Get-Date
 $scriptStartTime = $startTime
-#$scriptName = Split-Path -Path $PSCommandPath -Leaf
+$scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
-$logFilePath = "$($scriptName.Substring(0, $scriptName.Length - 4))_$env:COMPUTERNAME.log"
+$logFilePath = "$($scriptName).$($env:COMPUTERNAME).PSEdition-$($PSEdition).$($scriptStartTimeString).log"
 $PSDefaultParameterValues = @{
     'Write-Color:LogFile' = $logFilePath
     'Write-Color:LogTime' = $true
