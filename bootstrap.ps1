@@ -172,6 +172,7 @@ process
         $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
         Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
         Write-PSFMessage "Log path: $psFrameworkLogFilePath"
+        Invoke-ExpressionWithLogging -command "New-Item -Path $bsPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
     # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
@@ -212,7 +213,7 @@ process
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-    if (Test-Path -Path "$bsPath\Get-WindowsUpdate*.log" -PathType Leaf)
+    if (Test-Path -Path "$bsPath\ScriptRanToCompletion" -PathType Leaf)
     {
         Invoke-GetWindowsUpdate
         Complete-ScriptExecution
