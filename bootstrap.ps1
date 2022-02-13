@@ -33,6 +33,7 @@ DynamicParam
     $appsJsonFilePath = "$PSScriptRoot\apps.json"
     Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
     $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
     $appNames = $apps.Name

@@ -25,6 +25,7 @@ function Invoke-ExpressionWithLogging
 function Set-PSFramework
 {
     Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
+    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     $logFilePath = "$bsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
     $paramSetPSFLoggingProvider = @{
         Name     = 'logfile'
@@ -65,8 +66,11 @@ else
     New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
 }
 $scriptPathNew = "$bsPath\$scriptName"
-Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $scriptPathNew -Force"
-$scriptPath = $scriptPathNew
+if ($scriptPath -ne $scriptPathNew)
+{
+    Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $scriptPathNew -Force"
+    $scriptPath = $scriptPathNew
+}
 
 Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
 
@@ -100,6 +104,17 @@ else
         #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
         Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
 
+        Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
+        $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
+        if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
+        {
+            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
+        }
+        else
+        {
+            Write-PSFMessage "Nuget $($nuget.Version) already installed"
+        }
+
         Invoke-ExpressionWithLogging -command "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
         Import-Module -Name PSFramework -ErrorAction SilentlyContinue
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
@@ -122,7 +137,7 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$bootstrapScriptUrl`', `'$bootstrapScriptFilePath`')"
 
     if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
     {
