@@ -382,7 +382,7 @@ process
     }
     else
     {
-        # Chocolatey install requires at least PS3. Clean install of 2008R2/Win7 only have PS2, so need to manually get PS5.1 installed on those
+        # Chocolatey install requires at least PS3. 2008R2/Win7 by default only have PS 2.0, so need to manually get PS5.1 installed on those
         if ($PSVersionTable.PSVersion -lt [Version]'3.0')
         {
             $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-WMF.ps1'
