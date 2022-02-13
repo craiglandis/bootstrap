@@ -74,6 +74,24 @@ if ($scriptPath -ne $scriptPathNew)
 
 Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
 
+$currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
+if ($currentBuild -lt 9600)
+{
+    Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
+
+        $currentKey = Get-ItemProperty -Path $_.PsPath
+        if ($currentKey.ProfileName -eq $ProfileName)
+        {
+            # 0 is Public, 1 is Private, 2 is Domain
+            Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 0
+        }
+    }
+}
+else
+{
+    Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public"
+}
+
 if (!$userName)
 {
     Write-Error "Required parameter missing: -userName <userName>"
