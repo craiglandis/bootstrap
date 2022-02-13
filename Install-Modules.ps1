@@ -291,6 +291,7 @@ Pester,False,True
 posh-git,False,False
 posh-gist,False,False
 PoshRSJob,False,False
+Invoke-CommandAs
 #>
 
 if ($name)
