@@ -428,18 +428,18 @@ process
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
         if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
         {
-            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
+            Invoke-ExpressionWithLogging -command "Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force"
         }
         else
         {
             Write-PSFMessage "Nuget $($nuget.Version) already installed"
         }
 
-        Import-Module -Name Appx
+        Invoke-ExpressionWithLogging -command "Import-Module -Name Appx -ErrorAction SilentlyContinue"
     }
     else
     {
-        Import-Module -Name Appx -UseWindowsPowerShell
+        Invoke-ExpressionWithLogging -command "Import-Module -Name Appx -UseWindowsPowerShell -ErrorAction SilentlyContinue"
     }
 
     # https://psframework.org/
