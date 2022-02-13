@@ -158,10 +158,13 @@ process
         Write-PSFMessage "Creating log path $bsPath"
         New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
     }
-    # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
-    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
-    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bsPath -Force"
-    Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
+    if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
+    {
+        # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
+        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
+        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bsPath -Force"
+        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
+    }
     $runCount = (Get-ChildItem -Path "$bsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
@@ -280,7 +283,7 @@ process
         '15063' {$os = 'WIN10'; $isWin10 = $true} # RS2 1703 Redstone 2
         '16299' {if ($isWindowsServer) {$os = 'WS1709'} else {$os = 'WIN10'; $isWin10 = $true}} # 1709 (Redstone 3)
         '17134' {if ($isWindowsServer) {$os = 'WS1803'} else {$os = 'WIN10'; $isWin10 = $true}} # 1803 (Redstone 4)
-        '17763' {if ($isWindowsServer) {$os = 'WS19'} else {$os = 'WIN10'; $isWin10 = $true}} # 1809 October 2018 Update (Redstone 5)
+        '17763' {if ($isWindowsServer) {$os = 'WS19'; $isWS19 = $true} else {$os = 'WIN10'; $isWin10 = $true}} # 1809 October 2018 Update (Redstone 5)
         '18362' {if ($isWindowsServer) {$os = 'WS1909'} else {$os = 'WIN10'; $isWin10 = $true}} # 1903 19H1 November 2019 Update
         '18363' {if ($isWindowsServer) {$os = 'WS1909'} else {$os = 'WIN10'; $isWin10 = $true}} # 1909 19H2 November 2019 Update
         '19041' {if ($isWindowsServer) {$os = 'WS2004'} else {$os = 'WIN10'; $isWin10 = $true}} # 2004 20H1 May 2020 Update
@@ -1031,9 +1034,12 @@ process
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $bsPath"
     Write-PSFMessage "Log path: $psFrameworkLogFilePath"
 
-    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
-    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
-    Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
+    if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
+    {
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
+    }
 
     $isRebootNeeded = Get-WURebootStatus -Silent
     Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
