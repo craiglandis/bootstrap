@@ -355,6 +355,7 @@ process
         {
             $installWmfScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-WMF.ps1'
             $installWmfScriptFilePath = "$bsPath\$($installWmfScriptUrl.Split('/')[-1])"
+            Import-Module -Name BitsTransfer
             Start-BitsTransfer -Source $installWmfScriptUrl -Destination $installWmfScriptFilePath
             (New-Object Net.WebClient).DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
             Invoke-ExpressionWithLogging -command $installWmfScriptFilePath
@@ -409,10 +410,11 @@ process
             {
                 $bootstrapScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1'
                 $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
-                Write-PSFMessage "Downloading $bootstrapScriptUrl to $scriptPath"
-                (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $scriptPath)
+                $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
+                Write-PSFMessage "Downloading $bootstrapScriptUrl to $bootstrapScriptFilePath"
+                (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)
             }
-            Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $scriptPath`" /f"
+            Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $bootstrapScriptFilePath`" /f"
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
         }
     }
