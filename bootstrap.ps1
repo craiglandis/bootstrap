@@ -33,7 +33,7 @@ DynamicParam
     $appsJsonFilePath = "$PSScriptRoot\apps.json"
     Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
     $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
     (New-Object Net.WebClient).DownloadFile($appsJsonFileUrl, $appsJsonFilePath)
     $apps = Get-Content -Path $PSScriptRoot\apps.json | ConvertFrom-Json
     $appNames = $apps.Name
@@ -396,7 +396,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Expression -command ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
