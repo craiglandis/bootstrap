@@ -143,11 +143,9 @@ process
     # Since this script will be called via psremoting using Invoke-Command so that it runs in the context of a specific user instead of system,
     # the $MyInvocation.MyCommand.Path, $PSScriptRoot, and $PSCommandPath automatic variables are not populated, because Invoke-Command is reading the script but executing it as a script block
     $bsPath = "$env:SystemDrive\bs"
-    $scriptName = 'bootstrap.ps1'
-    $scriptBaseName = $scriptName.Split('.')[0]
-    $scriptPath = "$bsPath\$scriptName"
     $scriptPath = $MyInvocation.MyCommand.Path
     $scriptName = Split-Path -Path $scriptPath -Leaf
+    $scriptBaseName = $scriptName.Split('.')[0]
 
     if (Test-Path -Path $bsPath -PathType Container)
     {
