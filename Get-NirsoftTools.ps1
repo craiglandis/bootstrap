@@ -72,8 +72,6 @@ function Get-Download
     Write-Output "Downloading $uri to $outFile"
     (New-Object Net.WebClient).DownloadFile($uri, $outFile)
     Expand-Zip -Path $outFile -DestinationPath $destinationPath
-    #Invoke-WebRequest -UseBasicParsing -Uri $uri -OutFile $outFile -ErrorAction Stop #-Verbose
-    #Expand-Archive -LiteralPath $outFile -DestinationPath $destinationPath -Force
     $newExeFile = Get-ChildItem -Path $destinationPath\*.exe | Select-Object -First 1
     $newExeFileFullName = $newExeFile.FullName
     $newExeFileName = $newExeFile.Name
