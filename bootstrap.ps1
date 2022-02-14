@@ -365,6 +365,16 @@ process
         Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
     }
 
+    if (Test-Path -Path $profile.AllUsersAllHosts -PathType Leaf)
+    {
+        Write-PSFMessage "$($profile.AllUsersAllHosts) already exists, don't need to create it"
+    }
+    else
+    {
+        Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
+        Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
+    }
+
     if (Test-Path -Path $profile.CurrentUserCurrentHost -PathType Leaf)
     {
         Write-PSFMessage "$($profile.CurrentUserCurrentHost) already exists, don't need to create it"
