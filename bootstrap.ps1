@@ -1016,30 +1016,13 @@ process
         Invoke-ExpressionWithLogging -command 'SetUserFTA .yml applications\code.exe'
     }
 
-    $runtimes = dotnet --list-runtimes
-    if ($runtimes | Select-String -SimpleMatch '6.0')
-    {
-        $netVersion = 6
-    }
-    else
-    {
-        $netVersion = 4
-    }
-
-    $getZimmermanToolsScriptZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/Get-ZimmermanTools.zip'
-    $getZimmermanToolsScriptZipFileName = $getZimmermanToolsScriptZipUrl.Split('/')[-1]
-    $getZimmermanToolsScriptZipFilePath = "$bsPath\$getZimmermanToolsScriptZipFileName"
-    $getZimmermanToolsScriptZipFolderPath = $getZimmermanToolsScriptZipFilePath.Replace('.zip', '')
-
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getZimmermanToolsScriptZipUrl`', `'$getZimmermanToolsScriptZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $getZimmermanToolsScriptZipFilePath -DestinationPath $getZimmermanToolsScriptZipFolderPath"
-    $getZimmermanToolsScriptFilePath = (Get-ChildItem -Path $getZimmermanToolsScriptZipFolderPath\*.ps1 -File).FullName
-    Invoke-ExpressionWithLogging -command "$getZimmermanToolsScriptFilePath -Dest $toolsPath -NetVersion $netVersion"
-    if ($netVersion -eq 6)
-    {
-        Invoke-ExpressionWithLogging -command "Copy-Item -Path $toolsPath\net6\* -Destination $toolsPath"
-        Invoke-ExpressionWithLogging -command "Remove-Item -Path $toolsPath\net6 -Recurse -Force"
-    }
+    $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
+    $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
+    $zimmermanToolsZipFilePath = "$bsPath\$zimmermanToolsZipFileName"
+    $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip','')
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
+    Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath
+    Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
 
     $tssUrl = 'https://aka.ms/getTSSv2'
     $tssFolderPath = "$bsPath\TSSv2"
