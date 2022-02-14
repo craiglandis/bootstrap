@@ -65,11 +65,24 @@ else
     Write-PSFMessage "Creating log path $bsPath"
     New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
 }
+
 $scriptPathNew = "$bsPath\$scriptName"
 if ($scriptPath -ne $scriptPathNew)
 {
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $scriptPathNew -Force"
     $scriptPath = $scriptPathNew
+}
+
+$logScriptFilePath = "$bsPath\log.ps1"
+if (Test-Path -Path $logScriptFilePath -PathType Leaf)
+{
+    Write-PSFMessage "$logScriptFilePath already exists, don't need to create it"
+}
+else
+{
+    $logCommand = "Import-Csv (Get-ChildItem -Path $bsPath\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
+    Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
+    Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
 }
 
 Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
