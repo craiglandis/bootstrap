@@ -139,6 +139,7 @@ process
 
     function Invoke-GetWindowsUpdate
     {
+        $ProgressPreference = 'SilentlyContinue'
         $getWindowsUpdateLogFilePath = "$bsPath\Get-WindowsUpdate-$(Get-Date -Format yyyyMMddHHmmssff).log"
         Invoke-Expression -Command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
         $isRebootNeeded = Get-WURebootStatus -Silent
@@ -708,7 +709,7 @@ process
             # https://docs.chocolatey.org/en-us/choco/commands/install
             $timestamp = Get-Date -Format yyyyMMddHHmmssff
             $chocoInstallLogFilePath = "$bsPath\choco_install_$($appName)_$($timestamp).log"
-            $command = "choco install $appName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
+            $command = "choco install $appName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath"
             if ($chocolateyParams)
             {
                 # EXAMPLE: choco install sysinternals --params "/InstallDir:C:\your\install\path"
@@ -716,6 +717,7 @@ process
                 $command = $command.Replace('TOOLSPATH', $toolsPath)
                 $command = $command.Replace('MYPATH', $myPath)
             }
+            $command = "$command | Out-Null"
             Invoke-ExpressionWithLogging -command $command
         }
         elseif ($appName -and !$useChocolatey -and $isWingetInstalled)
@@ -1021,7 +1023,7 @@ process
     $zimmermanToolsZipFilePath = "$bsPath\$zimmermanToolsZipFileName"
     $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip','')
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
-    Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath
+    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
     Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
 
     $tssUrl = 'https://aka.ms/getTSSv2'

@@ -56,7 +56,7 @@ $scriptName = Split-Path -Path $scriptPath -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
 $bsPath = "$env:SystemDrive\bs"
-if (Test-Path -Path $bsPath -PathType Container) 
+if (Test-Path -Path $bsPath -PathType Container)
 {
     Write-PSFMessage "Log path $bsPath already exists, don't need to create it"
 }
@@ -119,8 +119,8 @@ else
 {
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     {
-        #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
-        Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
+        Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
+        #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
 
         Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
@@ -150,8 +150,8 @@ else
 
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
-    #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
-    Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
+    Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
+    #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
@@ -159,11 +159,17 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 
     if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
     {
-        $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
-        Enable-PSRemoting -SkipNetworkProfileCheck -Force
-        Invoke-Command -Credential $credential -ComputerName localhost -ScriptBlock {param($scriptPath) & $scriptPath} -ArgumentList $bootstrapScriptFilePath
-        Disable-PSRemoting -Force
+        if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
+        {
+            $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
+            $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
+            Enable-PSRemoting -SkipNetworkProfileCheck -Force
+            Invoke-Command -Credential $credential -ComputerName localhost -ScriptBlock {param($scriptPath) & $scriptPath} -ArgumentList $bootstrapScriptFilePath
+        }
+        else
+        {
+            Invoke-ExpressionWithLogging -command $bootstrapScriptFilePath
+        }
     }
     else
     {
@@ -192,7 +198,6 @@ else
     {
         Write-PSFMessage "WMF5.1 ($hotfixId) already installed but PowerShell version is $psVersion, Windows restart still needed"
         Invoke-Schtasks
-        #Invoke-ExpressionWithLogging -command "Invoke-Schtasksputer -Force"
     }
     else
     {
@@ -218,7 +223,6 @@ else
 
             $shell = New-Object -Com Shell.Application
             $zip = $shell.NameSpace($filePath)
-            # foreach ($item in $zip.Items()) { $shell.Namespace($extractedFilePath).CopyHere($item)}
             foreach ($item in $zip.Items())
             {
                 $shell.Namespace($extractedFilePath).CopyHere($item, 0x14)

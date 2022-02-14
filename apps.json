@@ -13,6 +13,8 @@
     "ChocolateyName": "dotnetfx",
     "WingetName": "Microsoft.dotNetFramework",
     "Groups": [
+      "PC",
+      "VM"
     ]
   },
   {
