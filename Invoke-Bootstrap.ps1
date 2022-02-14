@@ -74,22 +74,25 @@ if ($scriptPath -ne $scriptPathNew)
 
 Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
 
-$currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
-if ($currentBuild -lt 9600)
+if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
-    Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
+    $currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
+    if ($currentBuild -lt 9600)
+    {
+        Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
 
-        $currentKey = Get-ItemProperty -Path $_.PsPath
-        if ($currentKey.ProfileName -eq $ProfileName)
-        {
-            # 0 is Public, 1 is Private, 2 is Domain
-            Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 1
+            $currentKey = Get-ItemProperty -Path $_.PsPath
+            if ($currentKey.ProfileName -eq $ProfileName)
+            {
+                # 0 is Public, 1 is Private, 2 is Domain
+                Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 1
+            }
         }
     }
-}
-else
-{
-    Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"
+    else
+    {
+        Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"
+    }
 }
 
 if (!$userName)
@@ -120,7 +123,6 @@ else
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     {
         Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
-        #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
 
         Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
@@ -151,7 +153,6 @@ else
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
     Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
-    #Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12"
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
@@ -232,16 +233,17 @@ else
             {
                 Start-Sleep -Seconds 1
             }
-            Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
-            Write-PSFMessage "Windows will automatically restart after the WMF5.1 silent install completes"
+
             Invoke-Schtasks
-            exit
+            Write-PSFMessage "Windows will restart automatically after WMF5.1 silent install completes"
+            Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
         }
         else
         {
-            $wusa = "$env:windir\System32\wusa.exe"
-            Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/norestart' -Wait"
             Invoke-Schtasks
+            Write-PSFMessage "Windows will restart automatically after WMF5.1 silent install completes"
+            $wusa = "$env:windir\System32\wusa.exe"
+            Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/forcerestart' -Wait"
         }
 
         do
@@ -250,7 +252,5 @@ else
             Write-PSFMessage 'Installing WMF 5.1...'
             $hotfixInstalled = [bool](Get-WmiObject -Query "Select HotFixID from Win32_QuickFixEngineering where HotFixID='$hotfixId'")
         } until ($hotfixInstalled)
-
-        #Invoke-ExpressionWithLogging -command "Restart-Computer -Force"
     }
 }
