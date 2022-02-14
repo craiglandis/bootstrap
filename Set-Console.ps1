@@ -1,4 +1,5 @@
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Set-Console.ps1
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\Set-Console.ps1
 param(
 	[switch]$UpdateShortcuts = $true, # Change to $true for shortcuts (.lnk) to be updated in addition to the registry changes. Creates backups (*.lnk.bak) before changing the existing shortcut.
 	[switch]$KeepBackupShortcuts = $false # If $true, keeps the backup *.lnk.bak. If $false, removes the backup *.lnk.bak file.
@@ -172,7 +173,7 @@ if ($isPC -or $isVM)
 			$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
 			$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
 			$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
-			(New-Object System.Net.WebClient).DownloadFile($cascadiaCodeNerdFontZipUrl, $cascadiaCodeNerdFontZipFilePath)
+			(New-Object Net.WebClient).DownloadFile($cascadiaCodeNerdFontZipUrl, $cascadiaCodeNerdFontZipFilePath)
 			Expand-Archive -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath -Force
 
 			# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
@@ -224,8 +225,8 @@ $settings = @{
 "2560x1440 buffersize" = 0xbb800e6;
 "1920x1200 windowsize" = 0x3e00ab;
 "1920x1200 buffersize" = 0xbb800ab;
-"1920x1080 windowsize" = 0x3700ac;
-"1920x1080 buffersize" = 0xbb800ac;
+"1920x1080 windowsize" = 0x280096; #0x3700ac;
+"1920x1080 buffersize" = 0x270f0096; #0xbb800ac;
 "1680x1050 windowsize" = 0x360096;
 "1680x1050 buffersize" = 0xbb80096;
 "1600x1200 windowsize" = 0x3e008f;
@@ -240,8 +241,8 @@ $settings = @{
 "1280x1024 buffersize" = 0xbb80071;
 "1152x864 windowsize"  = 0x2b0066;
 "1152x864 buffersize"  = 0xbb80066;
-"1024x768 windowsize"  = 0x26005a;
-"1024x768 buffersize"  = 0xbb8005a;
+"1024x768 windowsize"  = 0x280096; #0x26005a;
+"1024x768 buffersize"  = 0x270f0096; #0xbb8005a;
 "800x600 windowsize"   = 0x1d0046;
 "800x600 buffersize"   = 0xbb80046;
 "FaceName"             = $faceName;

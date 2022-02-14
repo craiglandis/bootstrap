@@ -56,7 +56,7 @@ $scriptName = Split-Path -Path $scriptPath -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
 $bsPath = "$env:SystemDrive\bs"
-if (Test-Path -Path $bsPath -PathType Container)
+if (Test-Path -Path $bsPath -PathType Container) 
 {
     Write-PSFMessage "Log path $bsPath already exists, don't need to create it"
 }
@@ -83,13 +83,13 @@ if ($currentBuild -lt 9600)
         if ($currentKey.ProfileName -eq $ProfileName)
         {
             # 0 is Public, 1 is Private, 2 is Domain
-            Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 0
+            Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 1
         }
     }
 }
 else
 {
-    Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public"
+    Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"
 }
 
 if (!$userName)
