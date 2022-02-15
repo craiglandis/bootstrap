@@ -1,4 +1,4 @@
-# Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force; \\tsclient\c\onedrive\my\Get-NirsoftTools.ps1
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Get-NirsoftTools.ps1
 <#
 .SYNOPSIS
     Get-Nirsoft.ps1
