@@ -69,6 +69,8 @@ process
     function Set-PSFramework
     {
         Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
+        Import-Module -Name PSFramework -ErrorAction SilentlyContinue
+        $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
         $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
         $paramSetPSFLoggingProvider = @{
             Name     = 'logfile'
@@ -177,9 +179,6 @@ process
         Invoke-ExpressionWithLogging -command "New-Item -Path $bsPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
-    # Alias Write-PSFMessage to Write-PSFMessage until confirming PSFramework module is installed
-    Set-Alias -Name Write-PSFMessage -Value Write-Output
-    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
@@ -192,6 +191,30 @@ process
     $scriptPath = $MyInvocation.MyCommand.Path
     $scriptName = Split-Path -Path $scriptPath -Leaf
     $scriptBaseName = $scriptName.Split('.')[0]
+
+    $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
+    if ($psframework)
+    {
+        Set-PSFramework
+    }
+    else
+    {
+        # Alias Write-PSFMessage to Write-PSFMessage until PSFramework module is installed
+        Set-Alias -Name Write-PSFMessage -Value Write-Output
+        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
+        Import-Module -Name PSFramework -Force
+        $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
+        if ($psframework)
+        {
+            Set-PSFramework
+        }
+        else
+        {
+            Write-Error 'PSFramework module failed to install'
+            exit
+        }
+    }
+
     Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
 
     $bsPath = "$env:SystemDrive\bs"
@@ -227,14 +250,15 @@ process
         New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
     }
 
-    if ($isVM)
+    $tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+    if ($tempDrive)
     {
-        $tempDrive = (Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}).DeviceID
-        $packagesPath = "$tempDrive\Packages"
+        $tempDrive = $tempDrive.DeviceID
+        $packagesPath = "$tempDrive\packages"
     }
     else
     {
-        $packagesPath = "$bsPath\Packages"
+        $packagesPath = "$bsPath\packages"
     }
     if (Test-Path -Path $packagesPath -PathType Container)
     {
@@ -693,18 +717,16 @@ process
     $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
     $powerShellx64MsiFilePath = "$packagesPath\$powerShellx64MsiFileName"
-    $powerShellx64MsiLogFilePath = "$($powerShellx64MsiFilePath).$(Get-Date -Format yyyyMMddHHmmssff).log"
+    $powerShellx64MsiLogFilePath = "$logsPath\$($powerShellx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
-    #Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     # Install PS7 preview version
     $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
     $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
     $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
-    $powerShellPreviewx64MsiLogFilePath = "$($powerShellPreviewx64MsiFilePath).$(Get-Date -Format yyyyMMddHHmmssff).log"
+    $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
-    #Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=1 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
     if (!$apps)
@@ -891,8 +913,8 @@ process
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
     $nppSettingsZipFileName = $nppSettingsZipUrl.Split('/')[-1]
-    $nppSettingsZipFilePath = "$bsPath\$nppSettingsZipFileName"
-    $nppSettingsTempFolderPath = "$bsPath\$($nppSettingsZipFileName.Replace('.zip',''))"
+    $nppSettingsZipFilePath = "$packagesPath\$nppSettingsZipFileName"
+    $nppSettingsTempFolderPath = "$packagesPath\$($nppSettingsZipFileName.Replace('.zip',''))"
     $nppSettingsFolderPath = 'C:\OneDrive\npp'
     $nppAppDataPath = "$env:APPDATA\Notepad++"
     $nppCloudFolderPath = "$nppAppDataPath\cloud"
