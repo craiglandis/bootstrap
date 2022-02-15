@@ -31,6 +31,7 @@ function Set-PSFramework
         Name     = 'logfile'
         FilePath = $logFilePath
         Enabled  = $true
+        TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
     }
     Set-PSFLoggingProvider @paramSetPSFLoggingProvider
     Write-PSFMessage "PSFramework $($psframework.Version)"
@@ -72,6 +73,55 @@ if ($scriptPath -ne $scriptPathNew)
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $scriptPathNew -Force"
     $scriptPath = $scriptPathNew
 }
+
+$systemDrive = Get-WmiObject -Class Win32_LogicalDisk | where-object {$_.DeviceID -eq $env:SystemDrive}
+$systemDriveSizeGB = [Math]::Round($systemDrive.Size/1GB,2)
+$systemDriveFreeSpaceGBBefore = [Math]::Round($systemDrive.FreeSpace/1GB,2)
+Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBBefore GB"
+Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\Logs\CBS\*.log -Force"
+Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\SoftwareDistribution\DataStore\DataStore.edb -Force"
+$systemDrive = Get-WmiObject -Class Win32_LogicalDisk | where-object {$_.DeviceID -eq $env:SystemDrive}
+$systemDriveFreeSpaceGBAfter = [Math]::Round($systemDrive.FreeSpace/1GB,2)
+Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBAfter GB (deleting CBS logs and DataStore.edb freed $($systemDriveFreeSpaceGBAfter - $systemDriveFreeSpaceGBBefore) GB)"
+
+$productType = (Get-WmiObject -Class Win32_OperatingSystem).ProductType
+$build = [environment]::OSVersion.Version.Build
+
+if ($productType -ne 1)
+{
+    # Disable Server Manager from starting at Windows startup
+    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
+}
+
+$build = [environment]::OSVersion.Version.Build
+
+if ($productType -eq 1)
+{
+    if ($build -ge 22000)
+    {
+        # Win11
+        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+    }
+
+    if ($build -lt 22000 -and $build -ge 10240)
+    {
+        # Win10: Enable "Always show all icons in the notification area"
+        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+    }
+}
+
+# Config for all Windows versions
+# Show file extensions
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
+# Show hidden files
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+# Show protected operating system files
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 0 /f | Out-Null"
+# Explorer show compressed files color
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
+# Taskbar on left instead of center
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
 
 $logScriptFilePath = "$bsPath\log.ps1"
 if (Test-Path -Path $logScriptFilePath -PathType Leaf)

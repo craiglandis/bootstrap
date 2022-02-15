@@ -74,6 +74,7 @@ process
             Name     = 'logfile'
             FilePath = $logFilePath
             Enabled  = $true
+            TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
         }
         Set-PSFLoggingProvider @paramSetPSFLoggingProvider
         Write-PSFMessage "PSFramework $($psframework.Version)"
@@ -314,6 +315,7 @@ process
     }
 
     # https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions
+    $build = [environment]::OSVersion.Version.Build # TODO: switch to using just build number and product type instead of caption+version
     switch -regex ($osVersion)
     {
         '7601' {if ($isWindowsServer) {$os = 'WS08R2'; $isWS08R2 = $true} else {$os = 'WIN7'; $isWin7 = $true}}
@@ -352,7 +354,7 @@ process
 
     if ($isWin10)
     {
-        # Enable "Always show all icons in the notification area"
+        # WIN10: Enable "Always show all icons in the notification area"
         Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v EnableAutoTray /t REG_DWORD /d 0 /f | Out-Null"
     }
 
@@ -701,7 +703,6 @@ process
     $apps | ForEach-Object {
 
         $app = $_
-        Write-PSFMessage "Installing: $($app.Name)"
 
         if ($app.ChocolateyName -and ($app.WingetName -or !$app.WingetName))
         {
@@ -952,15 +953,15 @@ process
 
     if (Test-Path -Path $installModulesFilePath -PathType Leaf)
     {
-        Invoke-Expression -Command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
-        Invoke-Expression -Command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
-        Invoke-Expression -Command "powershell -nologo -noprofile -File $installModulesFilePath"
+        Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
+        Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
+        Invoke-ExpressionWithLogging -command "powershell -nologo -noprofile -File $installModulesFilePath"
 
         if (Test-Path -Path $pwshFilePath -PathType Leaf)
         {
-            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
-            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
-            Invoke-Expression -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
+            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
+            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
+            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
         }
     }
     else
