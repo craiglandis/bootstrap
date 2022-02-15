@@ -89,7 +89,8 @@ Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypa
 
 if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
-    $currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
+    #$currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
+    $currentBuild = [environment]::OSVersion.Version.Build
     if ($currentBuild -lt 9600)
     {
         Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
@@ -104,23 +105,23 @@ if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private"
+        Invoke-ExpressionWithLogging -command 'Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private'
     }
 }
 
 if (!$userName)
 {
-    Write-Error "Required parameter missing: -userName <userName>"
+    Write-Error 'Required parameter missing: -userName <userName>'
     exit
 }
 elseif (!$password)
 {
-    Write-Error "Required parameter missing: -password <password>"
+    Write-Error 'Required parameter missing: -password <password>'
     exit
 }
 elseif (!$bootstrapScriptUrl)
 {
-    Write-Error "Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>"
+    Write-Error 'Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>'
     exit
 }
 
@@ -135,7 +136,7 @@ else
 {
     if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     {
-        Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
+        Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
         Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
@@ -148,7 +149,7 @@ else
             Write-PSFMessage "Nuget $($nuget.Version) already installed"
         }
 
-        Invoke-ExpressionWithLogging -command "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
         Import-Module -Name PSFramework -ErrorAction SilentlyContinue
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
         if ($psframework)
@@ -163,9 +164,28 @@ else
     }
 }
 
+# Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
+# Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
+$tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+$tempDiskFreeSpaceGB = [Math]::Round($tempDisk.FreeSpace / 1GB, 0) / 2
+$totalPhysicalMemoryPlus1GB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB) + 1
+if ($totalPhysicalMemoryPlus1GB -gt $tempDiskFreeSpaceGB)
+{
+    $newPageFileSizeGB = $tempDiskFreeSpaceGB
+}
+else
+{
+    $newPageFileSizeGB = $totalPhysicalMemoryPlus1GB
+}
+"Setting $newPageFileSizeGB GB page file on temp disk $($tempDisk.DeviceID)"
+$pagingFiles = "$($tempDisk.DeviceID)\pagefile.sys $($newPageFileSizeGB * 1MB) $($newPageFileSizeGB * 1MB)"
+reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management" /v PagingFiles /t REG_MULTI_SZ /d $pagingFiles /f
+# Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
+# Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
+
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
-    Invoke-ExpressionWithLogging -command "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072"
+    Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
@@ -228,7 +248,7 @@ else
 
         if ($filePath.EndsWith('.zip'))
         {
-            $extractedFilePath = $filePath.Replace('.zip','')
+            $extractedFilePath = $filePath.Replace('.zip', '')
             Write-PSFMessage "Extracting $filePath to $extractedFilePath"
             if (!(Test-Path $extractedFilePath))
             {
@@ -248,13 +268,13 @@ else
             }
 
             Invoke-Schtasks
-            Write-PSFMessage "Windows will restart automatically after WMF5.1 silent install completes"
+            Write-PSFMessage 'Windows will restart automatically after WMF5.1 silent install completes'
             Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
         }
         else
         {
             Invoke-Schtasks
-            Write-PSFMessage "Windows will restart automatically after WMF5.1 silent install completes"
+            Write-PSFMessage 'Windows will restart automatically after WMF5.1 silent install completes'
             $wusa = "$env:windir\System32\wusa.exe"
             Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/forcerestart' -Wait"
         }

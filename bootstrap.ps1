@@ -506,8 +506,8 @@ process
     else
     {
         Write-PSFMessage 'PSFramework module not found, installing it'
-        Install-Module -Name PSFramework -Repository PSGallery -Scope CurrentUser -AllowClobber -Force -ErrorAction SilentlyContinue
-        Import-Module -Name PSFramework -ErrorAction SilentlyContinue
+        Invoke-ExpressionWithLogging -command "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging -command "Import-Module -Name PSFramework -ErrorAction SilentlyContinue"
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
         if ($psframework)
         {
