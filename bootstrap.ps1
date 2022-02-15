@@ -1,6 +1,5 @@
 <#
 TODO:
-
 Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections

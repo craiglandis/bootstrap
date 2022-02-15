@@ -268,7 +268,7 @@ else
     }
 }
 
-# Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
+# Ephemeral disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
 # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
 $currentPagingFilesValue = (Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management" -Name PagingFiles).PagingFiles
 Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
