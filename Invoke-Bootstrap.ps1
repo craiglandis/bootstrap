@@ -26,7 +26,7 @@ function Set-PSFramework
 {
     Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
-    $logFilePath = "$bsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
+    $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
     $paramSetPSFLoggingProvider = @{
         Name     = 'logfile'
         FilePath = $logFilePath
@@ -35,7 +35,7 @@ function Set-PSFramework
     }
     Set-PSFLoggingProvider @paramSetPSFLoggingProvider
     Write-PSFMessage "PSFramework $($psframework.Version)"
-    Write-PSFMessage "Log path: $bsPath"
+    Write-PSFMessage "Log path: $logsPath"
 }
 
 function Invoke-Schtasks
@@ -59,15 +59,56 @@ $scriptBaseName = $scriptName.Split('.')[0]
 $bsPath = "$env:SystemDrive\bs"
 if (Test-Path -Path $bsPath -PathType Container)
 {
-    Write-PSFMessage "Log path $bsPath already exists, don't need to create it"
+    Write-PSFMessage "$bsPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating log path $bsPath"
+    Write-PSFMessage "Creating $bsPath"
     New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
 }
 
-$scriptPathNew = "$bsPath\$scriptName"
+$scriptsPath = "$bsPath\scripts"
+if (Test-Path -Path $scriptsPath -PathType Container)
+{
+    Write-PSFMessage "$scriptsPath already exists, don't need to create it"
+}
+else
+{
+    Write-PSFMessage "Creating $scriptsPath"
+    New-Item -Path $scriptsPath -ItemType Directory -Force | Out-Null
+}
+
+$logsPath = "$bsPath\logs"
+if (Test-Path -Path $logsPath -PathType Container)
+{
+    Write-PSFMessage "$logsPath already exists, don't need to create it"
+}
+else
+{
+    Write-PSFMessage "Creating $logsPath"
+    New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
+}
+
+if ($isVM)
+{
+    $tempDrive = (Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}).DeviceID
+    $packagesPath = "$tempDrive\Packages"
+}
+else
+{
+    $packagesPath = "$bsPath\Packages"
+}
+if (Test-Path -Path $packagesPath -PathType Container)
+{
+    Write-PSFMessage "Packages path $packagesPath already exists, don't need to create it"
+}
+else
+{
+    Write-PSFMessage "Creating $packagesPath"
+    New-Item -Path $packagesPath -ItemType Directory -Force | Out-Null
+}
+
+$scriptPathNew = "$scriptsPath\$scriptName"
 if ($scriptPath -ne $scriptPathNew)
 {
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $scriptPath -Destination $scriptPathNew -Force"
@@ -87,41 +128,54 @@ Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDrive
 $productType = (Get-WmiObject -Class Win32_OperatingSystem).ProductType
 $build = [environment]::OSVersion.Version.Build
 
+$defaultUserHivePath = "$env:SystemDrive\Users\Default\NTUSER.DAT"
+$defaultUserKeyPath = "HKEY_USERS\DefaultUserHive"
+Invoke-ExpressionWithLogging -command "reg load $defaultUserKeyPath $defaultUserHivePath"
+
 if ($productType -ne 1)
 {
     # Disable Server Manager from starting at Windows startup
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging -command "reg add $defaultUserKeyPath\SOFTWARE\Microsoft\ServerManager /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging -command "reg add $defaultUserKeyPath\SOFTWARE\Microsoft\ServerManager /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
+    #Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
+    #Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
 }
-
-$build = [environment]::OSVersion.Version.Build
 
 if ($productType -eq 1)
 {
     if ($build -ge 22000)
     {
         # Win11
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        #Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32`' /f /ve | Out-Null"
     }
 
     if ($build -lt 22000 -and $build -ge 10240)
     {
         # Win10: Enable "Always show all icons in the notification area"
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        #Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32`' /f /ve | Out-Null"
     }
 }
 
 # Config for all Windows versions
 # Show file extensions
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
+#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
 # Show hidden files
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
 # Show protected operating system files
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 0 /f | Out-Null"
+#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
 # Explorer show compressed files color
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
+#Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
 # Taskbar on left instead of center
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+#Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+
+Invoke-ExpressionWithLogging -command "reg unload $defaultUserKeyPath"
 
 $logScriptFilePath = "$bsPath\log.ps1"
 if (Test-Path -Path $logScriptFilePath -PathType Leaf)
@@ -130,7 +184,7 @@ if (Test-Path -Path $logScriptFilePath -PathType Leaf)
 }
 else
 {
-    $logCommand = "Import-Csv (Get-ChildItem -Path $bsPath\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
+    $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
     Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
     Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
 }
@@ -242,7 +296,7 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
-    $bootstrapScriptFilePath = "$bsPath\$bootstrapScriptFileName"
+    $bootstrapScriptFilePath = "$scriptsPath\$bootstrapScriptFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$bootstrapScriptUrl`', `'$bootstrapScriptFilePath`')"
 
     if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
@@ -297,7 +351,7 @@ else
             '6.3.9600' {$url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win8.1AndW2K12R2-KB3191564-x64.msu'}
         }
         $fileName = $url.Split('/')[-1]
-        $filePath = "$bsPath\$fileName"
+        $filePath = "$packagesPath\$fileName"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$url`', `'$filePath`')"
 
         if ($filePath.EndsWith('.zip'))
