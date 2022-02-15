@@ -62,12 +62,10 @@ $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
 $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
 
 $scriptStartTime = Get-Date
-#$scriptName = Split-Path -Path $PSCommandPath -Leaf
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 Set-Alias -Name Write-PSFMessage -Value Write-Output
 $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
-#[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 if ($env:COMPUTERNAME.StartsWith('TDC'))
 {
@@ -144,6 +142,8 @@ if (Test-Path -Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe" -PathType L
 
 $faceName = 'Lucida Console'
 
+$build = [environment]::OSVersion.Version.Build
+
 if ($isPC -or $isVM)
 {
 	$systemFontsPath = "$env:SystemRoot\Fonts"
@@ -155,38 +155,44 @@ if ($isPC -or $isVM)
 	}
 	else
 	{
-		Write-PSFMessage "$fontFileName not installed, installing it now"
-		$ErrorActionPreference = 'SilentlyContinue'
-		$chocoVersion = choco -v
-		$ErrorActionPreference = 'Continue'
-
-		if ($chocoVersion)
+		if ($build -ge 10240)
 		{
-			Write-PSFMessage "Using Chocolatey to install it since Chocolatey itself is already installed"
-			choco install cascadia-code-nerd-font --limit-output --no-progress --no-color --confirm
+			Write-PSFMessage "This is OS build $build so installing Windows Terminal will install Cascadia Cove font"
 		}
 		else
 		{
-			$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
-			$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
-			$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-			$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
-			$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
-			$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
-			(New-Object Net.WebClient).DownloadFile($cascadiaCodeNerdFontZipUrl, $cascadiaCodeNerdFontZipFilePath)
-			Expand-Archive -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath -Force
+			Write-PSFMessage "$fontFileName not installed, installing it now"
+			$ErrorActionPreference = 'SilentlyContinue'
+			$chocoVersion = choco -v
+			$ErrorActionPreference = 'Continue'
+			if ($chocoVersion)
+			{
+				Write-PSFMessage "Using Chocolatey to install it since Chocolatey itself is already installed"
+				choco install cascadia-code-nerd-font --limit-output --no-progress --no-color --confirm
+			}
+			else
+			{
+				$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
+				$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -eq $false | Sort-Object -Property id -Descending | Select-Object -First 1
+				$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+				$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
+				$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
+				$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
+				(New-Object Net.WebClient).DownloadFile($cascadiaCodeNerdFontZipUrl, $cascadiaCodeNerdFontZipFilePath)
+				Expand-Archive -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath -Force
 
-			# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
-			$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
-			Get-ChildItem -Path $cascadiaCodeNerdFontExtractedFolderPath | ForEach-Object {
-				$fontPath = $_.FullName
-				if (Test-Path -Path $fontPath -PathType Leaf)
-				{
-					Write-PSFMessage "$fontPath already present"
-				}
-				else
-				{
-					$userFontsFolder.CopyHere($_.FullName, 16)
+				# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
+				$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
+				Get-ChildItem -Path $cascadiaCodeNerdFontExtractedFolderPath | ForEach-Object {
+					$fontPath = $_.FullName
+					if (Test-Path -Path $fontPath -PathType Leaf)
+					{
+						Write-PSFMessage "$fontPath already present"
+					}
+					else
+					{
+						$userFontsFolder.CopyHere($_.FullName, 16)
+					}
 				}
 			}
 		}
@@ -368,18 +374,18 @@ $regPaths | ForEach-Object {
 		New-ItemProperty -Path $regPath -Name ColorTable07 -Value $settings.CMDColorTable07 -PropertyType DWORD -Force | Out-Null
 	}
 
-	# Configure font, window position, history buffer, insert mode and quickedit
+	# Configure font, window position, history buffer, insert mode, and quickedit
 	Write-Host "`n$regPath"
-	Write-Host "`tFaceName =" $settings.FaceName
-	Write-Host "`tFontFamily =" $settings.FontFamily
-	Write-Host "`tFontSize =" $settings.FontSize
-	Write-Host "`tFontWeight =" $settings.FontWeight
-	rite-Host "`tHistoryBufferSize =" $settings.HistoryBufferSize
-	Write-Host "`tHistoryNoDup =" $settings.HistoryNoDup
-	Write-Host "`tInsertMode =" $settings.InsertMode
-	Write-Host "`tQuickEdit =" $settings.QuickEdit
+    Write-Host "`tFaceName =" $settings.FaceName
+    Write-Host "`tFontFamily =" $settings.FontFamily
+    Write-Host "`tFontSize =" $settings.FontSize
+    Write-Host "`tFontWeight =" $settings.FontWeight
+    Write-Host "`tHistoryBufferSize =" $settings.HistoryBufferSize
+    Write-Host "`tHistoryNoDup =" $settings.HistoryNoDup
+    Write-Host "`tInsertMode =" $settings.InsertMode
+    Write-Host "`tQuickEdit =" $settings.QuickEdit
 	Write-Host "`tScreenColors =" $settings.ScreenColors
-	Write-Host "`tWindowPosition =" $settings.WindowPosition
+    Write-Host "`tWindowPosition =" $settings.WindowPosition
 
 	New-ItemProperty -Path $regPath -Name FaceName -Value $settings.FaceName -Force | Out-Null
 	New-ItemProperty -Path $regPath -Name FontFamily -Value $settings.FontFamily -PropertyType DWORD -Force | Out-Null
