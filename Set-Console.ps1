@@ -370,16 +370,16 @@ $regPaths | ForEach-Object {
 
 	# Configure font, window position, history buffer, insert mode and quickedit
 	Write-Host "`n$regPath"
-    Write-Host "`tFaceName =" $settings.FaceName
-    Write-Host "`tFontFamily =" $settings.FontFamily
-    Write-Host "`tFontSize =" $settings.FontSize
-    Write-Host "`tFontWeight =" $settings.FontWeight
-    Write-Host "`tHistoryBufferSize =" $settings.HistoryBufferSize
-    Write-Host "`tHistoryNoDup =" $settings.HistoryNoDup
-    Write-Host "`tInsertMode =" $settings.InsertMode
-    Write-Host "`tQuickEdit =" $settings.QuickEdit
+	Write-Host "`tFaceName =" $settings.FaceName
+	Write-Host "`tFontFamily =" $settings.FontFamily
+	Write-Host "`tFontSize =" $settings.FontSize
+	Write-Host "`tFontWeight =" $settings.FontWeight
+	rite-Host "`tHistoryBufferSize =" $settings.HistoryBufferSize
+	Write-Host "`tHistoryNoDup =" $settings.HistoryNoDup
+	Write-Host "`tInsertMode =" $settings.InsertMode
+	Write-Host "`tQuickEdit =" $settings.QuickEdit
 	Write-Host "`tScreenColors =" $settings.ScreenColors
-    Write-Host "`tWindowPosition =" $settings.WindowPosition
+	Write-Host "`tWindowPosition =" $settings.WindowPosition
 
 	New-ItemProperty -Path $regPath -Name FaceName -Value $settings.FaceName -Force | Out-Null
 	New-ItemProperty -Path $regPath -Name FontFamily -Value $settings.FontFamily -PropertyType DWORD -Force | Out-Null
