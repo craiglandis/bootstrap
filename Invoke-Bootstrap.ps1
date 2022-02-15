@@ -166,20 +166,24 @@ else
 
 # Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
 # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
+$currentPagingFilesValue = (Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management" -Name PagingFiles).PagingFiles
+Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
 $tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
-$tempDiskFreeSpaceGB = [Math]::Round($tempDisk.FreeSpace / 1GB, 0) / 2
-$totalPhysicalMemoryPlus1GB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB) + 1
-if ($totalPhysicalMemoryPlus1GB -gt $tempDiskFreeSpaceGB)
+$halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
+Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
+$totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
+Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
+if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
 {
-    $newPageFileSizeGB = $tempDiskFreeSpaceGB
+    $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
 }
 else
 {
-    $newPageFileSizeGB = $totalPhysicalMemoryPlus1GB
+    $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
 }
-"Setting $newPageFileSizeGB GB page file on temp disk $($tempDisk.DeviceID)"
-$pagingFiles = "$($tempDisk.DeviceID)\pagefile.sys $($newPageFileSizeGB * 1MB) $($newPageFileSizeGB * 1MB)"
-reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management" /v PagingFiles /t REG_MULTI_SZ /d $pagingFiles /f
+$newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
+Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
+Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
 # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
 # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
 
