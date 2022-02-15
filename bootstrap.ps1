@@ -1120,5 +1120,5 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
 
-    Invoke-GetWindowsUpdate
+    #Invoke-GetWindowsUpdate
 }

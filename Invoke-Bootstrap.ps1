@@ -44,6 +44,45 @@ function Invoke-Schtasks
     Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
 }
 
+function Invoke-GetWindowsUpdate
+{
+    $ProgressPreference = 'SilentlyContinue'
+    $getWindowsUpdateLogFilePath = "$logsPath\Get-WindowsUpdate-$(Get-Date -Format yyyyMMddHHmmssff).log"
+    Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
+    $isRebootNeeded = Get-WURebootStatus -Silent
+    Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
+    if ($isRebootNeeded)
+    {
+        Invoke-Schtasks
+        Complete-ScriptExecution
+        Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+    }
+    else
+    {
+        Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
+    }
+}
+
+function Complete-ScriptExecution
+{
+    if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
+    {
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
+        Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
+    }
+
+    $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
+    Write-PSFMessage "$scriptName duration: $scriptDuration"
+
+    $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
+    $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
+    $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
+    Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
+    Write-PSFMessage "Log path: $psFrameworkLogFilePath"
+    Invoke-ExpressionWithLogging -command "New-Item -Path $bsPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
+}
+
 $ErrorActionPreference = 'Stop'
 $WarningPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
@@ -395,3 +434,5 @@ else
         } until ($hotfixInstalled)
     }
 }
+
+Invoke-GetWindowsUpdate
