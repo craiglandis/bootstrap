@@ -142,19 +142,48 @@ process
     function Invoke-GetWindowsUpdate
     {
         $ProgressPreference = 'SilentlyContinue'
-        $getWindowsUpdateLogFilePath = "$logsPath\Get-WindowsUpdate-$(Get-Date -Format yyyyMMddHHmmssff).log"
-        Invoke-ExpressionWithLogging -command "Get-WindowsUpdate -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | tee-object $getWindowsUpdateLogFilePath"
-        $isRebootNeeded = Get-WURebootStatus -Silent
-        Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
-        if ($isRebootNeeded)
+        Invoke-ExpressionWithLogging -command "Install-Module -Name pswindowsupdate -Repository PSGallery -Scope AllUsers -Force"
+        Invoke-ExpressionWithLogging -command "Import-Module -Name pswindowsupdate -Force"
+        $psWindowsUpdate = Get-Module -Name pswindowsupdate
+        if ($psWindowsUpdate)
         {
-            Invoke-Schtasks
-            Complete-ScriptExecution
-            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+            Write-PSFMessage "$($psWindowsUpdate.Name) $($psWindowsUpdate.Version)"
+            $logsPath = 'C:\bs\logs'
+            $timestamp = Get-Date -Format yyyyMMddHHmmssff
+            $invokeWUJobLogFilePath = "$logsPath\Invoke-WUJob-$($timestamp).log"
+            # Couldn't find a way to get a variable to expand when include within -Script {}, so using a literal path for now
+            # $getWindowsUpdateLogFilePath = "$logsPath\Get-WUList-$($timestamp).log"
+            # This script is run via remoting so it runs under a specific user context for app installs and OS config purposes
+            # But by design, the Windows Update APIs the PSWindowsUpdate module uses to install updates fail with access denied when run via remoting
+            # Workaround is to use Invoke-WUJob, which creates a scheduled task to run Get-WUList as local system account
+            Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; ipmo pswindowsupdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
+            do {
+                Start-Sleep -Seconds 5
+                $taskName = 'PSWindowsUpdate'
+                $scheduleService = New-Object -ComObject Schedule.Service
+                $scheduleService.Connect()
+                $rootFolder = $scheduleService.GetFolder('\')
+                $task = $rootFolder.GetTask($taskName)
+                Write-PSFMessage "Name: $($task.Name) State: $($task.State) LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)" -Level Host
+            } until ($task.State -eq 3)
+            $rootFolder.DeleteTask($taskName, 0)
+            $isRebootNeeded = Get-WURebootStatus -Silent
+            Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
+            if ($isRebootNeeded)
+            {
+                Invoke-Schtasks
+                Complete-ScriptExecution
+                Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+            }
+            else
+            {
+                Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
+            }
         }
         else
         {
-            Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
+            Write-PSFMessage "Failed to install pswindowsupdate module"
+            exit
         }
     }
 
@@ -1121,5 +1150,5 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
 
-    #Invoke-GetWindowsUpdate
+    Invoke-GetWindowsUpdate
 }

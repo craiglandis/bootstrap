@@ -276,7 +276,6 @@ PSGraph,False,False
 PSReadLine,True,False
 PSScriptAnalyzer,False,False
 PSScriptTools,False,False
-PSWindowsUpdate,False,False
 PSWordCloud,False,False,False,True
 PSWriteHTML,False,False
 Scour,False,False
@@ -291,6 +290,7 @@ Pester,False,True
 posh-git,False,False
 posh-gist,False,False
 PoshRSJob,False,False
+PSWindowsUpdate,False,False
 Invoke-CommandAs
 #>
 
