@@ -90,7 +90,7 @@
 	    "PC",
       "VM"
     ],
-	"Notes": "Winget doesn't have a portable one, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
+    "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
   },
   {
     "Name": "CrystalDiskMark",
