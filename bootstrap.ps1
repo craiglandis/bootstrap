@@ -1020,11 +1020,11 @@ process
 
     $vsCodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
     $vsCodeUserPath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
-    if ((Test-Path -Path $vsCodeSystemPath -PathType Leaf)
+    if (Test-Path -Path $vsCodeSystemPath -PathType Leaf)
     {
         $vsCodePath = $vsCodeSystemPath
     }
-    if ((Test-Path -Path $vsCodeUserPath -PathType Leaf)
+    if (Test-Path -Path $vsCodeUserPath -PathType Leaf)
     {
         $vsCodePath = $vsCodeUserPath
     }
