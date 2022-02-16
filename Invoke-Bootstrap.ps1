@@ -44,6 +44,16 @@ function Invoke-Schtasks
     Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
 }
 
+function Enable-PSLogging
+{
+    Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
+    $getPSLoggingScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-PSLogging.ps1'
+    $getPSLoggingScriptName = $getPSLoggingScriptUrl.Split('/')[-1]
+    $getPSLoggingScriptFilePath = "$scriptsPath\$getPSLoggingScriptName"
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getPSLoggingScriptUrl`', `'$getPSLoggingScriptFilePath`')"
+    Invoke-ExpressionWithLogging -Command "& `'$getPSLoggingScriptFilePath`' -Enable"
+}
+
 $ErrorActionPreference = 'Stop'
 $WarningPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
@@ -295,6 +305,8 @@ Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\C
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
     Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
+
+    Enable-PSLogging
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$scriptsPath\$bootstrapScriptFileName"

@@ -206,6 +206,16 @@ process
         Invoke-ExpressionWithLogging -command "New-Item -Path $bsPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
+    function Enable-PSLogging
+    {
+        Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
+        $getPSLoggingScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-PSLogging.ps1'
+        $getPSLoggingScriptName = $getPSLoggingScriptUrl.Split('/')[-1]
+        $getPSLoggingScriptFilePath = "$scriptsPath\$getPSLoggingScriptName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getPSLoggingScriptUrl`', `'$getPSLoggingScriptFilePath`')"
+        Invoke-ExpressionWithLogging -Command "& `'$getPSLoggingScriptFilePath`' -Enable"
+    }
+
     $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
@@ -241,6 +251,8 @@ process
             exit
         }
     }
+
+    Enable-PSLogging
 
     Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
 
