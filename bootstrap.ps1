@@ -1031,10 +1031,6 @@ process
 
     if ($vsCodePath)
     {
-        $vsCodePath --list-extensions
-        $vsCodePath --install-extension
-
-
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force"
