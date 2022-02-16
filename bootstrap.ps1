@@ -155,6 +155,7 @@ process
             # This script is run via remoting so it runs under a specific user context for app installs and OS config purposes
             # But by design, the Windows Update APIs the PSWindowsUpdate module uses to install updates fail with access denied when run via remoting
             # Workaround is to use Invoke-WUJob, which creates a scheduled task to run Get-WUList as local system account
+            $taskStartTime = Get-Date
             Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; ipmo pswindowsupdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
             do {
                 Start-Sleep -Seconds 5
@@ -164,7 +165,9 @@ process
                 $rootFolder = $scheduleService.GetFolder('\')
                 $task = $rootFolder.GetTask($taskName)
             } until ($task.State -eq 3)
-            Write-PSFMessage "Name: $($task.Name) State: $($task.State) LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)"
+            $taskEndTime = Get-Date
+            $taskDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $taskStartTime -End $taskEndTime)
+            Write-PSFMessage "Name: $($task.Name) Duration: $taskDuration LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)"
             $rootFolder.DeleteTask($taskName, 0)
             $isRebootNeeded = Get-WURebootStatus -Silent
             Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"

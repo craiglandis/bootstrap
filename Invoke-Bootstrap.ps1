@@ -195,7 +195,7 @@ if (Test-Path -Path $logScriptFilePath -PathType Leaf)
 else
 {
     #$logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
-    $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, Runspace, Message -AutoSize"
+    $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, File, Message -AutoSize"
     Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
     Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
 }
