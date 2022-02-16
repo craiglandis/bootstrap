@@ -163,8 +163,8 @@ process
                 $scheduleService.Connect()
                 $rootFolder = $scheduleService.GetFolder('\')
                 $task = $rootFolder.GetTask($taskName)
-                Write-PSFMessage "Name: $($task.Name) State: $($task.State) LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)" -Level Host
             } until ($task.State -eq 3)
+            Write-PSFMessage "Name: $($task.Name) State: $($task.State) LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)"
             $rootFolder.DeleteTask($taskName, 0)
             $isRebootNeeded = Get-WURebootStatus -Silent
             Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
