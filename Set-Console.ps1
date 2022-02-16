@@ -247,11 +247,11 @@ if ($isPC -or $isVM)
 	{
 		$faceName = 'CaskaydiaCove Nerd Font'
 		# Calling AddFontResource makes a newly installed font available immediately without rebooting or logging in again
-		$null = foreach ($font in Get-ChildItem -Path $systemFontsPath\*nerd*.ttf)
+		$null = foreach ($font in Get-ChildItem -Path $systemFontsPath\*nerd*.ttf -ErrorAction SilentlyContinue)
 		{
 			[Session]::AddFontResource($font.FullName)
 		}
-		$null = foreach ($font in Get-ChildItem -Path $userFontsPath\*nerd*.ttf)
+		$null = foreach ($font in Get-ChildItem -Path $userFontsPath\*nerd*.ttf -ErrorAction SilentlyContinue)
 		{
 			[Session]::AddFontResource($font.FullName)
 		}
