@@ -148,7 +148,6 @@ process
         if ($psWindowsUpdate)
         {
             Write-PSFMessage "$($psWindowsUpdate.Name) $($psWindowsUpdate.Version)"
-            $logsPath = 'C:\bs\logs'
             $timestamp = Get-Date -Format yyyyMMddHHmmssff
             $invokeWUJobLogFilePath = "$logsPath\Invoke-WUJob-$($timestamp).log"
             # Couldn't find a way to get a variable to expand when include within -Script {}, so using a literal path for now
@@ -305,8 +304,7 @@ process
     }
     else
     {
-        #$logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\logs\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
-        $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, Runspace, Message -AutoSize"
+        $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, File, Message -AutoSize"
         Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
         Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
     }
@@ -1007,10 +1005,24 @@ process
     # https://www.thenickmay.com/how-to-install-autohotkey-even-without-administrator-access/
     # It works - the .ahk file must be named AutoHotkeyU64.ahk, then you run AutoHotkeyU64.exe
     # copy-item -Path \\tsclient\c\onedrive\ahk\AutoHotkey.ahk -Destination c:\my\ahk\AutoHotkeyU64.ahk
+
     $vsCodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
     $vsCodeUserPath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
-    if ((Test-Path -Path $vsCodeSystemPath -PathType Leaf) -or (Test-Path -Path $vsCodeUserPath -PathType Leaf))
+    if ((Test-Path -Path $vsCodeSystemPath -PathType Leaf)
     {
+        $vsCodePath = $vsCodeSystemPath
+    }
+    if ((Test-Path -Path $vsCodeUserPath -PathType Leaf)
+    {
+        $vsCodePath = $vsCodeUserPath
+    }
+
+    if ($vsCodePath)
+    {
+        $vsCodePath --list-extensions
+        $vsCodePath --install-extension
+
+
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force"

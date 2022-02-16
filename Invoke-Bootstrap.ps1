@@ -92,11 +92,11 @@ else
 if ($isVM)
 {
     $tempDrive = (Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}).DeviceID
-    $packagesPath = "$tempDrive\Packages"
+    $packagesPath = "$tempDrive\packages"
 }
 else
 {
-    $packagesPath = "$bsPath\Packages"
+    $packagesPath = "$bsPath\packages"
 }
 if (Test-Path -Path $packagesPath -PathType Container)
 {
