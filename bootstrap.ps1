@@ -969,7 +969,6 @@ process
     }
 
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$nppSettingsZipUrl`', `'$nppSettingsZipFilePath`')"
-    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath -Force"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath"
     Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath"
@@ -993,7 +992,6 @@ process
     $esZipFolderPath = "$packagesPath\$($esZipFileName.Replace('.zip',''))"
     $esZipFilePath = "$packagesPath\$esZipFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
-    #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $esZipFilePath -DestinationPath $esZipFolderPath -Force"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $esZipFilePath -DestinationPath $esZipFolderPath"
     Copy-Item -Path $esZipFolderPath\es.exe -Destination $toolsPath -Force
 
