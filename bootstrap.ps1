@@ -255,7 +255,19 @@ process
         }
     }
 
-    Enable-PSLogging
+    if ((Get-WmiObject -Class Win32_Baseboard -ErrorAction SilentlyContinue).Product -eq 'Virtual Machine')
+    {
+        $isVM = $true
+    }
+    else
+    {
+        $isVM = $false
+    }
+
+    if ($isVM)
+    {
+        Enable-PSLogging
+    }
 
     Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
 
@@ -369,19 +381,9 @@ process
         }
         else
         {
-            if ($PSVersionTable.PSVersion -lt [Version]'5.1')
-            {
-                $win32_Baseboard = Get-WmiObject -Class Win32_Baseboard
-            }
-            else
-            {
-                $win32_Baseboard = Get-CimInstance -ClassName Win32_Baseboard
-            }
-
-            if ($win32_Baseboard.Product -eq 'Virtual Machine')
+            if ($isVM)
             {
                 $group = 'VM'
-                $isVM = $true
             }
             else
             {
@@ -487,14 +489,17 @@ process
         Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
     }
 
-    if (Test-Path -Path $profile.AllUsersAllHosts -PathType Leaf)
+    if ($isVM)
     {
-        Write-PSFMessage "$($profile.AllUsersAllHosts) already exists, don't need to create it"
-    }
-    else
-    {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
-        Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
+        if (Test-Path -Path $profile.AllUsersAllHosts -PathType Leaf)
+        {
+            Write-PSFMessage "$($profile.AllUsersAllHosts) already exists, don't need to create it"
+        }
+        else
+        {
+            Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
+            Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
+        }
     }
 
     if (Test-Path -Path $profile.CurrentUserCurrentHost -PathType Leaf)
@@ -717,7 +722,6 @@ process
         $microsoftUiXamlPackageFolderPath = "$packagesPath\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$packagesPath\$microsoftUiXamlPackageFileName.zip"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
-        #Invoke-ExpressionWithLogging -command "Expand-Archive -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath -Force"
         Invoke-ExpressionWithLogging -command "Expand-Zip -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath"
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
         Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath | Out-Null"
@@ -787,16 +791,9 @@ process
     }
 
     Write-PSFMessage 'Checking if winget is installed'
-    try
-    {
-        $wingetVersion = winget -v
-    }
-    catch
-    {
-        Write-PSFMessage -Level InternalComment -Message 'Winget is not installed' -ErrorRecord $_
-    }
-
-    #if (Get-ChildItem -Path $env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*\winget.exe -ErrorAction SilentlyContinue)
+    $ErrorActionPreference = 'SilentlyContinue'
+    $wingetVersion = winget -v
+    $ErrorActionPreference = 'Continue'
     if ($wingetVersion)
     {
         $isWingetInstalled = $true
