@@ -331,9 +331,8 @@ process
     }
     else
     {
-        $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, File, Message -AutoSize"
-        Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
-        Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
+        $logCommand = "Import-Csv (Get-ChildItem -Path `$logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, @{Name = 'File'; Expression={`$_.File.Split('\')[-1]}}, Message -AutoSize"
+        $logCommand | Out-File -FilePath $logScriptFilePath -Force
     }
 
     if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
