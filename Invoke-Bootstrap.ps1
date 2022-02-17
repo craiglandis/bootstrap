@@ -1,3 +1,4 @@
+# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/ps/master/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1")
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
 param(
     [string]$userName,
@@ -28,9 +29,9 @@ function Set-PSFramework
     $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
     $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
     $paramSetPSFLoggingProvider = @{
-        Name     = 'logfile'
-        FilePath = $logFilePath
-        Enabled  = $true
+        Name       = 'logfile'
+        FilePath   = $logFilePath
+        Enabled    = $true
         TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
     }
     Set-PSFLoggingProvider @paramSetPSFLoggingProvider
@@ -66,18 +67,18 @@ $scriptPath = $MyInvocation.MyCommand.Path
 $scriptName = Split-Path -Path $scriptPath -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
-$bsPath = "$env:SystemDrive\bs"
-if (Test-Path -Path $bsPath -PathType Container)
+$bootstrapPath = "$env:SystemDrive\bootstrap"
+if (Test-Path -Path $bootstrapPath -PathType Container)
 {
-    Write-PSFMessage "$bsPath already exists, don't need to create it"
+    Write-PSFMessage "$bootstrapPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating $bsPath"
-    New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
+    Write-PSFMessage "Creating $bootstrapPath"
+    New-Item -Path $bootstrapPath -ItemType Directory -Force | Out-Null
 }
 
-$scriptsPath = "$bsPath\scripts"
+$scriptsPath = "$bootstrapPath\scripts"
 if (Test-Path -Path $scriptsPath -PathType Container)
 {
     Write-PSFMessage "$scriptsPath already exists, don't need to create it"
@@ -88,7 +89,7 @@ else
     New-Item -Path $scriptsPath -ItemType Directory -Force | Out-Null
 }
 
-$logsPath = "$bsPath\logs"
+$logsPath = "$bootstrapPath\logs"
 if (Test-Path -Path $logsPath -PathType Container)
 {
     Write-PSFMessage "$logsPath already exists, don't need to create it"
@@ -99,15 +100,51 @@ else
     New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
 }
 
-if ($isVM)
+$tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+if ($tempDrive)
 {
-    $tempDrive = (Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}).DeviceID
+    $tempDrive = $tempDrive.DeviceID
     $packagesPath = "$tempDrive\packages"
+
+    # Delete CBS\*.log and DataStore.edb to free up space
+    $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
+    $systemDriveSizeGB = [Math]::Round($systemDrive.Size / 1GB, 2)
+    $systemDriveFreeSpaceGBBefore = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
+    Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBBefore GB"
+    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\Logs\CBS\*.log -Force"
+    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\SoftwareDistribution\DataStore\DataStore.edb -Force"
+    $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
+    $systemDriveFreeSpaceGBAfter = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
+    Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBAfter GB (deleting CBS logs and DataStore.edb freed $($systemDriveFreeSpaceGBAfter - $systemDriveFreeSpaceGBBefore) GB)"
+
+    # Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
+    # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
+    $currentPagingFilesValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management' -Name PagingFiles).PagingFiles
+    Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
+    $tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+    $halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
+    Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
+    $totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
+    Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
+    if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
+    {
+        $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
+    }
+    else
+    {
+        $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
+    }
+    $newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
+    Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
+    Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
+    # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
+    # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
 }
 else
 {
-    $packagesPath = "$bsPath\packages"
+    $packagesPath = "$bootstrapPath\packages"
 }
+
 if (Test-Path -Path $packagesPath -PathType Container)
 {
     Write-PSFMessage "Packages path $packagesPath already exists, don't need to create it"
@@ -125,21 +162,11 @@ if ($scriptPath -ne $scriptPathNew)
     $scriptPath = $scriptPathNew
 }
 
-$systemDrive = Get-WmiObject -Class Win32_LogicalDisk | where-object {$_.DeviceID -eq $env:SystemDrive}
-$systemDriveSizeGB = [Math]::Round($systemDrive.Size/1GB,2)
-$systemDriveFreeSpaceGBBefore = [Math]::Round($systemDrive.FreeSpace/1GB,2)
-Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBBefore GB"
-Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\Logs\CBS\*.log -Force"
-Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\SoftwareDistribution\DataStore\DataStore.edb -Force"
-$systemDrive = Get-WmiObject -Class Win32_LogicalDisk | where-object {$_.DeviceID -eq $env:SystemDrive}
-$systemDriveFreeSpaceGBAfter = [Math]::Round($systemDrive.FreeSpace/1GB,2)
-Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBAfter GB (deleting CBS logs and DataStore.edb freed $($systemDriveFreeSpaceGBAfter - $systemDriveFreeSpaceGBBefore) GB)"
-
 $productType = (Get-WmiObject -Class Win32_OperatingSystem).ProductType
 $build = [environment]::OSVersion.Version.Build
 
 $defaultUserHivePath = "$env:SystemDrive\Users\Default\NTUSER.DAT"
-$defaultUserKeyPath = "HKEY_USERS\DefaultUserHive"
+$defaultUserKeyPath = 'HKEY_USERS\DefaultUserHive'
 Invoke-ExpressionWithLogging -command "reg load $defaultUserKeyPath $defaultUserHivePath"
 
 if ($productType -ne 1)
@@ -147,8 +174,8 @@ if ($productType -ne 1)
     # Disable Server Manager from starting at Windows startup
     Invoke-ExpressionWithLogging -command "reg add $defaultUserKeyPath\SOFTWARE\Microsoft\ServerManager /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
     Invoke-ExpressionWithLogging -command "reg add $defaultUserKeyPath\SOFTWARE\Microsoft\ServerManager /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
-    #Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
-    #Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
 }
 
 if ($productType -eq 1)
@@ -156,45 +183,44 @@ if ($productType -eq 1)
     if ($build -ge 22000)
     {
         # Win11
-        #Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
         Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32`' /f /ve | Out-Null"
     }
 
     if ($build -lt 22000 -and $build -ge 10240)
     {
         # Win10: Enable "Always show all icons in the notification area"
-        #Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
         Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32`' /f /ve | Out-Null"
     }
 }
 
 # Config for all Windows versions
 # Show file extensions
-#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
 # Show hidden files
-#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
 # Show protected operating system files
-#Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
 # Explorer show compressed files color
-#Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
 # Taskbar on left instead of center
-#Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
 
 Invoke-ExpressionWithLogging -command "reg unload $defaultUserKeyPath"
 
-$logScriptFilePath = "$bsPath\log.ps1"
+$logScriptFilePath = "$bootstrapPath\log.ps1"
 if (Test-Path -Path $logScriptFilePath -PathType Leaf)
 {
     Write-PSFMessage "$logScriptFilePath already exists, don't need to create it"
 }
 else
 {
-    #$logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv | Sort-Object -Property LastWriteTime -Descending)[0].FullName | Format-Table Timestamp, Message -AutoSize"
     $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, File, Message -AutoSize"
     Invoke-ExpressionWithLogging -command "New-Item -Path $logScriptFilePath -ItemType File -Force | Out-Null"
     Invoke-ExpressionWithLogging -command "Set-Content -Value `"$logCommand`" -Path $logScriptFilePath -Force"
@@ -204,7 +230,6 @@ Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypa
 
 if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
-    #$currentBuild = [int](Get-ItemProperty 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion').CurrentBuild
     $currentBuild = [environment]::OSVersion.Version.Build
     if ($currentBuild -lt 9600)
     {
@@ -278,29 +303,6 @@ else
         }
     }
 }
-
-# Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
-# Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
-$currentPagingFilesValue = (Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management" -Name PagingFiles).PagingFiles
-Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
-$tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
-$halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
-Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
-$totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
-Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
-if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
-{
-    $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
-}
-else
-{
-    $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
-}
-$newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
-Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
-Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
-# Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
-# Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
 
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {

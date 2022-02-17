@@ -120,8 +120,8 @@ Add-Type -Name Session -Namespace '' -member @'
 public static extern int AddFontResource(string filePath);
 '@
 
-$bsPath = "$env:SystemDrive\bs"
-$logsPath = "$bsPath\logs"
+$bootstrapPath = "$env:SystemDrive\bootstrap"
+$logsPath = "$bootstrapPath\logs"
 if (Test-Path -Path $logsPath -PathType Container)
 {
 	Write-PSFMessage "$logsPath already exists, don't need to create it"

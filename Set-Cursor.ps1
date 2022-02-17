@@ -1,6 +1,5 @@
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Set-Cursor.ps1
 
-#$scriptName = Split-Path -Path $PSCommandPath -Leaf
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 
 if ($PSVersionTable.PSVersion -lt [Version]'6.0')

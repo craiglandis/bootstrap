@@ -85,7 +85,7 @@ process
     function Get-AppList
     {
         $appsJsonFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/apps.json'
-        $appsJsonFilePath = "$bsPath\apps.json"
+        $appsJsonFilePath = "$bootstrapPath\apps.json"
         Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
         if ($isWin7 -or $isWS08R2 -or $isWS12)
         {
@@ -194,7 +194,7 @@ process
         if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
         {
             Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
-            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bsPath -Force"
+            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bootstrapPath -Force"
             Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
         }
 
@@ -206,7 +206,7 @@ process
         $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
         Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
         Write-PSFMessage "Log path: $psFrameworkLogFilePath"
-        Invoke-ExpressionWithLogging -command "New-Item -Path $bsPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
+        Invoke-ExpressionWithLogging -command "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
     function Enable-PSLogging
@@ -259,18 +259,18 @@ process
 
     Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
 
-    $bsPath = "$env:SystemDrive\bs"
-    if (Test-Path -Path $bsPath -PathType Container)
+    $bootstrapPath = "$env:SystemDrive\bootstrap"
+    if (Test-Path -Path $bootstrapPath -PathType Container)
     {
-        Write-PSFMessage "$bsPath already exists, don't need to create it"
+        Write-PSFMessage "$bootstrapPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $bsPath"
-        New-Item -Path $bsPath -ItemType Directory -Force | Out-Null
+        Write-PSFMessage "Creating $bootstrapPath"
+        New-Item -Path $bootstrapPath -ItemType Directory -Force | Out-Null
     }
 
-    $scriptsPath = "$bsPath\scripts"
+    $scriptsPath = "$bootstrapPath\scripts"
     if (Test-Path -Path $scriptsPath -PathType Container)
     {
         Write-PSFMessage "$scriptsPath already exists, don't need to create it"
@@ -281,7 +281,7 @@ process
         New-Item -Path $scriptsPath -ItemType Directory -Force | Out-Null
     }
 
-    $logsPath = "$bsPath\logs"
+    $logsPath = "$bootstrapPath\logs"
     if (Test-Path -Path $logsPath -PathType Container)
     {
         Write-PSFMessage "$logsPath already exists, don't need to create it"
@@ -300,7 +300,7 @@ process
     }
     else
     {
-        $packagesPath = "$bsPath\packages"
+        $packagesPath = "$bootstrapPath\packages"
     }
     if (Test-Path -Path $packagesPath -PathType Container)
     {
@@ -312,7 +312,7 @@ process
         New-Item -Path $packagesPath -ItemType Directory -Force | Out-Null
     }
 
-    $logScriptFilePath = "$bsPath\log.ps1"
+    $logScriptFilePath = "$bootstrapPath\log.ps1"
     if (Test-Path -Path $logScriptFilePath -PathType Leaf)
     {
         Write-PSFMessage "$logScriptFilePath already exists, don't need to create it"
@@ -328,13 +328,13 @@ process
     {
         # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
         Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
-        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bsPath -Force"
+        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bootstrapPath -Force"
         Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
     }
     $runCount = (Get-ChildItem -Path "$logsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
 
-    if (Test-Path -Path "$bsPath\ScriptRanToCompletion" -PathType Leaf)
+    if (Test-Path -Path "$bootstrapPath\ScriptRanToCompletion" -PathType Leaf)
     {
         Invoke-GetWindowsUpdate
         Complete-ScriptExecution
