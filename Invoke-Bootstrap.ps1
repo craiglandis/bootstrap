@@ -239,7 +239,7 @@ if (Test-Path -Path $logScriptFilePath -PathType Leaf)
 }
 else
 {
-    $logCommand = "Import-Csv (Get-ChildItem -Path `$logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, @{Name = 'File'; Expression={`$_.File.Split('\')[-1]}}, Message -AutoSize"
+    $logCommand = "Import-Csv (Get-ChildItem -Path $logsPath\*.csv).FullName | Sort-Object -Property Timestamp | Format-Table Timestamp, @{Name = 'File'; Expression={`$_.File.Split('\')[-1]}}, Message -AutoSize"
     $logCommand | Out-File -FilePath $logScriptFilePath -Force
 }
 

@@ -197,47 +197,40 @@ if ($isPC -or $isVM)
 	}
 	else
 	{
-		if ($build -ge 10240)
+		Write-PSFMessage "$fontFileName not installed, installing it now"
+		$ErrorActionPreference = 'SilentlyContinue'
+		$chocoVersion = choco -v
+		$ErrorActionPreference = 'Continue'
+		if ($chocoVersion)
 		{
-			Write-PSFMessage "This is OS build $build so installing Windows Terminal will install Cascadia Cove font"
+			Write-PSFMessage 'Using Chocolatey to install it since Chocolatey itself is already installed'
+			$timestamp = Get-Date -Format yyyyMMddHHmmssff
+			$packageName = 'cascadia-code-nerd-font'
+			$chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
+			Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
 		}
 		else
 		{
-			Write-PSFMessage "$fontFileName not installed, installing it now"
-			$ErrorActionPreference = 'SilentlyContinue'
-			$chocoVersion = choco -v
-			$ErrorActionPreference = 'Continue'
-			if ($chocoVersion)
-			{
-				Write-PSFMessage 'Using Chocolatey to install it since Chocolatey itself is already installed'
-				$timestamp = Get-Date -Format yyyyMMddHHmmssff
-				$packageName = 'cascadia-code-nerd-font'
-				$chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
-				Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
-			}
-			else
-			{
-				$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
-				$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
-				$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-				$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
-				$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
-				$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
-				Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`"$cascadiaCodeNerdFontZipUrl`", `"$cascadiaCodeNerdFontZipFilePath`")"
-				Invoke-ExpressionWithLogging -command "Expand-Zip -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath"
+			$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
+			$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
+			$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+			$cascadiaCodeNerdFontZipFileName = $cascadiaCodeNerdFontZipUrl.Split('/')[-1]
+			$cascadiaCodeNerdFontZipFilePath = "$env:temp\$cascadiaCodeNerdFontZipFileName"
+			$cascadiaCodeNerdFontExtractedFolderPath = "$env:temp\CascadiaCodeNerdFont"
+			Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`"$cascadiaCodeNerdFontZipUrl`", `"$cascadiaCodeNerdFontZipFilePath`")"
+			Invoke-ExpressionWithLogging -command "Expand-Zip -Path $cascadiaCodeNerdFontZipFilePath -DestinationPath $cascadiaCodeNerdFontExtractedFolderPath"
 
-				# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
-				$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
-				Get-ChildItem -Path $cascadiaCodeNerdFontExtractedFolderPath | ForEach-Object {
-					$fontPath = $_.FullName
-					if (Test-Path -Path $fontPath -PathType Leaf)
-					{
-						Write-PSFMessage "$fontPath already present"
-					}
-					else
-					{
-						$userFontsFolder.CopyHere($_.FullName, 16)
-					}
+			# Installs  the fonts just for current user (C:\Users\<username>\AppData\Local\Microsoft\Windows\Fonts)
+			$userFontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
+			Get-ChildItem -Path $cascadiaCodeNerdFontExtractedFolderPath | ForEach-Object {
+				$fontPath = $_.FullName
+				if (Test-Path -Path $fontPath -PathType Leaf)
+				{
+					Write-PSFMessage "$fontPath already present"
+				}
+				else
+				{
+					$userFontsFolder.CopyHere($_.FullName, 16)
 				}
 			}
 		}
