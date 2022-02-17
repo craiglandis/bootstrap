@@ -100,51 +100,63 @@ else
     New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
 }
 
-$dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq 'D:'}
-if ($dDrive)
+if ((Get-WmiObject -Class Win32_Baseboard -ErrorAction SilentlyContinue).Product -eq 'Virtual Machine')
 {
-    Write-PSFMessage "Drive $($dDrive.DeviceID) Name: $($dDrive.VolumeName) Type: $($dDrive.DriveType) Size: $([Math]::Round($dDrive.Size / 1GB, 2))GB Free: $([Math]::Round($dDrive.FreeSpace / 1GB, 2))GB"
+    $isVM = $true
+}
+else
+{
+    $isVM = $false
 }
 
-$tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
-if ($tempDrive)
+if ($isVM)
 {
-    $tempDrive = $tempDrive.DeviceID
-    $packagesPath = "$tempDrive\packages"
-
-    # Delete CBS\*.log and DataStore.edb to free up space
-    $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
-    $systemDriveSizeGB = [Math]::Round($systemDrive.Size / 1GB, 2)
-    $systemDriveFreeSpaceGBBefore = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
-    Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBBefore GB"
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\Logs\CBS\*.log -Force"
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\SoftwareDistribution\DataStore\DataStore.edb -Force"
-    $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
-    $systemDriveFreeSpaceGBAfter = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
-    Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBAfter GB (deleting CBS logs and DataStore.edb freed $($systemDriveFreeSpaceGBAfter - $systemDriveFreeSpaceGBBefore) GB)"
-
-    # Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
-    # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
-    $currentPagingFilesValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management' -Name PagingFiles).PagingFiles
-    Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
-    $tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
-    $halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
-    Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
-    $totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
-    Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
-    if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
+    $dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq 'D:'}
+    if ($dDrive)
     {
-        $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
+        Write-PSFMessage "Drive $($dDrive.DeviceID) Name: $($dDrive.VolumeName) Type: $($dDrive.DriveType) Size: $([Math]::Round($dDrive.Size / 1GB, 2))GB Free: $([Math]::Round($dDrive.FreeSpace / 1GB, 2))GB"
     }
-    else
+
+    $tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+    if ($tempDrive)
     {
-        $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
+        $tempDrive = $tempDrive.DeviceID
+        $packagesPath = "$tempDrive\packages"
+
+        # Delete CBS\*.log and DataStore.edb to free up space
+        $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
+        $systemDriveSizeGB = [Math]::Round($systemDrive.Size / 1GB, 2)
+        $systemDriveFreeSpaceGBBefore = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
+        Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBBefore GB"
+        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\Logs\CBS\*.log -Force"
+        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:SystemRoot\SoftwareDistribution\DataStore\DataStore.edb -Force"
+        $systemDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $env:SystemDrive}
+        $systemDriveFreeSpaceGBAfter = [Math]::Round($systemDrive.FreeSpace / 1GB, 2)
+        Invoke-ExpressionWithLogging -command "Drive $env:SystemDrive Size: $systemDriveSizeGB GB, Free: $systemDriveFreeSpaceGBAfter GB (deleting CBS logs and DataStore.edb freed $($systemDriveFreeSpaceGBAfter - $systemDriveFreeSpaceGBBefore) GB)"
+
+        # Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
+        # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
+        $currentPagingFilesValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management' -Name PagingFiles).PagingFiles
+        Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
+        $tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
+        $halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
+        Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
+        $totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
+        Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
+        if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
+        {
+            $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
+        }
+        else
+        {
+            $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
+        }
+        $newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
+        Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
+        Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
+        # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
+        # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
     }
-    $newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
-    Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
-    Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
-    # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
-    # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
 }
 else
 {
@@ -314,7 +326,10 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
     Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
-    Enable-PSLogging
+    if ($isVM)
+    {
+        Enable-PSLogging
+    }
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$scriptsPath\$bootstrapScriptFileName"
