@@ -100,6 +100,12 @@ else
     New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
 }
 
+$dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq 'D:'}
+if ($dDrive)
+{
+    Write-PSFMessage "Drive $($dDrive.DeviceID) Name: $($dDrive.VolumeName) Type: $($dDrive.DriveType) Size: $([Math]::Round($dDrive.Size / 1GB, 2))GB Free: $([Math]::Round($dDrive.FreeSpace / 1GB, 2))GB"
+}
+
 $tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
 if ($tempDrive)
 {
