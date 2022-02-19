@@ -1,9 +1,9 @@
-# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1")
+# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1");$env:SystemDrive\Invoke-Bootstrap.ps1
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
 param(
     [string]$userName,
     [string]$password,
-    [string]$bootstrapScriptUrl
+    [string]$bootstrapScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1'
 )
 
 function Invoke-ExpressionWithLogging
@@ -266,20 +266,23 @@ if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
     }
 }
 
-if (!$userName)
+if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
 {
-    Write-Error 'Required parameter missing: -userName <userName>'
-    exit
-}
-elseif (!$password)
-{
-    Write-Error 'Required parameter missing: -password <password>'
-    exit
-}
-elseif (!$bootstrapScriptUrl)
-{
-    Write-Error 'Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>'
-    exit
+    if (!$userName)
+    {
+        Write-Error 'Required parameter missing: -userName <userName>'
+        exit
+    }
+    elseif (!$password)
+    {
+        Write-Error 'Required parameter missing: -password <password>'
+        exit
+    }
+    elseif (!$bootstrapScriptUrl)
+    {
+        Write-Error 'Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>'
+        exit
+    }
 }
 
 # https://psframework.org/
