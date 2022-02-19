@@ -959,7 +959,9 @@ process
     if ($isWin11 -and $group -eq 'PC')
     {
         Invoke-ExpressionWithLogging -command 'wsl --install'
+        # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All'
+        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All'
     }
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
