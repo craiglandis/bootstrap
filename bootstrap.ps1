@@ -304,6 +304,17 @@ process
         New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
     }
 
+    $regFilesPath = "$bootstrapPath\reg"
+    if (Test-Path -Path $regFilesPath -PathType Container)
+    {
+        Write-PSFMessage "$regFilesPath already exists, don't need to create it"
+    }
+    else
+    {
+        Write-PSFMessage "Creating $regFilesPath"
+        New-Item -Path $regFilesPath -ItemType Directory -Force | Out-Null
+    }
+
     $tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
     if ($tempDrive)
     {
@@ -917,10 +928,11 @@ process
     $regFileUrls | ForEach-Object {
         $regFileUrl = $_
         $regFileName = $regFileUrl.Split('/')[-1]
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$regFileUrl`', `'$regFileName`')"
-        if (Test-Path -Path $regFileName -PathType Leaf)
+        $regFilePath = "$regFilesPath\$regFileName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$regFileUrl`', `'$regFilePath`')"
+        if (Test-Path -Path $regFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command "reg import $regFileName"
+            Invoke-ExpressionWithLogging -command "reg import $regFilePath"
         }
     }
 
@@ -947,6 +959,7 @@ process
     if ($isWin11 -and $group -eq 'PC')
     {
         Invoke-ExpressionWithLogging -command 'wsl --install'
+        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All'
     }
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
