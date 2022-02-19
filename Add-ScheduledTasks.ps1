@@ -317,14 +317,14 @@ if ($isPC)
 {
     $taskName = 'Caffeine'
     $argument = "/c Start $caffeineExeFilePath"
-    Add-ScheduledTask -taskName $taskName -execute $executeCmd -argument $argument -runLevel Highest
+    Add-ScheduledTask -taskName $taskName -triggerType $TASK_TRIGGER_LOGON -execute $executeCmd -argument $argument -runLevel Highest
 }
 
 if ($isSAW)
 {
     $taskName = 'AutoHotkey_Not_Elevated_SAW'
     $argument = "/c Start `"$ahkExeFilePath`" $ahkU64FilePath"
-    Add-ScheduledTask -taskName $taskName -execute $executeCmd -argument $argument -runLevel Limited
+    Add-ScheduledTask -taskName $taskName -triggerType $TASK_TRIGGER_LOGON -execute $executeCmd -argument $argument -runLevel Limited
 }
 
 if ($isPC -or $isVM)
