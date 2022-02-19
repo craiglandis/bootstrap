@@ -1,4 +1,4 @@
-# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1");$env:SystemDrive\Invoke-Bootstrap.ps1
+# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1");Invoke-Expression -command $env:SystemDrive\Invoke-Bootstrap.ps1
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
 param(
     [string]$userName,
