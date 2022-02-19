@@ -1,4 +1,7 @@
-# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Add-ScheduledTasks.ps1
+<# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\Add-ScheduledTasks.ps1
+copy \\tsclient\c\OneDrive\My\AutoHotkey.ahk c:\OneDrive\My\AutoHotkey.ahk
+copy \\tsclient\c\OneDrive\My\AutoHotkey_Not_Elevated.ahk c:\OneDrive\My\AutoHotkey_Not_Elevated.ahk
+#>
 param(
     [string]$toolsPath = 'C:\OneDrive\Tools',
     [string]$myPath = 'C:\OneDrive\My'

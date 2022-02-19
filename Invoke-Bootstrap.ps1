@@ -200,9 +200,12 @@ if ($productType -eq 1)
 {
     if ($build -ge 22000)
     {
-        # Win11
+        # Win11: Disable the new context menu
         Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
         Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32`' /f /ve | Out-Null"
+        # Win11: Taskbar on left instead of center
+        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+        Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
     }
 
     if ($build -lt 22000 -and $build -ge 10240)
@@ -214,6 +217,10 @@ if ($productType -eq 1)
 }
 
 # Config for all Windows versions
+# Always show all icons and notifications on the taskbar
+# On Win11 to toggle this in the GUI run: explorer shell:::{05d7b0f4-2121-4eff-bf6b-ed3f69b894d9}
+Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v EnableAutoTray /t REG_DWORD /d 0 /f | Out-Null"
+Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer`' /v EnableAutoTray /t REG_DWORD /d 0 /f | Out-Null"
 # Show file extensions
 Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
@@ -226,9 +233,6 @@ Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\SOFTWARE\Mi
 # Explorer show compressed files color
 Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
 Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
-# Taskbar on left instead of center
-Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
-Invoke-ExpressionWithLogging -command "reg add `'$defaultUserKeyPath\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
 
 Invoke-ExpressionWithLogging -command "reg unload $defaultUserKeyPath"
 

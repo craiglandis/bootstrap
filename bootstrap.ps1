@@ -1170,5 +1170,8 @@ process
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
 
+    Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f"
+    Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f"
+
     Invoke-GetWindowsUpdate
 }
