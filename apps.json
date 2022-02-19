@@ -303,6 +303,14 @@
     ]
   },
   {
+    "Name": "OneNote for Windows 10",
+    "ChocolateyName": "9WZDNCRFHVJL",
+    "WingetName": "Microsoft.PowerBI",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
