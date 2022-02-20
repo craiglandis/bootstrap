@@ -3,7 +3,7 @@ TODO:
 Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections
-Install Visio
+Install Visio https://www.office.com/?auth=2&home=1
 s
 # wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
 # reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
@@ -1187,6 +1187,8 @@ process
 
     Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f"
     Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f"
+
+    Invoke-ExpressionWithLogging -command "powercfg /hibernate off"
 
     Invoke-GetWindowsUpdate
 }
