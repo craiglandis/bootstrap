@@ -259,12 +259,12 @@
   },
   {
     "Name": "Microsoft 365 Apps for enterprise",
-    "ChocolateyName": "microsoft-office-deployment",
+    "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
     "Groups": [
       "PC"
     ],
-	"Notes": "The winget package is Microsoft 365 Apps for enterprise, which is what I want. The chocolatey package does have a way to install that SKU"
+    "Notes": "The Winget 'Microsoft.Office' package installs x64 Microsoft 365 Apps for Enterprise, which is what I want, Chocolatey 'microsoft-office-deployment' package installs x86"
   },
   {
     "Name": "Microsoft Edge",
