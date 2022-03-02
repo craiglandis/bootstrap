@@ -142,9 +142,9 @@ process
     function Invoke-GetWindowsUpdate
     {
         $ProgressPreference = 'SilentlyContinue'
-        Invoke-ExpressionWithLogging -command "Install-Module -Name pswindowsupdate -Repository PSGallery -Scope AllUsers -Force"
-        Invoke-ExpressionWithLogging -command "Import-Module -Name pswindowsupdate -Force"
-        $psWindowsUpdate = Get-Module -Name pswindowsupdate
+        Invoke-ExpressionWithLogging -command "Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope AllUsers -Force"
+        Invoke-ExpressionWithLogging -command "Import-Module -Name PSWindowsUpdate -Force"
+        $psWindowsUpdate = Get-Module -Name PSWindowsUpdate
         if ($psWindowsUpdate)
         {
             Write-PSFMessage "$($psWindowsUpdate.Name) $($psWindowsUpdate.Version)"
@@ -156,7 +156,7 @@ process
             # But by design, the Windows Update APIs the PSWindowsUpdate module uses to install updates fail with access denied when run via remoting
             # Workaround is to use Invoke-WUJob, which creates a scheduled task to run Get-WUList as local system account
             $taskStartTime = Get-Date
-            Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; ipmo pswindowsupdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
+            Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; ipmo PSWindowsUpdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
             do {
                 Start-Sleep -Seconds 5
                 $taskName = 'PSWindowsUpdate'
@@ -176,22 +176,22 @@ process
                 Invoke-Schtasks
                 Complete-ScriptExecution
                 Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
-                exit
+                #exit
             }
             else
             {
                 Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
                 Complete-ScriptExecution
                 Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
-                exit
+                #exit
             }
         }
         else
         {
-            Write-PSFMessage "Failed to install pswindowsupdate module"
+            Write-PSFMessage "Failed to install PSWindowsUpdate module"
             Complete-ScriptExecution
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
-            exit
+            #exit
         }
     }
 
