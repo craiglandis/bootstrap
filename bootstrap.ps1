@@ -176,15 +176,21 @@ process
                 Invoke-Schtasks
                 Complete-ScriptExecution
                 Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+                exit
             }
             else
             {
                 Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
+                Complete-ScriptExecution
+                Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+                exit
             }
         }
         else
         {
             Write-PSFMessage "Failed to install pswindowsupdate module"
+            Complete-ScriptExecution
+            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
             exit
         }
     }

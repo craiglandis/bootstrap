@@ -381,6 +381,16 @@
     "Notes": ""
   },
   {
+    "Name": "Speedtest",
+    "ChocolateyName": "speedtest",
+    "WingetName": "",
+    "Groups": [
+      "PC",
+      "VM"
+    ],
+    "Notes": ""
+  },
+  {
     "Name": "Steam",
     "ChocolateyName": "steam-client",
     "WingetName": "Valve.Steam",
