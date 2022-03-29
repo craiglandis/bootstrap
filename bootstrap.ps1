@@ -1036,6 +1036,15 @@ process
     # It works - the .ahk file must be named AutoHotkeyU64.ahk, then you run AutoHotkeyU64.exe
     # copy-item -Path \\tsclient\c\onedrive\ahk\AutoHotkey.ahk -Destination c:\my\ahk\AutoHotkeyU64.ahk
 
+    if ($group -eq 'VM' -or $group -eq 'PC' -or $group -eq 'LAPTOP')
+    {
+        $installVSCodeScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCode.ps1'
+        $installVSCodeScriptFileName = $installVSCodeScriptUrl.Split('/')[-1]
+        $installVSCodeScriptFilePath = "$scriptsPath\$installVSCodeScriptFileName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeScriptUrl`', `'$installVSCodeScriptFilePath`')"
+        Invoke-ExpressionWithLogging -command $installVSCodeScriptFilePath
+    }
+
     $vsCodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
     $vsCodeUserPath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
     if (Test-Path -Path $vsCodeSystemPath -PathType Leaf)

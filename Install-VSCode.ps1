@@ -1,3 +1,8 @@
+#Requires -Modules Helper
+param (
+    $path = "D:\packages" # where setup EXE will be saved, TODO: caller in bootstrap.ps1 needs to specify "-path $packagesPath"
+)
+
 function Get-RedirectedUrl
 {
     param (
@@ -15,6 +20,17 @@ function Get-RedirectedUrl
     }
 }
 
+Set-StrictMode -Version 3.0
+$scriptStartTime = Get-Date
+$scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
+$scriptFullName = $MyInvocation.MyCommand.Path
+$scriptName = Split-Path -Path $scriptFullName -Leaf
+$scriptBaseName = $scriptName.Split('.')[0]
+
+Import-Module -Name Helper -Force
+Set-PSFramework
+$PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
+
 $infContents = @'
 [Setup]
 Lang=english
@@ -26,8 +42,11 @@ Tasks=addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath,!ru
 $infFilePath = "$env:TEMP\vscode.inf"
 $infContents | Out-File -FilePath $infFilePath -Force
 
-# TODO: needs to be updated
-$downloadPath = 'c:\my'
+if ((Test-Path -Path $path -PathType Container -ErrorAction SilentlyContinue) -eq $false)
+{
+    Write-PSFMessage "$path not found, using $env:TEMP instead"
+    $path = $env:TEMP
+}
 
 <#
 Using https://update.code.visualstudio.com/latest/win32-x64/stable because it is more desciptive than https://go.microsoft.com/fwlink/?Linkid=852157,
@@ -43,10 +62,9 @@ Using https://update.code.visualstudio.com/latest/win32-x64/stable because it's 
 $url = 'https://update.code.visualstudio.com/latest/win32-x64/stable'
 $location = Get-RedirectedUrl -url $url
 $fileName = $location.Split('/')[-1]
-$filePath = "$downloadPath\$fileName"
+$filePath = "$path\$fileName"
 
-$command ="Invoke-WebRequest -Uri $location -OutFile $filePath"
-Invoke-Expression $command
+Invoke-ExpressionWithLogging "Invoke-WebRequest -Uri $location -OutFile $filePath"
 
 if (Test-Path -Path $filePath -PathType Leaf)
 {
