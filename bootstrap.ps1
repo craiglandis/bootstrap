@@ -1,16 +1,18 @@
 <#
+# Run from RDP client:
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
+# ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections
 Install Visio https://www.office.com/?auth=2&home=1
-s
-# wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
-# reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-# netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
-# Run from RDP client
-# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\onedrive\my\bootstrap.ps1
-# ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
+wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+Use fileUris to download the scripts instead of doing downloads from invoke-bootstrap.ps1/bootstrap.ps1
+Log to a custom event log - PSFramework - and create a .log, .csv, or .xlsx export of the useful stuff from that at the end
+Incorporate Helper module to minimize code redundancy
 #>
 [CmdletBinding()]
 param(
@@ -354,7 +356,8 @@ process
 
     if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
     {
-        # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
+        # Temporary Defender exclusions to avoid perf issue
+        # See also https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
         Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
         Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bootstrapPath -Force"
         Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
