@@ -1,4 +1,4 @@
-#Requires -Modules Helper
+<#Requires -Modules Helper#>
 param (
     $path = "D:\packages" # where setup EXE will be saved, TODO: caller in bootstrap.ps1 needs to specify "-path $packagesPath"
 )
@@ -27,7 +27,7 @@ $scriptFullName = $MyInvocation.MyCommand.Path
 $scriptName = Split-Path -Path $scriptFullName -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
-Import-Module -Name Helper -Force
+#Import-Module -Name Helper -Force
 Set-PSFramework
 $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
 
