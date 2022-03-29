@@ -44,7 +44,7 @@ $infContents | Out-File -FilePath $infFilePath -Force
 
 if ((Test-Path -Path $path -PathType Container -ErrorAction SilentlyContinue) -eq $false)
 {
-    Write-PSFMessage "$path not found, using $env:TEMP instead"
+    Write-PSFMessage "<c='yellow'>$path</c> not found, using <c='green'>$env:TEMP</c> instead"
     $path = $env:TEMP
 }
 
@@ -68,5 +68,17 @@ Invoke-ExpressionWithLogging "Invoke-WebRequest -Uri $location -OutFile $filePat
 
 if (Test-Path -Path $filePath -PathType Leaf)
 {
-    Start-Process -FilePath $filePath -ArgumentList "/verysilent /loadinf=$infFilePath"
+    Write-PSFMessage "Starting: <c='white'>$filePath</c>"
+    Start-Process -FilePath $filePath -ArgumentList "/verysilent /loadinf=$infFilePath" -Wait
+
+    $codeCmdFilePath = "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd"
+    if (Test-Path -Path $codeCmdFilePath -PathType Leaf)
+    {
+        Write-PSFMessage "Finished: <c='white'>$filePath</c>"
+    }
+    else
+    {
+        Write-PSFMessage "File not found: <c='yellow'>$codeCmdFilePath</c>, either VSCode is not installed, or is installed as user setup instead of system setup"
+        exit 2
+    }
 }

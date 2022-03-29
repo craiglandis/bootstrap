@@ -1043,6 +1043,12 @@ process
         $installVSCodeScriptFilePath = "$scriptsPath\$installVSCodeScriptFileName"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeScriptUrl`', `'$installVSCodeScriptFilePath`')"
         Invoke-ExpressionWithLogging -command $installVSCodeScriptFilePath
+
+        $installVSCodeExtensionsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCodeExtensions.ps1'
+        $installVSCodeExtensionsScriptFileName = $installVSCodeExtensionsScriptUrl.Split('/')[-1]
+        $installVSCodeExtensionsScriptFilePath = "$scriptsPath\$installVSCodeExtensionsScriptFileName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeExtensionsScriptUrl`', `'$installVSCodeExtensionsScriptFilePath`')"
+        Invoke-ExpressionWithLogging -command $installVSCodeExtensionsScriptFilePath
     }
 
     $vsCodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"

@@ -56,7 +56,14 @@ yzhang.markdown-all-in-one
 '@
 $extensionsToInstall = $extensionsToInstall.Split("`n").Trim()
 
-$installedExtensions = & "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd" --list-extensions
+$codeCmdFilePath = "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd"
+if ((Test-Path -Path $codeCmdFilePath -PathType Leaf) -eq $false)
+{
+    Write-PSFMessage "File not found: <c='yellow'>$codeCmdFilePath</c>, either VSCode is not installed, or is installed as user setup instead of system setup"
+    exit 2
+}
+
+$installedExtensions = & $codeCmdFilePath --list-extensions
 
 foreach ($extensionToInstall in $extensionsToInstall) {
     if ($installedExtensions.Contains($extensionToInstall))
@@ -68,7 +75,7 @@ foreach ($extensionToInstall in $extensionsToInstall) {
         # To test, uninstall one first:
         # & "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd" --uninstall-extension redhat.vscode-yaml
         Write-PSFMessage "Installing: <c='white'>$extensionToInstall</c>"
-        & "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd" --install-extension $extensionToInstall | Out-Null
+        & $codeCmdFilePath --install-extension $extensionToInstall | Out-Null
     }
 }
 
