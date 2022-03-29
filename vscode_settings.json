@@ -71,6 +71,9 @@
     "powershell.powerShellDefaultVersion": "PowerShell Preview (x64)",
 	"redhat.telemetry.enabled": false,
     "security.workspace.trust.untrustedFiles": "open",
+    "security.workspace.trust.banner": "never",
+    "security.workspace.trust.startupPrompt": "never",
+    "security.workspace.trust.enabled": false,
     "terminal.integrated.fontSize": 24,
     "terminal.integrated.shell.windows": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
     "workbench.colorCustomizations": {
