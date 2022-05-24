@@ -9,6 +9,10 @@ Az.Tools.Predictor is broken in latest version 0.5.0, so keeping it uninstalled 
 
 C:\>pwsh -noprofile -nologo -command Uninstall-Module -Name Az.Tools.Predictor
 
+pwsh -noprofile -nologo -command Uninstall-Module -Name oh-my-posh -force
+
+
+
 C:\>powershell -noprofile -nologo -command Uninstall-Module -Name Az.Tools.Predictor
 
 https://github.com/Azure/azure-powershell/issues/16586
@@ -261,6 +265,7 @@ else
 $modules = @'
 Az.Accounts,False,False
 Az.Tools.Installer,True,False
+Az.Tools.Predictor,True,False,False,True
 CustomizeWindows11
 ImportExcel,False,False
 Microsoft.PowerShell.ConsoleGuiTools,True,False,False,True
