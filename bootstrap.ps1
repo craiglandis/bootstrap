@@ -1010,7 +1010,7 @@ process
     # Delete that one, then download the latest (1.1.0.21) from the voidtools site
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\bin\es.exe -Force -ErrorAction SilentlyContinue"
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\lib\Everything\tools\es.exe -Force -ErrorAction SilentlyContinue"
-    $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.21.zip'
+    $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.23.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
     $esZipFolderPath = "$packagesPath\$($esZipFileName.Replace('.zip',''))"
     $esZipFilePath = "$packagesPath\$esZipFileName"
