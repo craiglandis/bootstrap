@@ -1007,7 +1007,7 @@ process
     Invoke-ExpressionWithLogging -command "Set-Content -Path $env:APPDATA\Notepad++\cloud\choice -Value $nppSettingsFolderPath -Force"
 
     # The chocolatey package for Everything includes an old version (1.1.0.9) of the es.exe CLI tool
-    # Delete that one, then download the latest (1.1.0.21) from the voidtools site
+    # Delete that one, then download the latest (1.1.0.23) from the voidtools site
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\bin\es.exe -Force -ErrorAction SilentlyContinue"
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\lib\Everything\tools\es.exe -Force -ErrorAction SilentlyContinue"
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.23.zip'
