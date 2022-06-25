@@ -67,6 +67,20 @@ process
         }
     }
 
+    function Confirm-NugetInstalled
+    {
+        Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
+        $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
+        if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
+        {
+            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
+        }
+        else
+        {
+            Write-PSFMessage "Nuget $($nuget.Version) already installed"
+        }
+    }
+
     function Set-PSFramework
     {
         Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
@@ -249,6 +263,7 @@ process
     {
         # Alias Write-PSFMessage to Write-PSFMessage until PSFramework module is installed
         Set-Alias -Name Write-PSFMessage -Value Write-Output
+        Confirm-NugetInstalled
         Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
         Import-Module -Name PSFramework -Force
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
@@ -614,17 +629,7 @@ process
     # This needs to be before Set-PSRepository, otherwise Set-PSRepository will prompt to install it
     if ($PSEdition -eq 'Desktop')
     {
-        Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
-        $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
-        if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
-        {
-            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
-        }
-        else
-        {
-            Write-PSFMessage "Nuget $($nuget.Version) already installed"
-        }
-
+        Confirm-NugetInstalled
         Invoke-ExpressionWithLogging -command 'Import-Module -Name Appx -ErrorAction SilentlyContinue'
     }
     else
