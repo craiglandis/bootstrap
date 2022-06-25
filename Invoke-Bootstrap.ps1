@@ -157,6 +157,10 @@ if ($isVM)
         # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
         # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
     }
+    else
+    {
+        $packagesPath = "$bootstrapPath\packages"
+    }
 }
 else
 {
