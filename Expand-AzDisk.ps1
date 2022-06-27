@@ -111,7 +111,7 @@ else
     $settings = @{
         'fileUris'         = @($expandAzDiskScriptUrl)
         'commandToExecute' = "PowerShell -ExecutionPolicy Bypass -File $expandAzDiskScriptUrlFileName -diskpart"
-        'ticks'            = (Get-Date).ticks
+        'ticks'            = (Get-Date).Ticks
     }
     $publisher = 'Microsoft.Compute'
     $extensionType = 'CustomScriptExtension'
