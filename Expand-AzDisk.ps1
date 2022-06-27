@@ -96,15 +96,15 @@ else
     $osDisk.DiskSizeGB = $newDiskSizeGB
     Write-Output "Update-AzDisk -ResourceGroupName $resourceGroupName -Disk `$osDisk -DiskName $osDiskName -ErrorAction Stop"
     $result = Update-AzDisk -ResourceGroupName $resourceGroupName -Disk $osDisk -DiskName $osDiskName -ErrorAction Stop
-    Invoke-ExpressionWithLogging -command "Start-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
+    $result = Invoke-ExpressionWithLogging -command "Start-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
     do
     {
         Start-Sleep -Seconds 3
-        $vmStatus = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Status -ErrorAction Stop"
+        $vmStatus = Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Status -ErrorAction Stop
         $vmAgentStatus = $vmStatus.VMAgent.Statuses.DisplayStatus
         $powerState = ($vmStatus.Statuses | Where-Object {$_.Code -match 'PowerState'}).Code.Split('/')[1]
+        Write-Output "Power state: $powerState, VM agent status: $vmAgentStatus"
     } until ($vmAgentStatus -eq 'Ready' -and $powerState -eq 'running')
-    Write-Output "Power state: $powerState, VM agent status: $vmAgentStatus"
 
     $expandAzDiskScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Expand-AzDisk.ps1'
     $expandAzDiskScriptUrlFileName = $expandAzDiskScriptUrl.Split('/')[-1]
@@ -118,18 +118,18 @@ else
     $name = "$publisher.$extensionType"
     [version]$version = (Get-AzVMExtensionImage -Location $location -PublisherName $publisher -Type $extensionType | Sort-Object {[Version]$_.Version} -Desc | Select-Object Version -First 1).Version
     $typeHandlerVersion = "$($version.Major).$($version.Minor)"
-    $result = Set-AzVMExtension -Location $location -ResourceGroupName $resourceGroupName -VMName $vmName -Publisher $publisher -ExtensionType $extensionType -Name $name -Settings $settings -TypeHandlerVersion $typeHandlerVersion
-    $extensionStatus = Get-AzVMExtension -ResourceGroupName $resourceGroupName -VMName $vmName -Name $name -Status
+    $result = Invoke-ExpressionWithLogging -command "Set-AzVMExtension -Location $location -ResourceGroupName $resourceGroupName -VMName $vmName -Publisher $publisher -ExtensionType $extensionType -Name $name -Settings $settings -TypeHandlerVersion $typeHandlerVersion -ErrorAction Stop"
+    $extensionStatus = Invoke-ExpressionWithLogging -command "Get-AzVMExtension -ResourceGroupName $resourceGroupName -VMName $vmName -Name $name -Status"
     $stdout = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdOut/succeeded'}
     $stdoutMessage = $stdout.Message
-    Write-Output "STDOUT: `n$stdoutMessage"
+    Write-Output "$('='*30) STDOUT $('='*30) `n$stdoutMessage`n$('='*68)"
     if ($extensionStatus.ProvisioningState -eq 'Failed')
     {
         $extensionErrorMessage = $extensionStatus.Statuses.Message
         $stderr = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdErr/succeeded'}
         $stderrMessage = $stderr.Message
         Write-Output $extensionErrorMessage
-        Write-Output "STDERR: `n$stderrMessage"
+        Write-Output "$('='*30) STDERR $('='*30) `n$stderrMessage`n$('='*68)"
     }
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
