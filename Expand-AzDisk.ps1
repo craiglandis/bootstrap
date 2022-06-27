@@ -22,7 +22,6 @@ function Invoke-ExpressionWithLogging
     }
 }
 
-#Set-StrictMode -Version 3.0
 Set-StrictMode -Version Latest
 
 if ($diskpart)
