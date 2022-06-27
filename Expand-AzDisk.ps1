@@ -82,8 +82,6 @@ else
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
 
-    $vm.StorageProfile.OsDisk.DiskSizeGB
-
     Invoke-ExpressionWithLogging -command "Stop-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Force -ErrorAction Stop"
     $vm = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
     $location = $vm.Location
