@@ -1,8 +1,8 @@
 # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/expand-os-disk
 param (
-    [string]$resourceGroupName = 'rg',
-    [string]$vmName = 'ws08r2test1',
-    [int]$newDiskSizeGB = 128,
+    [string]$resourceGroupName,
+    [string]$vmName,
+    [int]$newDiskSizeGB,
     [switch]$diskpart
 )
 
