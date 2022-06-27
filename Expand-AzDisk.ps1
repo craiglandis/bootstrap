@@ -118,7 +118,7 @@ else
     $name = "$publisher.$extensionType"
     [version]$version = (Get-AzVMExtensionImage -Location $location -PublisherName $publisher -Type $extensionType | Sort-Object {[Version]$_.Version} -Desc | Select-Object Version -First 1).Version
     $typeHandlerVersion = "$($version.Major).$($version.Minor)"
-    $result = Invoke-ExpressionWithLogging -command "Set-AzVMExtension -Location $location -ResourceGroupName $resourceGroupName -VMName $vmName -Publisher $publisher -ExtensionType $extensionType -Name $name -Settings $settings -TypeHandlerVersion $typeHandlerVersion -ErrorAction Stop"
+    $result = Set-AzVMExtension -Location $location -ResourceGroupName $resourceGroupName -VMName $vmName -Publisher $publisher -ExtensionType $extensionType -Name $name -Settings $settings -TypeHandlerVersion $typeHandlerVersion -ErrorAction Stop
     $extensionStatus = Invoke-ExpressionWithLogging -command "Get-AzVMExtension -ResourceGroupName $resourceGroupName -VMName $vmName -Name $name -Status"
     $stdout = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdOut/succeeded'}
     $stdoutMessage = $stdout.Message
