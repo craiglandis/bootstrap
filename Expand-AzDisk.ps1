@@ -22,8 +22,6 @@ function Invoke-ExpressionWithLogging
     }
 }
 
-Set-StrictMode -Version Latest
-
 if ($diskpart)
 {
     # https://github.com/search?l=PowerShell&q=diskpart+extend+size&type=Code
