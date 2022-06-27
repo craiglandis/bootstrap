@@ -10,15 +10,15 @@ function Invoke-ExpressionWithLogging
     param(
         [string]$command
     )
-    Write-Output $command
+    Write-Host $command
     try
     {
         Invoke-Expression -Command $command
     }
     catch
     {
-        Write-Output "Failed: $command"
-        Write-Output "`$LASTEXITCODE: $LASTEXITCODE"
+        Write-Host "Failed: $command"
+        Write-Host "`$LASTEXITCODE: $LASTEXITCODE"
     }
 }
 
@@ -80,7 +80,12 @@ else
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
 
-    Invoke-ExpressionWithLogging -command "Stop-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Force -ErrorAction Stop"
+    $vmStatus = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Status -ErrorAction Stop"
+    $powerState = ($vmStatus.Statuses | Where-Object {$_.Code -match 'PowerState'}).Code.Split('/')[1]
+    if ($powerState -ne 'deallocated')
+    {
+        $result = Invoke-ExpressionWithLogging -command "Stop-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Force -ErrorAction Stop"
+    }
     $vm = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
     $location = $vm.Location
     $osDiskName = $vm.StorageProfile.OsDisk.Name
@@ -90,9 +95,8 @@ else
     Write-Output "Updating OS disk to new disk size: $newDiskSizeGB GB"
     $osDisk.DiskSizeGB = $newDiskSizeGB
     Write-Output "Update-AzDisk -ResourceGroupName $resourceGroupName -Disk `$osDisk -DiskName $osDiskName -ErrorAction Stop"
-    Update-AzDisk -ResourceGroupName $resourceGroupName -Disk $osDisk -DiskName $osDiskName -ErrorAction Stop
+    $result = Update-AzDisk -ResourceGroupName $resourceGroupName -Disk $osDisk -DiskName $osDiskName -ErrorAction Stop
     Invoke-ExpressionWithLogging -command "Start-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
-
     do
     {
         Start-Sleep -Seconds 3
