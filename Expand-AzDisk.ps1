@@ -1,3 +1,4 @@
+# https://docs.microsoft.com/en-us/azure/virtual-machines/windows/expand-os-disk
 param (
     [string]$resourceGroupName = 'rg',
     [string]$vmName = 'ws08r2test1',
