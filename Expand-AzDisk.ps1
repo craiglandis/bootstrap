@@ -110,7 +110,7 @@ else
     $expandAzDiskScriptUrlFileName = $expandAzDiskScriptUrl.Split('/')[-1]
     $settings = @{
         'fileUris'         = @($expandAzDiskScriptUrl)
-        'commandToExecute' = "powerShell -ExecutionPolicy Bypass -File $expandAzDiskScriptUrlFileName -diskpart"
+        'commandToExecute' = "PowerShell -ExecutionPolicy Bypass -File $expandAzDiskScriptUrlFileName -diskpart"
         'ticks'            = (Get-Date).ticks
     }
     $publisher = 'Microsoft.Compute'
