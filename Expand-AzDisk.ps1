@@ -1,6 +1,6 @@
 param (
-    [string]$resourceGroupName,
-    [string]$vmName,
+    [string]$resourceGroupName = 'rg',
+    [string]$vmName = 'ws08r2test1',
     [int]$newDiskSizeGB = 128,
     [switch]$diskpart
 )
@@ -84,16 +84,27 @@ else
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
 
+    $vm.StorageProfile.OsDisk.DiskSizeGB
+
     Invoke-ExpressionWithLogging -command "Stop-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Force -ErrorAction Stop"
-    $vm = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName"
+    $vm = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
     $osDiskName = $vm.StorageProfile.OsDisk.Name
-    $osDisk = Get-AzDisk -ResourceGroupName $resourceGroupName -DiskName $osDiskName
+    $osDisk = Invoke-ExpressionWithLogging -command "Get-AzDisk -ResourceGroupName $resourceGroupName -DiskName $osDiskName"
     $currentDiskSizeGB = $osDisk.DiskSizeGB
-    Write-Output "Disk name: $osDiskName Current disk size GB: $currentDiskSizeGB"
-    Write-Output "Updating to new disk size GB: $newDiskSizeGB"
-    $osDisk.DiskSizeGB = 128
-    Invoke-ExpressionWithLogging -command "Update-AzDisk -ResourceGroupName $resourceGroupName -Disk $osDisk -DiskName $osDiskName -ErrorAction Stop"
+    Write-Output "Current OS disk size GB: $currentDiskSizeGB OS disk name: $osDiskName"
+    Write-Output "Updating OS disk to new disk size: $newDiskSizeGB GB"
+    $osDisk.DiskSizeGB = $newDiskSizeGB
+    Write-Output "Update-AzDisk -ResourceGroupName $resourceGroupName -Disk `$osDisk -DiskName $osDiskName -ErrorAction Stop"
+    Update-AzDisk -ResourceGroupName $resourceGroupName -Disk $osDisk -DiskName $osDiskName -ErrorAction Stop
     Invoke-ExpressionWithLogging -command "Start-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -ErrorAction Stop"
+
+    do {
+        Start-Sleep -Seconds 3
+        $vmStatus = Invoke-ExpressionWithLogging -command "Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName -Status -ErrorAction Stop"
+        $vmAgentStatus = $vmStatus.VMAgent.Statuses.DisplayStatus
+        $powerState = ($vmStatus.Statuses | Where-Object {$_.Code -match 'PowerState'}).Code.Split('/')[1]
+    } until ($vmAgentStatus -eq 'Ready' -and $powerState -eq 'running')
+    Write-Output "Power state: $powerState, VM agent status: $vmAgentStatus"
 
     $expandAzDiskScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Expand-AzDisk.ps1'
     $expandAzDiskScriptUrlFileName = $expandAzDiskScriptUrl.Split('/')[-1]
