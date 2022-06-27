@@ -22,7 +22,8 @@ function Invoke-ExpressionWithLogging
     }
 }
 
-Set-StrictMode -Version 3.0
+#Set-StrictMode -Version 3.0
+Set-StrictMode -Version Latest
 
 if ($diskpart)
 {
@@ -122,7 +123,19 @@ else
     [version]$version = (Get-AzVMExtensionImage -Location $location -PublisherName $publisher -Type $extensionType | Sort-Object {[Version]$_.Version} -Desc | Select-Object Version -First 1).Version
     $typeHandlerVersion = "$($version.Major).$($version.Minor)"
     $result = Set-AzVMExtension -Location $location -ResourceGroupName $resourceGroupName -VMName $vmName -Publisher $publisher -ExtensionType $extensionType -Name $name -Settings $settings -TypeHandlerVersion $typeHandlerVersion
-    Write-Output "Set-AzVMExtension: IsSuccessStatusCode: $($result.IsSuccessStatusCode) StatusCode: $($result.StatusCode) ReasonPhrase: $($result.ReasonPhrase)"
+    $extensionStatus = Get-AzVMExtension -ResourceGroupName $resourceGroupName -VMName $vmName -Name $name -Status
+    $stdout = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdOut/succeeded'}
+    $stdoutMessage = $stdout.Message
+    Write-Output "STDOUT: $stdoutMessage"
+    if ($extensionStatus.ProvisioningState -eq 'Failed')
+    {
+        $extensionErrorMessage = $extensionStatus.Statuses.Message
+        $stderr = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdErr/succeeded'}
+        $stderrMessage = $stderr.Message
+        Write-Output $extensionErrorMessage
+        Write-Output "STDERR: $stderrMessage"
+    }
+
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
     Write-Output "$scriptName duration: $scriptDuration"
 }
