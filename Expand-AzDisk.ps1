@@ -44,25 +44,25 @@ if ($diskpart)
     $bootVolume = $volumes[$bootVolumeIndex]
     Write-Output "PowerShell $($PSVersionTable.PSVersion.ToString())"
     $os = Get-WmiObject -Class Win32_OperatingSystem
-    "$($os.Caption) $(([Environment]::OSVersion).Version.ToString())"
+    Write-Output "$($os.Caption) $(([Environment]::OSVersion).Version.ToString())"
     Write-Output "Boot volume index: $bootVolumeIndex, Name: $($bootVolume.Name), Caption: $($bootVolume.Caption), DriveLetter: $($bootVolume.DriveLetter), DeviceID: $($bootVolume.DeviceID)"
     $capacityBefore = [int]($bootVolume.Capacity / 1024 / 1024 / 1024)
-    Write-Output "Capacity: $([int]($bootVolume.Capacity/1024/1024/1024)) GB, Free $([int]($bootVolume.FreeSpace/1024/1024/1024)) GB, Used: $([int](($bootVolume.Capacity - $bootVolume.FreeSpace)/1024/1024/1024)) GB"
+    Write-Output "Capacity: $capacityBefore GB, Free $([int]($bootVolume.FreeSpace/1024/1024/1024)) GB, Used: $([int](($bootVolume.Capacity - $bootVolume.FreeSpace)/1024/1024/1024)) GB"
 
+    # -Encoding ASCII is necessary with Out-File, else the file is created as Unicode, and Diskpart just returns its help syntax when you try to use it
     $diskPartScriptPath = [IO.Path]::GetTempFileName()
-    "select volume $bootVolumeIndex" | Out-File -FilePath $diskPartScriptPath -Append -ErrorAction Stop
-    'extend' | Out-File -FilePath $diskPartScriptPath -Append -ErrorAction Stop
-
-    & $env:SystemRoot\System32\diskpart.exe $diskPartScriptPath
+    "select volume $bootVolumeIndex" | Out-File -FilePath $diskPartScriptPath -Encoding ASCII -Append -ErrorAction Stop
+    "extend" | Out-File -FilePath $diskPartScriptPath -Encoding ASCII -Append -ErrorAction Stop
+    & $env:SystemRoot\System32\diskpart.exe /s $diskPartScriptPath
     Remove-Item -Path $diskPartScriptPath -ErrorAction SilentlyContinue
 
     $volumes = Get-WmiObject -Class Win32_Volume
     $bootVolume = $volumes[$bootVolumeIndex]
-    $capacityAfter = [int]($bootVolume.Capacity / 1024 / 1024 / 1024)
+    $capacityAfter = [int]($bootVolume.Capacity/1024/1024/1024)
     if ($capacityAfter -gt $capacityBefore)
     {
         Write-Output 'Boot volume successfully expanded'
-        Write-Output "Capacity: $([int]($bootVolume.Capacity/1024/1024/1024)) GB, Free $([int]($bootVolume.FreeSpace/1024/1024/1024)) GB, Used: $([int](($bootVolume.Capacity - $bootVolume.FreeSpace)/1024/1024/1024)) GB"
+        Write-Output "Capacity: $capacityAfter GB, Free $([int]($bootVolume.FreeSpace/1024/1024/1024)) GB, Used: $([int](($bootVolume.Capacity - $bootVolume.FreeSpace)/1024/1024/1024)) GB"
         exit 0
     }
     else
@@ -125,14 +125,14 @@ else
     $extensionStatus = Get-AzVMExtension -ResourceGroupName $resourceGroupName -VMName $vmName -Name $name -Status
     $stdout = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdOut/succeeded'}
     $stdoutMessage = $stdout.Message
-    Write-Output "STDOUT: $stdoutMessage"
+    Write-Output "STDOUT: `n$stdoutMessage"
     if ($extensionStatus.ProvisioningState -eq 'Failed')
     {
         $extensionErrorMessage = $extensionStatus.Statuses.Message
         $stderr = $extensionStatus.SubStatuses | Where-Object {$_.Code -eq 'ComponentStatus/StdErr/succeeded'}
         $stderrMessage = $stderr.Message
         Write-Output $extensionErrorMessage
-        Write-Output "STDERR: $stderrMessage"
+        Write-Output "STDERR: `n$stderrMessage"
     }
 
     $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
