@@ -27,9 +27,6 @@ Set-StrictMode -Version Latest
 if ($diskpart)
 {
     # https://github.com/search?l=PowerShell&q=diskpart+extend+size&type=Code
-    # list volume
-    # select volume <volumenumber>
-    # extend [size=<size>]
 
     $volumes = Get-WmiObject -Class Win32_Volume
     $volumeIndex = 0
