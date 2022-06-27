@@ -41,6 +41,10 @@ if ($diskpart)
         $volumeIndex++
     }
     $bootVolume = $volumes[$bootVolumeIndex]
+    Write-Output "PowerShell $($PSVersionTable.PSVersion.ToString())"
+    $os =Get-WmiObject -Class Win32_OperatingSystem
+    "$($os.Caption) $(([Environment]::OSVersion).Version.ToString())"
+    Write-Output "Boot volume index: $bootVolumeIndex, Name: $($bootVolume.Name), Caption: $($bootVolume.Caption), DriveLetter: $($bootVolume.DriveLetter), DeviceID: $($bootVolume.DeviceID)"
     $capacityBefore = [int]($bootVolume.Capacity/1024/1024/1024)
     Write-Output "Capacity: $([int]($bootVolume.Capacity/1024/1024/1024)) GB, Free $([int]($bootVolume.FreeSpace/1024/1024/1024)) GB, Used: $([int](($bootVolume.Capacity - $bootVolume.FreeSpace)/1024/1024/1024)) GB"
 
