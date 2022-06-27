@@ -25,8 +25,6 @@ function Invoke-ExpressionWithLogging
 
 if ($diskpart)
 {
-    # https://github.com/search?l=PowerShell&q=diskpart+extend+size&type=Code
-
     $volumes = Get-WmiObject -Class Win32_Volume
     $volumeIndex = 0
     foreach ($volume in $volumes)
