@@ -83,15 +83,6 @@
     ]
   },
   {
-    "Name": "CrystalDiskMark",
-    "ChocolateyName": "crystaldiskmark",
-    "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": [
-      "PC"
-    ],
-    "Notes": ""
-  },
-  {
     "Name": "CPU-Z",
     "ChocolateyName": "CPU-Z",
     "WingetName": "CPUID.CPU-Z",
@@ -106,6 +97,7 @@
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
     "Groups": [
+      "PC",
       "VM"
     ]
   },
@@ -113,6 +105,14 @@
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
+    "Groups": [
+      "PC"
+    ]
+  },
+  {
+    "Name": "Docker Desktop",
+    "ChocolateyName": "docker-desktop",
+    "WingetName": "Docker.DockerDesktop",
     "Groups": [
       "PC"
     ]
