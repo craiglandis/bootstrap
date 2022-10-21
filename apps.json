@@ -83,11 +83,20 @@
     ]
   },
   {
+    "Name": "CrystalDiskMark",
+    "ChocolateyName": "crystaldiskmark",
+    "WingetName": "CrystalDewWorld.CrystalDiskMark",
+    "Groups": [
+      "PC"
+    ],
+    "Notes": ""
+  },
+  {
     "Name": "CPU-Z",
     "ChocolateyName": "CPU-Z",
     "WingetName": "CPUID.CPU-Z",
     "Groups": [
-	    "PC",
+      "PC",
       "VM"
     ],
     "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
