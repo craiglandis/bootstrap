@@ -1134,6 +1134,19 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
     Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
 
+    if ($isPC)
+    {
+        $caption = Get-WmiObject Win32_OperatingSystem | Select-Object -ExpandProperty Caption
+        if ($caption -eq 'Microsoft Windows 11 Enterprise')
+        {
+            c:\windows\system32\cscript.exe //H:cscript
+            cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com
+            cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43
+            cscript //NoLogo c:\windows\system32\slmgr.vbs /ato
+            cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv
+        }
+    }
+
     if ($isPC -or $isVM)
     {
         $taskName = 'bootstrap'
