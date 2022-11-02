@@ -3,6 +3,14 @@
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
+=== 2022-11-02 start ===
+Docker Desktop - supress subscription service agreement
+Docker Desktop - throws error "WSL 2 installation is incomplete" - wants WSL2 kernel update - https://aka.ms/wsl2kernel (https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
+Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong color
+Steam - steam logon prompt comes up, no obvious way to surpress without stopping Steam from starting at boot, so no big deal, leave as-is
+PowerShell - profile is not created
+
+=== 2022-11-02 end ===
 Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections
