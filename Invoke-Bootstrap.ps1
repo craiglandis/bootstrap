@@ -6,27 +6,59 @@ param(
     [string]$bootstrapScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1'
 )
 
+function Out-Log
+{
+    param(
+        [string]$text,
+        [string]$prefix = 'timespan',
+        [switch]$raw
+    )
+    if ($raw)
+    {
+        $text
+    }
+    elseif ($prefix -eq 'timespan' -and $scriptStartTime)
+    {
+        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+        $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+    }
+    elseif ($prefix -eq 'both' -and $scriptStartTime)
+    {
+        $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+        $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+    }
+    else
+    {
+        $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+    }
+    Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+    Write-Host " $text"
+    "$prefixString $text" | Out-File $logFilePath -Append
+}
+
 function Invoke-ExpressionWithLogging
 {
     param(
         [string]$command
     )
-    Write-PSFMessage $command
+    Out-Log $command
     try
     {
         Invoke-Expression -Command $command
     }
     catch
     {
-        Write-PSFMessage -Level Error -Message "Failed: $command" -ErrorRecord $_
-        Write-PSFMessage "`$LASTEXITCODE: $LASTEXITCODE"
+        Out-Log -Message "Failed: $command"
+        Out-Log "$LASTEXITCODE : $LASTEXITCODE"
     }
 }
 
+<#
 function Set-PSFramework
 {
-    Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
-    $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
+    Remove-Item Alias:Out-Log -Force -ErrorAction SilentlyContinue
+    $PSDefaultParameterValues['Out-Log:Level'] = 'Output'
     $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
     $paramSetPSFLoggingProvider = @{
         Name       = 'logfile'
@@ -35,9 +67,10 @@ function Set-PSFramework
         TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
     }
     Set-PSFLoggingProvider @paramSetPSFLoggingProvider
-    Write-PSFMessage "PSFramework $($psframework.Version)"
-    Write-PSFMessage "Log path: $logsPath"
+    Out-Log "PSFramework $($psframework.Version)"
+    Out-Log "Log path: $logsPath"
 }
+#>
 
 function Invoke-Schtasks
 {
@@ -59,7 +92,7 @@ $ErrorActionPreference = 'Stop'
 $WarningPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
 
-Set-Alias -Name Write-PSFMessage -Value Write-Output
+# Set-Alias -Name Out-Log -Value Write-Output
 
 $scriptStartTime = Get-Date
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
@@ -68,35 +101,37 @@ $scriptName = Split-Path -Path $scriptPath -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
 $bootstrapPath = "$env:SystemDrive\bootstrap"
+$logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+
 if (Test-Path -Path $bootstrapPath -PathType Container)
 {
-    Write-PSFMessage "$bootstrapPath already exists, don't need to create it"
+    Out-Log "$bootstrapPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating $bootstrapPath"
+    Out-Log "Creating $bootstrapPath"
     New-Item -Path $bootstrapPath -ItemType Directory -Force | Out-Null
 }
 
 $scriptsPath = "$bootstrapPath\scripts"
 if (Test-Path -Path $scriptsPath -PathType Container)
 {
-    Write-PSFMessage "$scriptsPath already exists, don't need to create it"
+    Out-Log "$scriptsPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating $scriptsPath"
+    Out-Log "Creating $scriptsPath"
     New-Item -Path $scriptsPath -ItemType Directory -Force | Out-Null
 }
 
 $logsPath = "$bootstrapPath\logs"
 if (Test-Path -Path $logsPath -PathType Container)
 {
-    Write-PSFMessage "$logsPath already exists, don't need to create it"
+    Out-Log "$logsPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating $logsPath"
+    Out-Log "Creating $logsPath"
     New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
 }
 
@@ -114,7 +149,7 @@ if ($isVM)
     $dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq 'D:'}
     if ($dDrive)
     {
-        Write-PSFMessage "Drive $($dDrive.DeviceID) Name: $($dDrive.VolumeName) Type: $($dDrive.DriveType) Size: $([Math]::Round($dDrive.Size / 1GB, 2))GB Free: $([Math]::Round($dDrive.FreeSpace / 1GB, 2))GB"
+        Out-Log "Drive $($dDrive.DeviceID) Name: $($dDrive.VolumeName) Type: $($dDrive.DriveType) Size: $([Math]::Round($dDrive.Size / 1GB, 2))GB Free: $([Math]::Round($dDrive.FreeSpace / 1GB, 2))GB"
     }
 
     $tempDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
@@ -137,12 +172,12 @@ if ($isVM)
         # Ephemeral OS disk VMs put the pagefile on C: for some reason, which takes up space, so putting it on the temp drive D:
         # Sets initial/maximum both to size of RAM + 1GB unless that is more than 50% of temp drive free space, in which case set it to 50% temp drive free space
         $currentPagingFilesValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\Memory Management' -Name PagingFiles).PagingFiles
-        Write-PSFMessage "Current PagingFiles value: $currentPagingFilesValue"
+        Out-Log "Current PagingFiles value: $currentPagingFilesValue"
         $tempDisk = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.VolumeName -eq 'Temporary Storage'}
         $halfTempDiskFreeSpaceMB = [Math]::Round($tempDisk.FreeSpace / 1MB, 0) / 2
-        Write-PSFMessage "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
+        Out-Log "$halfTempDiskFreeSpaceMB MB is half the free space on $($tempDisk.DeviceID)"
         $totalPhysicalMemoryMBPlus1MB = [Math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB) + 1
-        Write-PSFMessage "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
+        Out-Log "$totalPhysicalMemoryMBPlus1MB total MB physical memory plus 1MB"
         if ($totalPhysicalMemoryMBPlus1MB -gt $halfTempDiskFreeSpaceMB)
         {
             $newPageFileSizeMB = $halfTempDiskFreeSpaceMB
@@ -152,7 +187,7 @@ if ($isVM)
             $newPageFileSizeMB = $totalPhysicalMemoryMBPlus1MB
         }
         $newPagingFilesValue = "$($tempDisk.DeviceID)\pagefile.sys $newPageFileSizeMB $newPageFileSizeMB"
-        Write-PSFMessage "New PagingFiles value: $newPagingFilesValue"
+        Out-Log "New PagingFiles value: $newPagingFilesValue"
         Invoke-ExpressionWithLogging -command "reg add `"HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management`" /v PagingFiles /t REG_MULTI_SZ /d `"$newPagingFilesValue`" /f | Out-Null"
         # Saw hangs trying to use Set-WmiInstance, which I think tries to make the changes immediately, so just changing the registry since that takes effect at reboot which is fine for my needs
         # Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name = "$($tempDisk.DeviceID)\pagefile.sys"; InitialSize = $($newPageFileSizeGB * 1MB); MaximumSize = $($newPageFileSizeGB * 1MB)}
@@ -169,11 +204,11 @@ else
 
 if (Test-Path -Path $packagesPath -PathType Container)
 {
-    Write-PSFMessage "Packages path $packagesPath already exists, don't need to create it"
+    Out-Log "Packages path $packagesPath already exists, don't need to create it"
 }
 else
 {
-    Write-PSFMessage "Creating $packagesPath"
+    Out-Log "Creating $packagesPath"
     New-Item -Path $packagesPath -ItemType Directory -Force | Out-Null
 }
 
@@ -243,7 +278,7 @@ Invoke-ExpressionWithLogging -command "reg unload $defaultUserKeyPath"
 $logScriptFilePath = "$bootstrapPath\log.ps1"
 if (Test-Path -Path $logScriptFilePath -PathType Leaf)
 {
-    Write-PSFMessage "$logScriptFilePath already exists, don't need to create it"
+    Out-Log "$logScriptFilePath already exists, don't need to create it"
 }
 else
 {
@@ -306,7 +341,7 @@ else
     {
         Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
-        Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
+        Out-Log 'Verifying Nuget 2.8.5.201+ is installed'
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
         if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
         {
@@ -314,7 +349,7 @@ else
         }
         else
         {
-            Write-PSFMessage "Nuget $($nuget.Version) already installed"
+            Out-Log "Nuget $($nuget.Version) already installed"
         }
 
         Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
@@ -370,26 +405,26 @@ else
     $osVersion = Get-WmiObject -Query 'Select Version from Win32_OperatingSystem'
     $osVersion = $osVersion.Version
     $psVersion = $PSVersionTable.PSVersion
-    Write-PSFMessage "OS version: $osVersion"
-    Write-PSFMessage "PS version: $psVersion"
+    Out-Log "OS version: $osVersion"
+    Out-Log "PS version: $psVersion"
     switch ($osVersion)
     {
         '6.1.7601' {$hotfixId = 'KB3191566'}
         '6.2.9200' {$hotfixId = 'KB3191565'}
         '6.3.9600' {$hotfixId = 'KB3191564'}
     }
-    Write-PSFMessage "WMF 5.1 hotfixId: $hotfixId"
+    Out-Log "WMF 5.1 hotfixId: $hotfixId"
 
     $hotfixInstalled = [bool](Get-WmiObject -Query "Select HotFixID from Win32_QuickFixEngineering where HotFixID='$hotfixId'")
 
     if ($hotfixInstalled -and $psVersion -lt [Version]'5.1')
     {
-        Write-PSFMessage "WMF5.1 ($hotfixId) already installed but PowerShell version is $psVersion, Windows restart still needed"
+        Out-Log "WMF5.1 ($hotfixId) already installed but PowerShell version is $psVersion, Windows restart still needed"
         Invoke-Schtasks
     }
     else
     {
-        Write-PSFMessage "$hotfixId not installed and PowerShell version is $psVersion, continuing with WMF 5.1 ($hotfixId) install"
+        Out-Log "$hotfixId not installed and PowerShell version is $psVersion, continuing with WMF 5.1 ($hotfixId) install"
         switch ($osVersion)
         {
             '6.1.7601' {$url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip'}
@@ -403,7 +438,7 @@ else
         if ($filePath.EndsWith('.zip'))
         {
             $extractedFilePath = $filePath.Replace('.zip', '')
-            Write-PSFMessage "Extracting $filePath to $extractedFilePath"
+            Out-Log "Extracting $filePath to $extractedFilePath"
             if (!(Test-Path $extractedFilePath))
             {
                 Invoke-ExpressionWithLogging -command "New-Item -Path $extractedFilePath -ItemType Directory -Force | Out-Null"
@@ -422,13 +457,13 @@ else
             }
 
             Invoke-Schtasks
-            Write-PSFMessage 'Windows will restart automatically after WMF5.1 silent install completes'
+            Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
         }
         else
         {
             Invoke-Schtasks
-            Write-PSFMessage 'Windows will restart automatically after WMF5.1 silent install completes'
+            Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             $wusa = "$env:windir\System32\wusa.exe"
             Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/forcerestart' -Wait"
         }
@@ -436,7 +471,7 @@ else
         do
         {
             Start-Sleep 5
-            Write-PSFMessage 'Installing WMF 5.1...'
+            Out-Log 'Installing WMF 5.1...'
             $hotfixInstalled = [bool](Get-WmiObject -Query "Select HotFixID from Win32_QuickFixEngineering where HotFixID='$hotfixId'")
         } until ($hotfixInstalled)
     }
