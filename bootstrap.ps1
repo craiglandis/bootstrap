@@ -983,7 +983,7 @@ process
     Invoke-ExpressionWithLogging -command "Remove-Item $env:USERPROFILE\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
 
     $scriptFileUrls = @(
-        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
+        # 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Add-ScheduledTasks.ps1'
     )
