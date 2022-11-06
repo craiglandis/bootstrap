@@ -329,6 +329,7 @@ if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
 }
 
 # https://psframework.org/
+<#
 Import-Module -Name PSFramework -ErrorAction SilentlyContinue
 $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
 if ($psframework)
@@ -366,6 +367,7 @@ else
         }
     }
 }
+#>
 
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
