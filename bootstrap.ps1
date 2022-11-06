@@ -58,26 +58,63 @@ begin
 }
 process
 {
+
+	function Out-Log
+	{
+		param(
+			[string]$text,
+			[string]$prefix = 'timespan',
+			[switch]$raw
+		)
+		
+		if ($raw)
+		{
+			$text
+		}
+		elseif ($prefix -eq 'timespan' -and $scriptStartTime)
+		{
+			$timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+			$prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+		}
+		elseif ($prefix -eq 'both' -and $scriptStartTime)
+		{
+			$timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+			$timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+			$prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+		}
+		else
+		{
+			$prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+		}
+		Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+		Write-Host " $text"
+			
+		if ($logFilePath)
+		{	
+			"$prefixString $text" | Out-File $logFilePath -Append
+		}
+	}
+
     function Invoke-ExpressionWithLogging
     {
         param(
             [string]$command
         )
-        Write-PSFMessage $command
+        Out-Log $command
         try
         {
             Invoke-Expression -Command $command
         }
         catch
         {
-            Write-PSFMessage -Level Error -Message "Failed: $command" -ErrorRecord $_
-            Write-PSFMessage "`$LASTEXITCODE: $LASTEXITCODE"
+            Out-Log -Level Error -Message "Failed: $command" -ErrorRecord $_
+            Out-Log "`$LASTEXITCODE: $LASTEXITCODE"
         }
     }
 
     function Confirm-NugetInstalled
     {
-        Write-PSFMessage 'Verifying Nuget 2.8.5.201+ is installed'
+        Out-Log 'Verifying Nuget 2.8.5.201+ is installed'
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
         if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
         {
@@ -85,15 +122,15 @@ process
         }
         else
         {
-            Write-PSFMessage "Nuget $($nuget.Version) already installed"
+            Out-Log "Nuget $($nuget.Version) already installed"
         }
     }
-
+	<#
     function Set-PSFramework
     {
-        Remove-Item Alias:Write-PSFMessage -Force -ErrorAction SilentlyContinue
+        Remove-Item Alias:Out-Log -Force -ErrorAction SilentlyContinue
         Import-Module -Name PSFramework -ErrorAction SilentlyContinue
-        $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
+        $PSDefaultParameterValues['Out-Log:Level'] = 'Output'
         $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
         $paramSetPSFLoggingProvider = @{
             Name     = 'logfile'
@@ -102,9 +139,10 @@ process
             TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
         }
         Set-PSFLoggingProvider @paramSetPSFLoggingProvider
-        Write-PSFMessage "PSFramework $($psframework.Version)"
-        Write-PSFMessage "Logs path: $logsPath"
+        Out-Log "PSFramework $($psframework.Version)"
+        Out-Log "Logs path: $logsPath"
     }
+	#>
 
     function Get-AppList
     {
@@ -171,7 +209,7 @@ process
         $psWindowsUpdate = Get-Module -Name PSWindowsUpdate
         if ($psWindowsUpdate)
         {
-            Write-PSFMessage "$($psWindowsUpdate.Name) $($psWindowsUpdate.Version)"
+            Out-Log "$($psWindowsUpdate.Name) $($psWindowsUpdate.Version)"
             $timestamp = Get-Date -Format yyyyMMddHHmmssff
             $invokeWUJobLogFilePath = "$logsPath\Invoke-WUJob-$($timestamp).log"
             # Couldn't find a way to get a variable to expand when include within -Script {}, so using a literal path for now
@@ -191,10 +229,10 @@ process
             } until ($task.State -eq 3)
             $taskEndTime = Get-Date
             $taskDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $taskStartTime -End $taskEndTime)
-            Write-PSFMessage "Name: $($task.Name) Duration: $taskDuration LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)"
+            Out-Log "Name: $($task.Name) Duration: $taskDuration LastTaskResult: $($task.LastTaskResult) LastRunTime: $($task.LastRunTime)"
             $rootFolder.DeleteTask($taskName, 0)
             $isRebootNeeded = Get-WURebootStatus -Silent
-            Write-PSFMessage "`$isRebootNeeded: $isRebootNeeded"
+            Out-Log "`$isRebootNeeded: $isRebootNeeded"
             if ($isRebootNeeded)
             {
                 Invoke-Schtasks
@@ -212,7 +250,7 @@ process
         }
         else
         {
-            Write-PSFMessage "Failed to install PSWindowsUpdate module"
+            Out-Log "Failed to install PSWindowsUpdate module"
             Complete-ScriptExecution
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
             #exit
@@ -229,13 +267,15 @@ process
         }
 
         $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
-        Write-PSFMessage "$scriptName duration: $scriptDuration"
+        Out-Log "$scriptName duration: $scriptDuration"
 
-        $psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
+        <#
+		$psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
         $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
-        $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
-        Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
-        Write-PSFMessage "Log path: $psFrameworkLogFilePath"
+        $psFrameworkLogFilePath = $psFrameworkLogFile.FullName        
+        Out-Log "Log path: $psFrameworkLogFilePath"
+		#>
+		Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
         Invoke-ExpressionWithLogging -command "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
@@ -262,6 +302,7 @@ process
     $scriptName = Split-Path -Path $scriptPath -Leaf
     $scriptBaseName = $scriptName.Split('.')[0]
 
+	<#
     $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
     if ($psframework)
     {
@@ -269,8 +310,8 @@ process
     }
     else
     {
-        # Alias Write-PSFMessage to Write-PSFMessage until PSFramework module is installed
-        Set-Alias -Name Write-PSFMessage -Value Write-Output
+        # Alias Out-Log to Out-Log until PSFramework module is installed
+        Set-Alias -Name Out-Log -Value Write-Output
         Confirm-NugetInstalled
         Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
         Import-Module -Name PSFramework -Force
@@ -285,6 +326,7 @@ process
             exit
         }
     }
+	#>
 
     if ((Get-WmiObject -Class Win32_Baseboard -ErrorAction SilentlyContinue).Product -eq 'Virtual Machine')
     {
@@ -298,51 +340,53 @@ process
     if ($isVM)
     {
         Enable-PSLogging
-    }
-
-    Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+    }    
 
     $bootstrapPath = "$env:SystemDrive\bootstrap"
+	$logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+	
+	Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+	
     if (Test-Path -Path $bootstrapPath -PathType Container)
     {
-        Write-PSFMessage "$bootstrapPath already exists, don't need to create it"
+        Out-Log "$bootstrapPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $bootstrapPath"
+        Out-Log "Creating $bootstrapPath"
         New-Item -Path $bootstrapPath -ItemType Directory -Force | Out-Null
     }
 
     $scriptsPath = "$bootstrapPath\scripts"
     if (Test-Path -Path $scriptsPath -PathType Container)
     {
-        Write-PSFMessage "$scriptsPath already exists, don't need to create it"
+        Out-Log "$scriptsPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $scriptsPath"
+        Out-Log "Creating $scriptsPath"
         New-Item -Path $scriptsPath -ItemType Directory -Force | Out-Null
     }
 
     $logsPath = "$bootstrapPath\logs"
     if (Test-Path -Path $logsPath -PathType Container)
     {
-        Write-PSFMessage "$logsPath already exists, don't need to create it"
+        Out-Log "$logsPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $logsPath"
+        Out-Log "Creating $logsPath"
         New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
     }
 
     $regFilesPath = "$bootstrapPath\reg"
     if (Test-Path -Path $regFilesPath -PathType Container)
     {
-        Write-PSFMessage "$regFilesPath already exists, don't need to create it"
+        Out-Log "$regFilesPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $regFilesPath"
+        Out-Log "Creating $regFilesPath"
         New-Item -Path $regFilesPath -ItemType Directory -Force | Out-Null
     }
 
@@ -358,18 +402,18 @@ process
     }
     if (Test-Path -Path $packagesPath -PathType Container)
     {
-        Write-PSFMessage "Packages path $packagesPath already exists, don't need to create it"
+        Out-Log "Packages path $packagesPath already exists, don't need to create it"
     }
     else
     {
-        Write-PSFMessage "Creating $packagesPath"
+        Out-Log "Creating $packagesPath"
         New-Item -Path $packagesPath -ItemType Directory -Force | Out-Null
     }
 
     $logScriptFilePath = "$bootstrapPath\log.ps1"
     if (Test-Path -Path $logScriptFilePath -PathType Leaf)
     {
-        Write-PSFMessage "$logScriptFilePath already exists, don't need to create it"
+        Out-Log "$logScriptFilePath already exists, don't need to create it"
     }
     else
     {
@@ -410,16 +454,16 @@ process
             $installDir = "$env:SystemDrive:\ch"
             if (Test-Path -Path $installDir -PathType Container)
             {
-                Write-PSFMessage "$installDir already exists, don't need to create it"
+                Out-Log "$installDir already exists, don't need to create it"
             }
             else
             {
-                Write-PSFMessage "Creating $installDir folder for non-admin chocolatey installs"
+                Out-Log "Creating $installDir folder for non-admin chocolatey installs"
                 New-Item -Path $installDir -ItemType Directory | Out-Null
             }
             Invoke-ExpressionWithLogging -command "[Environment]::SetEnvironmentVariable('ChocolateyInstall', '$installDir', 'User')"
             $env:ChocolateyInstall = $installDir
-            Write-PSFMessage "`$env:ChocolateyInstall : $env:ChocolateyInstall"
+            Out-Log "`$env:ChocolateyInstall : $env:ChocolateyInstall"
         }
         else
         {
@@ -433,7 +477,7 @@ process
                 $isPC = $true
             }
         }
-        Write-PSFMessage "`$isPC: $isPC `$isVM: $isVM `$isSAW: $isSAW"
+        Out-Log "`$isPC: $isPC `$isVM: $isVM `$isSAW: $isSAW"
     }
 
     if ($show)
@@ -441,8 +485,8 @@ process
         $apps = Get-AppList
         $apps = $apps | Where-Object {$_.Groups -contains $group}
         $appCount = ($apps | Measure-Object).Count
-        Write-PSFMessage "`nGroup: $group, Count: $appCount"
-        Write-PSFMessage $apps
+        Out-Log "`nGroup: $group, Count: $appCount"
+        Out-Log $apps
         exit
     }
 
@@ -489,7 +533,7 @@ process
         '22000' {$os = 'WIN11'; $isWin11 = $true} # 21H2
         default {$os = 'Unknown'}
     }
-    Write-PSFMessage "OS: $os ($osVersion)"
+    Out-Log "OS: $os ($osVersion)"
 
     if ($isWindowsServer)
     {
@@ -535,7 +579,7 @@ process
     {
         if (Test-Path -Path $profile.AllUsersAllHosts -PathType Leaf)
         {
-            Write-PSFMessage "$($profile.AllUsersAllHosts) already exists, don't need to create it"
+            Out-Log "$($profile.AllUsersAllHosts) already exists, don't need to create it"
         }
         else
         {
@@ -546,7 +590,7 @@ process
 
     if (Test-Path -Path $profile.CurrentUserCurrentHost -PathType Leaf)
     {
-        Write-PSFMessage "$($profile.CurrentUserCurrentHost) already exists, don't need to create it"
+        Out-Log "$($profile.CurrentUserCurrentHost) already exists, don't need to create it"
     }
     else
     {
@@ -559,7 +603,7 @@ process
 
     if ($chocoVersion)
     {
-        Write-PSFMessage "Chocolatey $chocoVersion already installed"
+        Out-Log "Chocolatey $chocoVersion already installed"
     }
     else
     {
@@ -584,11 +628,11 @@ process
             $ErrorActionPreference = 'Continue'
             if ($chocoVersion)
             {
-                Write-PSFMessage "Chocolatey $chocoVersion already installed"
+                Out-Log "Chocolatey $chocoVersion already installed"
             }
             else
             {
-                Write-PSFMessage 'Chocolatey failed to install'
+                Out-Log 'Chocolatey failed to install'
                 exit
             }
         }
@@ -596,13 +640,13 @@ process
 
     if ($chocoVersion)
     {
-        Write-PSFMessage "Chocolatey $chocoVersion successfully installed"
-        Write-PSFMessage "Changing Chocolatey download cache to $packagesPath to save space on OS disk. See also https://docs.chocolatey.org/en-us/guides/usage/change-cache"
+        Out-Log "Chocolatey $chocoVersion successfully installed"
+        Out-Log "Changing Chocolatey download cache to $packagesPath to save space on OS disk. See also https://docs.chocolatey.org/en-us/guides/usage/change-cache"
         Invoke-ExpressionWithLogging -command "choco config set cacheLocation $packagesPath"
     }
     else
     {
-        Write-PSFMessage 'Chocolatey install failed'
+        Out-Log 'Chocolatey install failed'
         exit
     }
 
@@ -616,17 +660,17 @@ process
         Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
         if ($LASTEXITCODE -eq 3010)
         {
-            Write-PSFMessage 'Creating onstart scheduled task to run script again at startup'
+            Out-Log 'Creating onstart scheduled task to run script again at startup'
             if (Test-Path -Path $scriptPath -PathType Leaf)
             {
-                Write-PSFMessage "Script already exists in $scriptPath"
+                Out-Log "Script already exists in $scriptPath"
             }
             else
             {
                 $bootstrapScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1'
                 $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
                 $bootstrapScriptFilePath = "$scriptsPath\$bootstrapScriptFileName"
-                Write-PSFMessage "Downloading $bootstrapScriptUrl to $bootstrapScriptFilePath"
+                Out-Log "Downloading $bootstrapScriptUrl to $bootstrapScriptFilePath"
                 (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)
             }
             Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $bootstrapScriptFilePath`" /f"
@@ -646,6 +690,7 @@ process
     }
 
     # https://psframework.org/
+	<#
     Import-Module -Name PSFramework -ErrorAction SilentlyContinue
     $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
     if ($psframework)
@@ -654,7 +699,7 @@ process
     }
     else
     {
-        Write-PSFMessage 'PSFramework module not found, installing it'
+        Out-Log 'PSFramework module not found, installing it'
         Invoke-ExpressionWithLogging -command "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
         Invoke-ExpressionWithLogging -command "Import-Module -Name PSFramework -ErrorAction SilentlyContinue"
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
@@ -668,6 +713,7 @@ process
             exit
         }
     }
+	#>
 
     $ErrorActionPreference = 'SilentlyContinue'
     $chocoVersion = choco -v
@@ -675,7 +721,7 @@ process
 
     if ($chocoVersion)
     {
-        Write-PSFMessage "Chocolatey $chocoVersion already installed"
+        Out-Log "Chocolatey $chocoVersion already installed"
     }
     else
     {
@@ -692,22 +738,22 @@ process
         $ErrorActionPreference = 'Continue'
         if ($chocoVersion)
         {
-            Write-PSFMessage "Chocolatey $chocoVersion already installed"
+            Out-Log "Chocolatey $chocoVersion already installed"
         }
         else
         {
-            Write-PSFMessage 'Chocolatey failed to install'
+            Out-Log 'Chocolatey failed to install'
             exit
         }
     }
 
     if ($chocoVersion)
     {
-        Write-PSFMessage "Chocolatey $chocoVersion successfully installed"
+        Out-Log "Chocolatey $chocoVersion successfully installed"
     }
     else
     {
-        Write-PSFMessage 'Chocolatey install failed'
+        Out-Log 'Chocolatey install failed'
         exit
     }
 
@@ -812,7 +858,7 @@ process
         $apps = Get-AppList
         if (!$apps)
         {
-            Write-PSFMessage -Level Error -Message 'Failed to get app list'
+            Out-Log -Level Error -Message 'Failed to get app list'
             exit
         }
     }
@@ -822,7 +868,7 @@ process
         $apps = $apps | Where-Object {$_.Groups -contains $group}
     }
 
-    Write-PSFMessage 'Checking if winget is installed'
+    Out-Log 'Checking if winget is installed'
     $ErrorActionPreference = 'SilentlyContinue'
     $wingetVersion = winget -v
     $ErrorActionPreference = 'Continue'
@@ -834,9 +880,9 @@ process
     {
         $isWingetInstalled = $false
     }
-    Write-PSFMessage "`$isWingetInstalled: $isWingetInstalled"
-    Write-PSFMessage "Mode: $group"
-    Write-PSFMessage "$($apps.Count) apps to be installed"
+    Out-Log "`$isWingetInstalled: $isWingetInstalled"
+    Out-Log "Mode: $group"
+    Out-Log "$($apps.Count) apps to be installed"
     $apps | ForEach-Object {
 
         $app = $_
@@ -896,20 +942,20 @@ process
     ERROR: Exception calling "CreateDirectory" with "1" argument(s): "Cannot create "C:\OneDrive\Tools" because a file or directory with the same name already exists."
     So don't precreate these, let the package create them, and if needed, make sure they are created after all package installs are done
     #>
-    Write-PSFMessage "Checking if $toolsPath exists"
+    Out-Log "Checking if $toolsPath exists"
     if (Test-Path -Path $toolsPath -PathType Container)
     {
-        Write-PSFMessage "$toolsPath already exists, don't need to create it"
+        Out-Log "$toolsPath already exists, don't need to create it"
     }
     else
     {
         Invoke-ExpressionWithLogging -command "New-Item -Path $toolsPath -Type Directory -Force | Out-Null"
     }
 
-    Write-PSFMessage "Checking if $myPath exists"
+    Out-Log "Checking if $myPath exists"
     if (Test-Path -Path $myPath -PathType Container)
     {
-        Write-PSFMessage "$myPath already exists, don't need to create it"
+        Out-Log "$myPath already exists, don't need to create it"
     }
     else
     {
@@ -917,13 +963,13 @@ process
     }
 
     # https://stackoverflow.com/questions/714877/setting-windows-powershell-environment-variables
-    Write-PSFMessage "Adding $toolsPath and $myPath to user Path environment variable"
+    Out-Log "Adding $toolsPath and $myPath to user Path environment variable"
     $newUserPath = "$env:Path;$toolsPath;$myPath"
     Invoke-ExpressionWithLogging -command "[Environment]::SetEnvironmentVariable('Path', '$newUserPath', 'User')"
 
     $userPathFromRegistry = (Get-ItemProperty -Path 'HKCU:\Environment' -Name Path).Path
     $separator = "`n$('='*160)`n"
-    Write-PSFMessage "$separator`$userPathFromRegistry: $userPathFromRegistry$separator"
+    Out-Log "$separator`$userPathFromRegistry: $userPathFromRegistry$separator"
 
     Invoke-ExpressionWithLogging -command "Remove-Item $env:PUBLIC\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
     Invoke-ExpressionWithLogging -command "Remove-Item $env:USERPROFILE\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
@@ -997,7 +1043,7 @@ process
 
     if (Test-Path -Path $nppSettingsFolderPath -PathType Container)
     {
-        Write-PSFMessage "$nppSettingsFolderPath already exists, don't need to create it"
+        Out-Log "$nppSettingsFolderPath already exists, don't need to create it"
     }
     else
     {
@@ -1011,7 +1057,7 @@ process
 
     if (Test-Path -Path $nppCloudFolderPath -PathType Container)
     {
-        Write-PSFMessage "$nppSettingsFolderPath already exists, don't need to create it"
+        Out-Log "$nppSettingsFolderPath already exists, don't need to create it"
     }
     else
     {
@@ -1083,12 +1129,12 @@ process
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
         Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force"
-        Write-PSFMessage "Downloading $vsCodeSettingsJsonUrl"
+        Out-Log "Downloading $vsCodeSettingsJsonUrl"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
     }
     else
     {
-        Write-PSFMessage "VSCode not installed, skipping download of $vsCodeSettingsJsonUrl"
+        Out-Log "VSCode not installed, skipping download of $vsCodeSettingsJsonUrl"
     }
 
     Invoke-ExpressionWithLogging -command 'Update-Help -Force -ErrorAction SilentlyContinue'
@@ -1130,7 +1176,7 @@ process
     }
     else
     {
-        Write-PSFMessage "File not found: $installModulesFilePath"
+        Out-Log "File not found: $installModulesFilePath"
     }
 
     # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
@@ -1165,7 +1211,7 @@ process
         $bootstrapTask = $tasks | Where-Object {$_.Name -eq $taskName}
         if ($bootstrapTask)
         {
-            Write-PSFMessage "Found $taskName scheduled task from previous script run, deleting it"
+            Out-Log "Found $taskName scheduled task from previous script run, deleting it"
             $rootFolder.DeleteTask($taskName, 0)
         }
     }
