@@ -345,7 +345,10 @@ process
     $bootstrapPath = "$env:SystemDrive\bootstrap"
 	$logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
 	
-	Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+	$windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+	$isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
+	Out-Log "Running as USER   : $windowsIdentityName"
+	Out-Log "Running as SYSTEM : $isSystem"
 	
     if (Test-Path -Path $bootstrapPath -PathType Container)
     {
