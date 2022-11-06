@@ -34,7 +34,10 @@ function Out-Log
     }
     Write-Host $prefixString -NoNewline -ForegroundColor Cyan
     Write-Host " $text"
-    "$prefixString $text" | Out-File $logFilePath -Append
+	if ($logFilePath)
+	{	
+		"$prefixString $text" | Out-File $logFilePath -Append
+	}
 }
 
 function Invoke-ExpressionWithLogging
@@ -102,6 +105,11 @@ $scriptBaseName = $scriptName.Split('.')[0]
 
 $bootstrapPath = "$env:SystemDrive\bootstrap"
 $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+
+$windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+$isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
+Out-Log "Running as USER   : $windowsIdentityName"
+Out-Log "Running as SYSTEM : $isSystem"
 
 if (Test-Path -Path $bootstrapPath -PathType Container)
 {
