@@ -4,6 +4,7 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 === 2022-11-02 start ===
+Why did PS 7.0 get installed instead of 7.2?
 Docker Desktop - supress subscription service agreement
 Docker Desktop - throws error "WSL 2 installation is incomplete" - wants WSL2 kernel update - https://aka.ms/wsl2kernel (https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
 Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong color
