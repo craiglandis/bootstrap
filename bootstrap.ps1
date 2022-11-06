@@ -343,12 +343,16 @@ process
     }    
 
     $bootstrapPath = "$env:SystemDrive\bootstrap"
-	$logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+    $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+    if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container) -eq $false)
+    {
+        new-item -path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
+    }
 	
-	$windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
-	$isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
-	Out-Log "Running as USER   : $windowsIdentityName"
-	Out-Log "Running as SYSTEM : $isSystem"
+    $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+    $isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
+    Out-Log "Running as USER   : $windowsIdentityName"
+    Out-Log "Running as SYSTEM : $isSystem"
 	
     if (Test-Path -Path $bootstrapPath -PathType Container)
     {
@@ -534,6 +538,7 @@ process
         '19044' {$os = 'WIN10'; $isWin10 = $true} # 21H2 November 2021 Update
         '20348' {$os = 'WS22'; $isWS22 = $true} # 21H2
         '22000' {$os = 'WIN11'; $isWin11 = $true} # 21H2
+	'22621' {$os = 'WIN11'; $isWin11 = $true} # 22H2
         default {$os = 'Unknown'}
     }
     Out-Log "OS: $os ($osVersion)"
