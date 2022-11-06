@@ -87,7 +87,6 @@
     "ChocolateyName": "CPU-Z",
     "WingetName": "CPUID.CPU-Z",
     "Groups": [
-      "PC",
       "VM"
     ],
     "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
@@ -128,18 +127,14 @@
     "Name": "EA Desktop",
     "ChocolateyName": "",
     "WingetName": "ElectronicArts.EADesktop",
-    "Groups": [
-      "PC"
-    ],
+    "Groups": [],
     "Notes": "EA Desktop replaces Origin"
   },
   {
     "Name": "Epic Games Launcher",
     "ChocolateyName": "epicgameslauncher",
     "WingetName": "EpicGames.EpicGamesLauncher",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "Everything",
@@ -170,25 +165,19 @@
     "Name": "foobar2000",
     "ChocolateyName": "foobar2000",
     "WingetName": "PeterPawlowski.foobar2000",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "GeForce Experience",
     "ChocolateyName": "geforce-experience",
     "WingetName": "Nvidia.GeForceExperience",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "GeForce Game Ready Driver",
     "ChocolateyName": "geforce-game-ready-driver",
     "WingetName": "",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "Git",
@@ -210,9 +199,7 @@
     "Name": "Graphviz",
     "ChocolateyName": "graphviz",
     "WingetName": "Graphviz.Graphviz",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "Greenshot",
@@ -255,10 +242,7 @@
     "Name": "kubectl",
     "ChocolateyName": "kubernetes-cli",
     "WingetName": "",
-    "Groups": [
-      "LAPTOP",
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "Lenovo System Update",
@@ -339,24 +323,20 @@
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "PowerShell 7",
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
-    "Groups": [
-    ],
+    "Groups": [],
     "Notes": "Scripting this install instead of using choco/winget since those packages can be stale"
   },
   {
     "Name": "PowerShell 7 Preview",
     "ChocolateyName": "powershell-preview",
     "WingetName": "Microsoft.PowerShell.Preview",
-    "Groups": [
-    ],
+    "Groups": [],
     "Notes": "This package was stale (had 7.2.0-preview.4 when 7.3.0-preview.1 was latest, and since it's easy to get the MSI, just installing it manually instead of with "
   },
   {
@@ -364,9 +344,7 @@
     "ChocolateyName": "",
     "ChocolateyParams": "--silent",
     "WingetName": "Microsoft.PowerToys",
-    "Groups": [
-      "PC"
-    ],
+    "Groups": [],
     "Notes": "The chocolatey package - powertoys - waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
   },
   {
@@ -382,9 +360,8 @@
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": [
-    ],
-	"Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
+    "Groups": [],
+    "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
     "Name": "ScreenToGif",
@@ -448,9 +425,7 @@
     "Name": "Ubisoft Connect",
     "ChocolateyName": "ubisoft-connect",
     "WingetName": "Ubisoft.Connect",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   },
   {
     "Name": "Visual Studio Code",
@@ -465,8 +440,7 @@
     "Name": "Visual Studio 2022 Enterprise",
     "ChocolateyName": "visualstudio2022enterprise",
     "WingetName": "Microsoft.VisualStudio.2022.Enterprise",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "WinDbg",
@@ -488,9 +462,8 @@
     "Name": "Windows Driver Kit 11",
     "ChocolateyName": "windowsdriverkit11",
     "WingetName": "",
-    "Groups": [
-    ],
-	  "Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
+    "Groups": [],
+    "Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
   },
   {
     "Name": "Windows Management Framework and PowerShell",
@@ -504,18 +477,14 @@
     "Name": "Windows Terminal",
     "ChocolateyName": "",
     "WingetName": "9N0DX20HK701",
-    "Groups": [
-      "PC"
-    ],
+    "Groups": [],
     "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview"
   },
   {
     "Name": "Windows Terminal Preview",
     "ChocolateyName": "",
     "WingetName": "9N8G5RFZ9XK3",
-    "Groups": [
-      "PC"
-    ],
+    "Groups": [],
     "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Currently no choco package for terminal preview (choco find *windows*terminal* only returns microsoft-windows-terminal"
   },
   {
@@ -546,8 +515,6 @@
     "Name": "Zoom",
     "ChocolateyName": "zoom",
     "WingetName": "Zoom.Zoom",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": []
   }
 ]
