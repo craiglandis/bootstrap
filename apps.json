@@ -143,7 +143,18 @@
     "Groups": [
       "PC",
       "VM"
+    ],
+    "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
+  },
+  {
+    "Name": "Everything CLI (ES.EXE)",
+    "ChocolateyName": "es",
+    "WingetName": "",
+    "Groups": [
+      "PC",
+      "VM"
     ]
+    "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
   {
     "Name": "Fiddler",
