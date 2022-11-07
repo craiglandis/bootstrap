@@ -3,110 +3,87 @@
     "Name": ".NET Desktop Runtime 6.0.1",
     "ChocolateyName": "dotnet-desktopruntime",
     "WingetName": "",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": ".NET Framework 4.8",
     "ChocolateyName": "dotnetfx",
     "WingetName": "Microsoft.dotNetFramework",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Audacity",
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "AutoHotkey",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Bicep CLI",
     "ChocolateyName": "bicep",
     "WingetName": "Microsoft.Bicep",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"]
   },
   {
     "Name": "Cascadia Font Family",
     "ChocolateyName": "cascadia-code-nerd-font",
+    "WingetName": "ALCPU.CoreTemp",
+    "Groups": ["PC"]
+  },
+  {
+    "Name": "CoreTemp",
+    "ChocolateyName": "coretemp",
     "WingetName": "",
-    "Groups": [
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "CPU-Z",
     "ChocolateyName": "CPU-Z",
     "WingetName": "CPUID.CPU-Z",
-    "Groups": [
-      "VM"
-    ],
+    "Groups": ["VM"],
     "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
   },
   {
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"]
   },
   {
     "Name": "Docker Desktop",
@@ -120,8 +97,7 @@
     "Name": "Draw.io Desktop",
     "ChocolateyName": "",
     "WingetName": "JGraph.Draw",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "EA Desktop",
@@ -203,8 +179,7 @@
     "Name": "Google Chrome",
     "ChocolateyName": "googlechrome",
     "WingetName": "Google.Chrome",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "Graphviz",
@@ -216,8 +191,7 @@
     "Name": "Greenshot",
     "ChocolateyName": "greenshot",
     "WingetName": "Greenshot.Greenshot",
-    "Groups": [
-    ],
+    "Groups": [],
     "Notes": "Not using choco or winget to install it since neither have the prerelease version"
   },
   {
@@ -232,22 +206,19 @@
     "Name": "ImDisk Toolkit",
     "ChocolateyName": "ImDisk-Toolkit",
     "WingetName": "",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "iPerf3",
     "ChocolateyName": "iperf3",
     "WingetName": "",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "iTunes",
     "ChocolateyName": "iTunes",
     "WingetName": "Apple.iTunes",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "kubectl",
@@ -259,16 +230,13 @@
     "Name": "Lenovo System Update",
     "ChocolateyName": "lenovo-thinkvantage-system-update",
     "WingetName": "Lenovo.SystemUpdate",
-    "Groups": [
-      "LAPTOP"
-    ]
+    "Groups": ["LAPTOP"]
   },
   {
     "Name": "LessMSI",
     "ChocolateyName": "lessmsi",
     "WingetName": "",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "Microsoft 365 Apps for enterprise",
@@ -466,8 +434,7 @@
     "Name": "Windows Admin Center",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsAdminCenter",
-    "Groups": [
-    ]
+    "Groups": []
   },
   {
     "Name": "Windows Driver Kit 11",
