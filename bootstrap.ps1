@@ -5,7 +5,7 @@
 TODO:
 === 2022-11-02 start ===
 Install container feature - Enable-WindowsOptionalFeature -Online -FeatureName Containers -All -NoRestart
-Switch Docker to use Windows containers (needs to be run after Docker installed) & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon
+Switch Docker to use Windows containers (needs to be run after Docker installed AND currently RUNNING) & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon
 Why did PS 7.0 get installed instead of 7.2?
 Why is the font not getting installed?
 Why aren't 7-zip file associations getting updated?
