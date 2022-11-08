@@ -61,14 +61,14 @@ function Invoke-Schtasks
 {
     $taskRun = "powershell.exe -ExecutionPolicy Bypass -File $scriptPath -userName $userName -password $password -bootstrapScriptUrl $bootstrapScriptUrl"
     Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
-    $task = Invoke-ExpressionWithLogging -command "schtasks /Query /TN bootstrap"
+    $task = Invoke-ExpressionWithLogging -command 'schtasks /Query /TN bootstrap'
     if ($task)
     {
-        Out-Log "Bootstrap scheduled task successfully created"
+        Out-Log 'Bootstrap scheduled task successfully created'
     }
     else
     {
-        Out-Log "Failed to create bootstrap scheduled task"
+        Out-Log 'Failed to create bootstrap scheduled task'
     }
 }
 
@@ -96,7 +96,7 @@ $bootstrapPath = "$env:SystemDrive\bootstrap"
 $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
 if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container) -eq $false)
 {
-    new-item -path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
+    New-Item -Path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
 }
 
 $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
@@ -338,11 +338,11 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
     Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
-    Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+    Invoke-ExpressionWithLogging -command 'Invoke-Schtasks'
 
     if ($isVM)
     {
-        Invoke-ExpressionWithLogging -command "Enable-PSLogging"
+        Invoke-ExpressionWithLogging -command 'Enable-PSLogging'
     }
     Out-Log "IsVM: $isVM"
 
@@ -354,28 +354,28 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
     if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
     {
         Out-Log "File does exist: $bootstrapScriptFilePath"
-        Out-Log "Checking if running as local system account"
+        Out-Log 'Checking if running as local system account'
         if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
         {
-            Out-Log "Running as local system account"
+            Out-Log 'Running as local system account'
             Out-Log "Converting password: $password to secure string"
             $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
             if ($passwordSecureString)
             {
                 Out-Log "Succesfully converted password: $password to secure string"
                 $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
-                Invoke-ExpressionWithLogging -command "Enable-PSRemoting -SkipNetworkProfileCheck -Force"
+                Invoke-ExpressionWithLogging -command 'Enable-PSRemoting -SkipNetworkProfileCheck -Force'
                 Invoke-Command -Credential $credential -ComputerName localhost -ScriptBlock {param($scriptPath) & $scriptPath} -ArgumentList $bootstrapScriptFilePath
             }
             else
             {
-                Out-Log "ERROR: Failed to convert password to secure string"
+                Out-Log 'ERROR: Failed to convert password to secure string'
                 Exit
             }
         }
         else
         {
-            Out-Log "Not running as local system account"
+            Out-Log 'Not running as local system account'
             Invoke-ExpressionWithLogging -command $bootstrapScriptFilePath
         }
     }
@@ -385,7 +385,7 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
         exit 2
     }
 
-    Out-Log "Done"
+    Out-Log 'Done'
 }
 else
 {
@@ -407,7 +407,7 @@ else
     if ($hotfixInstalled -and $psVersion -lt [Version]'5.1')
     {
         Out-Log "WMF5.1 ($hotfixId) already installed but PowerShell version is $psVersion, Windows restart still needed"
-        Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+        Invoke-ExpressionWithLogging -command 'Invoke-Schtasks'
     }
     else
     {
@@ -443,13 +443,13 @@ else
                 Start-Sleep -Seconds 1
             }
 
-            Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+            Invoke-ExpressionWithLogging -command 'Invoke-Schtasks'
             Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+            Invoke-ExpressionWithLogging -command 'Invoke-Schtasks'
             Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             $wusa = "$env:windir\System32\wusa.exe"
             Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/forcerestart' -Wait"

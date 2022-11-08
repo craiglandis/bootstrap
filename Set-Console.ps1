@@ -152,6 +152,13 @@ $scriptPath = Split-Path -Path $scriptFullName
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
+$bootstrapPath = "$env:SystemDrive\bootstrap"
+$logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container) -eq $false)
+{
+    New-Item -Path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
+}
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 Add-Type -Name Session -Namespace '' -member @'

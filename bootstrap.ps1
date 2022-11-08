@@ -69,41 +69,41 @@ begin
 process
 {
 
-	function Out-Log
-	{
-		param(
-			[string]$text,
-			[string]$prefix = 'timespan',
-			[switch]$raw
-		)
+    function Out-Log
+    {
+        param(
+            [string]$text,
+            [string]$prefix = 'timespan',
+            [switch]$raw
+        )
 
-		if ($raw)
-		{
-			$text
-		}
-		elseif ($prefix -eq 'timespan' -and $scriptStartTime)
-		{
-			$timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-			$prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
-		}
-		elseif ($prefix -eq 'both' -and $scriptStartTime)
-		{
-			$timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-			$timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-			$prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
-		}
-		else
-		{
-			$prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-		}
-		Write-Host $prefixString -NoNewline -ForegroundColor Cyan
-		Write-Host " $text"
+        if ($raw)
+        {
+            $text
+        }
+        elseif ($prefix -eq 'timespan' -and $scriptStartTime)
+        {
+            $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+            $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+        }
+        elseif ($prefix -eq 'both' -and $scriptStartTime)
+        {
+            $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+            $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+            $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+        }
+        else
+        {
+            $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+        }
+        Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+        Write-Host " $text"
 
-		if ($logFilePath)
-		{
-			"$prefixString $text" | Out-File $logFilePath -Append
-		}
-	}
+        if ($logFilePath)
+        {
+            "$prefixString $text" | Out-File $logFilePath -Append
+        }
+    }
 
     function Invoke-ExpressionWithLogging
     {
@@ -135,24 +135,6 @@ process
             Out-Log "Nuget $($nuget.Version) already installed"
         }
     }
-	<#
-    function Set-PSFramework
-    {
-        Remove-Item Alias:Out-Log -Force -ErrorAction SilentlyContinue
-        Import-Module -Name PSFramework -ErrorAction SilentlyContinue
-        $PSDefaultParameterValues['Out-Log:Level'] = 'Output'
-        $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
-        $paramSetPSFLoggingProvider = @{
-            Name     = 'logfile'
-            FilePath = $logFilePath
-            Enabled  = $true
-            TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
-        }
-        Set-PSFLoggingProvider @paramSetPSFLoggingProvider
-        Out-Log "PSFramework $($psframework.Version)"
-        Out-Log "Logs path: $logsPath"
-    }
-	#>
 
     function Get-AppList
     {
@@ -214,8 +196,8 @@ process
     function Invoke-GetWindowsUpdate
     {
         $ProgressPreference = 'SilentlyContinue'
-        Invoke-ExpressionWithLogging -command "Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope AllUsers -Force"
-        Invoke-ExpressionWithLogging -command "Import-Module -Name PSWindowsUpdate -Force"
+        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope AllUsers -Force'
+        Invoke-ExpressionWithLogging -command 'Import-Module -Name PSWindowsUpdate -Force'
         $psWindowsUpdate = Get-Module -Name PSWindowsUpdate
         if ($psWindowsUpdate)
         {
@@ -228,8 +210,9 @@ process
             # But by design, the Windows Update APIs the PSWindowsUpdate module uses to install updates fail with access denied when run via remoting
             # Workaround is to use Invoke-WUJob, which creates a scheduled task to run Get-WUList as local system account
             $taskStartTime = Get-Date
-            Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; ipmo PSWindowsUpdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
-            do {
+            Invoke-WUJob -ComputerName localhost -Script {$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; Import-Module PSWindowsUpdate; Get-WUList -MicrosoftUpdate -UpdateType Software -NotCategory 'Language packs' -AcceptAll -Download -Install -IgnoreReboot -Verbose *>&1 | Tee-Object C:\bs\logs\Get-WUList.log} -RunNow -Confirm:$false -Verbose -ErrorAction Ignore *>&1 | Tee-Object $invokeWUJobLogFilePath
+            do
+            {
                 Start-Sleep -Seconds 5
                 $taskName = 'PSWindowsUpdate'
                 $scheduleService = New-Object -ComObject Schedule.Service
@@ -260,7 +243,7 @@ process
         }
         else
         {
-            Out-Log "Failed to install PSWindowsUpdate module"
+            Out-Log 'Failed to install PSWindowsUpdate module'
             Complete-ScriptExecution
             Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
             #exit
@@ -285,7 +268,7 @@ process
         $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
         Out-Log "Log path: $psFrameworkLogFilePath"
 		#>
-		Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
+        Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
         Invoke-ExpressionWithLogging -command "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
     }
 
@@ -312,31 +295,12 @@ process
     $scriptName = Split-Path -Path $scriptPath -Leaf
     $scriptBaseName = $scriptName.Split('.')[0]
 
-	<#
-    $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-    if ($psframework)
+    $bootstrapPath = "$env:SystemDrive\bootstrap"
+    $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
+    if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container) -eq $false)
     {
-        Set-PSFramework
+        New-Item -Path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
     }
-    else
-    {
-        # Alias Out-Log to Out-Log until PSFramework module is installed
-        Set-Alias -Name Out-Log -Value Write-Output
-        Confirm-NugetInstalled
-        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
-        Import-Module -Name PSFramework -Force
-        $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-        if ($psframework)
-        {
-            Set-PSFramework
-        }
-        else
-        {
-            Write-Error 'PSFramework module failed to install'
-            exit
-        }
-    }
-	#>
 
     if ((Get-WmiObject -Class Win32_Baseboard -ErrorAction SilentlyContinue).Product -eq 'Virtual Machine')
     {
@@ -350,13 +314,6 @@ process
     if ($isVM)
     {
         Enable-PSLogging
-    }
-
-    $bootstrapPath = "$env:SystemDrive\bootstrap"
-    $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
-    if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container) -eq $false)
-    {
-        new-item -path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
     }
 
     $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
@@ -548,7 +505,7 @@ process
         '19044' {$os = 'WIN10'; $isWin10 = $true} # 21H2 November 2021 Update
         '20348' {$os = 'WS22'; $isWS22 = $true} # 21H2
         '22000' {$os = 'WIN11'; $isWin11 = $true} # 21H2
-	'22621' {$os = 'WIN11'; $isWin11 = $true} # 22H2
+        '22621' {$os = 'WIN11'; $isWin11 = $true} # 22H2
         default {$os = 'Unknown'}
     }
     Out-Log "OS: $os ($osVersion)"
@@ -708,7 +665,7 @@ process
     }
 
     # https://psframework.org/
-	<#
+    <#
     Import-Module -Name PSFramework -ErrorAction SilentlyContinue
     $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
     if ($psframework)
@@ -1211,17 +1168,17 @@ process
         $caption = Get-WmiObject Win32_OperatingSystem | Select-Object -ExpandProperty Caption
         if ($caption -eq 'Microsoft Windows 11 Enterprise')
         {
-            Invoke-ExpressionWithLogging -command "c:\windows\system32\cscript.exe //H:cscript"
-            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com"
-            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43"
-            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /ato"
-            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv"
+            Invoke-ExpressionWithLogging -command 'c:\windows\system32\cscript.exe //H:cscript'
+            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com'
+            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
+            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
+            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv'
         }
     }
 
     if ($isPC -or $isVM)
     {
-        Out-Log "Checking if bootstrap task exists"
+        Out-Log 'Checking if bootstrap task exists'
         $taskName = 'bootstrap'
         $scheduleService = New-Object -ComObject Schedule.Service
         $scheduleService.Connect()
@@ -1236,7 +1193,7 @@ process
             $bootstrapTask = $tasks | Where-Object {$_.Name -eq $taskName}
             if ($bootstrapTask)
             {
-                Out-Log "Failed to delete bootstrap scheduled task"
+                Out-Log 'Failed to delete bootstrap scheduled task'
             }
         }
         else
@@ -1296,7 +1253,7 @@ process
     $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
     $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
     $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
-    $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip','')
+    $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
     Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
     Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
@@ -1310,16 +1267,16 @@ process
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
     Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
 
-    Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f"
-    Invoke-ExpressionWithLogging -command "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f"
+    Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f'
+    Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f'
 
-    Invoke-ExpressionWithLogging -command "powercfg /hibernate off"
+    Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
 
-    Out-Log "Running Invoke-GetWindowsUpdate"
+    Out-Log 'Running Invoke-GetWindowsUpdate'
     Invoke-GetWindowsUpdate
-    Out-Log "Done running Invoke-GetWindowsUpdate"
+    Out-Log 'Done running Invoke-GetWindowsUpdate'
 
     # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
     # so try logoff first to see if that resolves things
-    Invoke-ExpressionWithLogging -command "C:\Windows\system32\logoff.exe"
+    Invoke-ExpressionWithLogging -command 'C:\Windows\system32\logoff.exe'
 }
