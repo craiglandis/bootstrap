@@ -4,6 +4,7 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 === 2022-11-02 start ===
+Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
 Install container feature - Enable-WindowsOptionalFeature -Online -FeatureName Containers -All -NoRestart
 Switch Docker to use Windows containers (needs to be run after Docker installed AND currently RUNNING) & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon
 Why did PS 7.0 get installed instead of 7.2?
