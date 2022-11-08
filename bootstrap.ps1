@@ -659,8 +659,8 @@ process
     if ($chocoVersion)
     {
         Out-Log "Chocolatey $chocoVersion successfully installed"
-        Out-Log "Changing Chocolatey download cache to $packagesPath to save space on OS disk. See also https://docs.chocolatey.org/en-us/guides/usage/change-cache"
-        Invoke-ExpressionWithLogging -command "choco config set cacheLocation $packagesPath"
+        #Out-Log "Changing Chocolatey download cache to $packagesPath to save space on OS disk. See also https://docs.chocolatey.org/en-us/guides/usage/change-cache"
+        #Invoke-ExpressionWithLogging -command "choco config set cacheLocation $packagesPath"
     }
     else
     {
