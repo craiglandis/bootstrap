@@ -154,6 +154,13 @@
     "Notes": ""
   },
   {
+    "Name": "Firefox",
+    "ChocolateyName": "Firefox",
+    "WingetName": "Mozilla.Firefox",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "foobar2000",
     "ChocolateyName": "foobar2000",
     "WingetName": "PeterPawlowski.foobar2000",
