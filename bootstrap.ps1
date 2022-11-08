@@ -1161,7 +1161,8 @@ process
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$packagesPath\$greenshotInstallerFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
-    Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
+    # This is hanging the script for some reason
+    # Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
 
     if ($isPC)
     {

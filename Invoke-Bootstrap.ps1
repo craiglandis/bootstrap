@@ -227,6 +227,14 @@ $defaultUserHivePath = "$env:SystemDrive\Users\Default\NTUSER.DAT"
 $defaultUserKeyPath = 'HKEY_USERS\DefaultUserHive'
 Invoke-ExpressionWithLogging -command "reg load $defaultUserKeyPath $defaultUserHivePath"
 
+# Set Windows sound scheme to "No sounds"
+Invoke-Expression "reg add $defaultUserKeyPath\AppEvents\Schemes /VE /T REG_SZ /F /D `".None`""
+Invoke-Expression "reg add HKCU\AppEvents\Schemes /VE /T REG_SZ /F /D `".None`""
+# Disable Windows startup sound
+Invoke-Expression "reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation /T REG_DWORD /V DisableStartupSound /D 1 /F"
+# Not sure this policy location is necessary
+# reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System /T REG_DWORD /V DisableStartupSound /D 1
+
 if ($productType -ne 1)
 {
     # Disable Server Manager from starting at Windows startup
