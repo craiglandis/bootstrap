@@ -338,6 +338,8 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
     Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
 
+    Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+
     if ($isVM)
     {
         Invoke-ExpressionWithLogging -command "Enable-PSLogging"
@@ -383,7 +385,6 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
         exit 2
     }
 
-    Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
     Out-Log "Done"
 }
 else
