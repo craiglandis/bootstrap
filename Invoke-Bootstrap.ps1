@@ -35,7 +35,7 @@ function Out-Log
     Write-Host $prefixString -NoNewline -ForegroundColor Cyan
     Write-Host " $text"
     if ($logFilePath)
-    {	
+    {
         "$prefixString $text" | Out-File $logFilePath -Append
     }
 }
@@ -57,28 +57,19 @@ function Invoke-ExpressionWithLogging
     }
 }
 
-<#
-function Set-PSFramework
-{
-    Remove-Item Alias:Out-Log -Force -ErrorAction SilentlyContinue
-    $PSDefaultParameterValues['Out-Log:Level'] = 'Output'
-    $logFilePath = "$logsPath\$($scriptBaseName)-Run$($runCount)-$scriptStartTimeString.csv"
-    $paramSetPSFLoggingProvider = @{
-        Name       = 'logfile'
-        FilePath   = $logFilePath
-        Enabled    = $true
-        TimeFormat = 'yyyy-MM-dd HH:mm:ss.fff'
-    }
-    Set-PSFLoggingProvider @paramSetPSFLoggingProvider
-    Out-Log "PSFramework $($psframework.Version)"
-    Out-Log "Log path: $logsPath"
-}
-#>
-
 function Invoke-Schtasks
 {
     $taskRun = "powershell.exe -ExecutionPolicy Bypass -File $scriptPath -userName $userName -password $password -bootstrapScriptUrl $bootstrapScriptUrl"
     Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
+    $task = Invoke-ExpressionWithLogging -command "schtasks /Query /TN bootstrap"
+    if ($task)
+    {
+        Out-Log "Bootstrap scheduled task successfully created"
+    }
+    else
+    {
+        Out-Log "Failed to create bootstrap scheduled task"
+    }
 }
 
 function Enable-PSLogging
@@ -95,8 +86,6 @@ $ErrorActionPreference = 'Stop'
 $WarningPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
 
-# Set-Alias -Name Out-Log -Value Write-Output
-
 $scriptStartTime = Get-Date
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
 $scriptPath = $MyInvocation.MyCommand.Path
@@ -111,7 +100,7 @@ if ((Test-Path -Path (Split-Path -Path $logFilePath -Parent) -PathType Container
 }
 
 $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
-$isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
+$isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'
 Out-Log "Running as USER   : $windowsIdentityName"
 Out-Log "Running as SYSTEM : $isSystem"
 
@@ -303,23 +292,25 @@ Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypa
 if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
     $currentBuild = [environment]::OSVersion.Version.Build
-    #if ($currentBuild -lt 9600)
-    # Run this for all Windows versions since the reg values appear to be the same even in Win11 so should work?
+    Out-Log "Windows build: $currentBuild"
+    # if ($currentBuild -lt 9600)
+    # Get-NetConnectionProfile hangs for some reason, I think the direct reg edit way will work on all versions
     if ($true)
     {
-        Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
-
+        $profiles = Invoke-ExpressionWithLogging -command "Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles'"
+        $profiles | ForEach-Object {
             $currentKey = Get-ItemProperty -Path $_.PsPath
             if ($currentKey.ProfileName -eq $ProfileName)
             {
                 # 0 is Public, 1 is Private, 2 is Domain
+                Out-Log "Setting $ProfileName profile to Private"
                 Set-ItemProperty -Path $_.PsPath -Name 'Category' -Value 1
             }
         }
     }
     else
     {
-        # This is hanging for some reason - maybe it's not able to run as a post-setup script
+        # Get-NetConnectionProfile hangs for some reason, I think the direct reg edit way will work on all versions
         # Invoke-ExpressionWithLogging -command 'Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private'
     }
 }
@@ -328,61 +319,20 @@ if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
 {
     if (!$userName)
     {
-        Write-Error 'Required parameter missing: -userName <userName>'
+        Out-Log 'ERROR: Required parameter missing: -userName <userName>'
         exit
     }
     elseif (!$password)
     {
-        Write-Error 'Required parameter missing: -password <password>'
+        Out-Log 'ERROR: Required parameter missing: -password <password>'
         exit
     }
     elseif (!$bootstrapScriptUrl)
     {
-        Write-Error 'Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>'
+        Out-Log 'ERROR: Required parameter missing: -bootstrapScriptUrl <bootstrapScriptUrl>'
         exit
     }
 }
-
-# https://psframework.org/
-<#
-Import-Module -Name PSFramework -ErrorAction SilentlyContinue
-$psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-if ($psframework)
-{
-    Set-PSFramework
-}
-else
-{
-    if ($PSVersionTable.PSVersion -ge [Version]'5.1')
-    {
-        Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
-
-        Out-Log 'Verifying Nuget 2.8.5.201+ is installed'
-        $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
-        if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
-        {
-            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
-        }
-        else
-        {
-            Out-Log "Nuget $($nuget.Version) already installed"
-        }
-
-        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue'
-        Import-Module -Name PSFramework -ErrorAction SilentlyContinue
-        $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
-        if ($psframework)
-        {
-            Set-PSFramework
-        }
-        else
-        {
-            Write-Error 'PSFramework module failed to install'
-            exit
-        }
-    }
-}
-#>
 
 if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 {
@@ -390,32 +340,51 @@ if ($PSVersionTable.PSVersion -ge [Version]'5.1')
 
     if ($isVM)
     {
-        Enable-PSLogging
+        Invoke-ExpressionWithLogging -command "Enable-PSLogging"
     }
+    Out-Log "IsVM: $isVM"
 
     $bootstrapScriptFileName = $bootstrapScriptUrl.Split('/')[-1]
     $bootstrapScriptFilePath = "$scriptsPath\$bootstrapScriptFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$bootstrapScriptUrl`', `'$bootstrapScriptFilePath`')"
 
+    Out-Log "Checking if path exists: $bootstrapScriptFilePath"
     if (Test-Path -Path $bootstrapScriptFilePath -PathType Leaf)
     {
+        Out-Log "File does exist: $bootstrapScriptFilePath"
+        Out-Log "Checking if running as local system account"
         if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
         {
+            Out-Log "Running as local system account"
+            Out-Log "Converting password: $password to secure string"
             $passwordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
-            $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
-            Enable-PSRemoting -SkipNetworkProfileCheck -Force
-            Invoke-Command -Credential $credential -ComputerName localhost -ScriptBlock {param($scriptPath) & $scriptPath} -ArgumentList $bootstrapScriptFilePath
+            if ($passwordSecureString)
+            {
+                Out-Log "Succesfully converted password: $password to secure string"
+                $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$userName", $passwordSecureString)
+                Invoke-ExpressionWithLogging -command "Enable-PSRemoting -SkipNetworkProfileCheck -Force"
+                Invoke-Command -Credential $credential -ComputerName localhost -ScriptBlock {param($scriptPath) & $scriptPath} -ArgumentList $bootstrapScriptFilePath
+            }
+            else
+            {
+                Out-Log "ERROR: Failed to convert password to secure string"
+                Exit
+            }
         }
         else
         {
+            Out-Log "Not running as local system account"
             Invoke-ExpressionWithLogging -command $bootstrapScriptFilePath
         }
     }
     else
     {
-        Write-Error "File not found: $bootstrapScriptFilePath"
+        Out-Log "ERROR: File not found: $bootstrapScriptFilePath"
         exit 2
     }
+
+    Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
+    Out-Log "Done"
 }
 else
 {
@@ -437,7 +406,7 @@ else
     if ($hotfixInstalled -and $psVersion -lt [Version]'5.1')
     {
         Out-Log "WMF5.1 ($hotfixId) already installed but PowerShell version is $psVersion, Windows restart still needed"
-        Invoke-Schtasks
+        Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
     }
     else
     {
@@ -473,13 +442,13 @@ else
                 Start-Sleep -Seconds 1
             }
 
-            Invoke-Schtasks
+            Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
             Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             Invoke-ExpressionWithLogging -command "$extractedFilePath\Install-WMF5.1.ps1 -AcceptEULA -AllowRestart"
         }
         else
         {
-            Invoke-Schtasks
+            Invoke-ExpressionWithLogging -command "Invoke-Schtasks"
             Out-Log 'Windows will restart automatically after WMF5.1 silent install completes'
             $wusa = "$env:windir\System32\wusa.exe"
             Invoke-ExpressionWithLogging -command "Start-Process -FilePath $wusa -ArgumentList $filePath, '/quiet', '/forcerestart' -Wait"
@@ -491,5 +460,6 @@ else
             Out-Log 'Installing WMF 5.1...'
             $hotfixInstalled = [bool](Get-WmiObject -Query "Select HotFixID from Win32_QuickFixEngineering where HotFixID='$hotfixId'")
         } until ($hotfixInstalled)
+        Out-Log 'Done'
     }
 }
