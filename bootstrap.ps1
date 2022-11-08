@@ -4,6 +4,7 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 === 2022-11-02 start ===
+asdf
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
 schtasks /create /xml Watch-RDPFiles.xml /tn \Watch-RDPFiles /ru $userName /rp $password
@@ -75,7 +76,7 @@ process
 			[string]$prefix = 'timespan',
 			[switch]$raw
 		)
-		
+
 		if ($raw)
 		{
 			$text
@@ -97,9 +98,9 @@ process
 		}
 		Write-Host $prefixString -NoNewline -ForegroundColor Cyan
 		Write-Host " $text"
-			
+
 		if ($logFilePath)
-		{	
+		{
 			"$prefixString $text" | Out-File $logFilePath -Append
 		}
 	}
@@ -281,7 +282,7 @@ process
         <#
 		$psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
         $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
-        $psFrameworkLogFilePath = $psFrameworkLogFile.FullName        
+        $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
         Out-Log "Log path: $psFrameworkLogFilePath"
 		#>
 		Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
@@ -349,7 +350,7 @@ process
     if ($isVM)
     {
         Enable-PSLogging
-    }    
+    }
 
     $bootstrapPath = "$env:SystemDrive\bootstrap"
     $logFilePath = "$bootstrapPath\$($scriptBaseName)_$(Get-Date -Format yyyyMMddhhmmss).log"
@@ -357,12 +358,12 @@ process
     {
         new-item -path (Split-Path -Path $logFilePath -Parent) -ItemType Directory -Force | Out-Null
     }
-	
+
     $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
-    $isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'	
+    $isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'
     Out-Log "Running as USER   : $windowsIdentityName"
     Out-Log "Running as SYSTEM : $isSystem"
-	
+
     if (Test-Path -Path $bootstrapPath -PathType Container)
     {
         Out-Log "$bootstrapPath already exists, don't need to create it"
