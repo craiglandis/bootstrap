@@ -129,7 +129,7 @@
     "Groups": [
       "PC",
       "VM"
-    ]
+    ],
     "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
   {
