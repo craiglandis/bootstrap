@@ -297,6 +297,8 @@ else
 
 Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
 
+<#
+# Since I'm using -SkipNetworkProfileCheck with Enable-PSRemoting, maybe setting the network profiles all to Private (1) isn't necessary?
 if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
     $currentBuild = [environment]::OSVersion.Version.Build
@@ -322,6 +324,7 @@ if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
         # Invoke-ExpressionWithLogging -command 'Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private'
     }
 }
+#>
 
 if ([System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem)
 {
