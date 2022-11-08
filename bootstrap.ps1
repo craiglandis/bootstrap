@@ -1211,11 +1211,11 @@ process
         $caption = Get-WmiObject Win32_OperatingSystem | Select-Object -ExpandProperty Caption
         if ($caption -eq 'Microsoft Windows 11 Enterprise')
         {
-            c:\windows\system32\cscript.exe //H:cscript
-            cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com
-            cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43
-            cscript //NoLogo c:\windows\system32\slmgr.vbs /ato
-            cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv
+            Invoke-ExpressionWithLogging -command "c:\windows\system32\cscript.exe //H:cscript"
+            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com"
+            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43"
+            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /ato"
+            Invoke-ExpressionWithLogging -command "cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv"
         }
     }
 
@@ -1232,6 +1232,12 @@ process
         {
             Out-Log "Found $taskName scheduled task from previous script run, deleting it"
             $rootFolder.DeleteTask($taskName, 0)
+            $tasks = $rootFolder.GetTasks(1) | Select-Object Name, Path, State
+            $bootstrapTask = $tasks | Where-Object {$_.Name -eq $taskName}
+            if ($bootstrapTask)
+            {
+                Out-Log "Failed to delete bootstrap scheduled task"
+            }
         }
         else
         {
@@ -1309,7 +1315,9 @@ process
 
     Invoke-ExpressionWithLogging -command "powercfg /hibernate off"
 
+    Out-Log "Running Invoke-GetWindowsUpdate"
     Invoke-GetWindowsUpdate
+    Out-Log "Done running Invoke-GetWindowsUpdate"
 
     # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
     # so try logoff first to see if that resolves things

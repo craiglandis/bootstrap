@@ -5,6 +5,40 @@ param(
 	[switch]$KeepBackupShortcuts = $false # If $true, keeps the backup *.lnk.bak. If $false, removes the backup *.lnk.bak file.
 )
 
+function Out-Log
+{
+    param(
+        [string]$text,
+        [string]$prefix = 'timespan',
+        [switch]$raw
+    )
+    if ($raw)
+    {
+        $text
+    }
+    elseif ($prefix -eq 'timespan' -and $scriptStartTime)
+    {
+        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+        $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+    }
+    elseif ($prefix -eq 'both' -and $scriptStartTime)
+    {
+        $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+        $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+    }
+    else
+    {
+        $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+    }
+    Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+    Write-Host " $text"
+    if ($logFilePath)
+    {
+        "$prefixString $text" | Out-File $logFilePath -Append
+    }
+}
+
 function Set-DefaultTerminalApp
 {
 	param
@@ -63,15 +97,15 @@ function Invoke-ExpressionWithLogging
 	param(
 		[string]$command
 	)
-	Write-PSFMessage $command
+	Out-Log$command
 	try
 	{
 		Invoke-Expression -Command $command
 	}
 	catch
 	{
-		Write-PSFMessage -Level Error -Message "Failed: $command" -ErrorRecord $_
-		Write-PSFMessage "`$LASTEXITCODE: $LASTEXITCODE"
+		Out-Log-Level Error -Message "Failed: $command" -ErrorRecord $_
+		Out-Log "`$LASTEXITCODE: $LASTEXITCODE"
 	}
 }
 
@@ -108,11 +142,16 @@ function Expand-Zip
 
 $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
 $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
+$ProgressPreference = 'SilentlyContinue'
 
 $scriptStartTime = Get-Date
+$scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
+$scriptFullName = $MyInvocation.MyCommand.Path
+$scriptPath = Split-Path -Path $scriptFullName
+#$scriptName = Split-Path -Path $scriptFullName -Leaf
 $scriptName = Split-Path -Path $MyInvocation.MyCommand.Path -Leaf
-# Set-Alias -Name Write-PSFMessage -Value Write-Output
-# $PSDefaultParameterValues['Write-PSFMessage:Level'] = 'Output'
+$scriptBaseName = $scriptName.Split('.')[0]
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 Add-Type -Name Session -Namespace '' -member @'
@@ -124,11 +163,11 @@ $bootstrapPath = "$env:SystemDrive\bootstrap"
 $logsPath = "$bootstrapPath\logs"
 if (Test-Path -Path $logsPath -PathType Container)
 {
-	Write-PSFMessage "$logsPath already exists, don't need to create it"
+	Out-Log "$logsPath already exists, don't need to create it"
 }
 else
 {
-	Write-PSFMessage "Creating $logsPath"
+	Out-Log "Creating $logsPath"
 	New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
 }
 
@@ -159,7 +198,7 @@ else
 		$fontSize = 18
 	}
 }
-Write-PSFMessage "`$isPC: $isPC `$isVM: $isVM `$isSAW: $isSAW"
+Out-Log "`$isPC: $isPC `$isVM: $isVM `$isSAW: $isSAW"
 
 # Skip this on VSAW which already has > 2.8.5.201
 if ($isVM -or $isPC)
@@ -193,17 +232,18 @@ if ($isPC -or $isVM)
 	$fontFileName = 'Caskaydia Cove Nerd Font Complete.ttf'
 	if ((Test-Path -Path "$systemFontsPath\$fontFileName" -PathType Leaf) -or (Test-Path -Path "$userFontsPath\$fontFileName" -PathType Leaf))
 	{
-		Write-PSFMessage "$fontFileName already installed, don't need to install it"
+		Out-Log "$fontFileName already installed, don't need to install it"
 	}
 	else
 	{
-		Write-PSFMessage "$fontFileName not installed, installing it now"
+		Out-Log "$fontFileName not installed, installing it now"
 		$ErrorActionPreference = 'SilentlyContinue'
-		$chocoVersion = choco -v
+		$chocoVersion = C:\ProgramData\chocolatey\choco.exe -v
 		$ErrorActionPreference = 'Continue'
 		if ($chocoVersion)
 		{
-			Write-PSFMessage 'Using Chocolatey to install it since Chocolatey itself is already installed'
+            Out-Log "Chocolatey $chocoVersion"
+			Out-Log'Using Chocolatey to install it since Chocolatey itself is already installed'
 			$timestamp = Get-Date -Format yyyyMMddHHmmssff
 			$packageName = 'cascadia-code-nerd-font'
 			$chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
@@ -211,6 +251,7 @@ if ($isPC -or $isVM)
 		}
 		else
 		{
+            Out-Log "Chocolatey not installed, downloading Cascadia Code Nerd Font from github"
 			$cascadiaCoveNerdFontReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/ryanoasis/nerd-fonts/releases'
 			$cascadiaCoveNerdFontRelease = $cascadiaCoveNerdFontReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
 			$cascadiaCodeNerdFontZipUrl = ($cascadiaCoveNerdFontRelease.assets | Where-Object {$_.browser_download_url.EndsWith('CascadiaCode.zip')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
@@ -226,7 +267,7 @@ if ($isPC -or $isVM)
 				$fontPath = $_.FullName
 				if (Test-Path -Path $fontPath -PathType Leaf)
 				{
-					Write-PSFMessage "$fontPath already present"
+					Out-Log "$fontPath already present"
 				}
 				else
 				{
@@ -234,7 +275,16 @@ if ($isPC -or $isVM)
 				}
 			}
 		}
-	}
+
+        if ((Test-Path -Path "$systemFontsPath\$fontFileName" -PathType Leaf) -or (Test-Path -Path "$userFontsPath\$fontFileName" -PathType Leaf))
+        {
+            Out-Log "$fontFileName installed"
+        }
+        else
+        {
+            Out-Log "$fontFileName did not get installed because reasons"
+        }
+    }
 
 	if ((Test-Path -Path "$systemFontsPath\$fontFileName" -PathType Leaf) -or (Test-Path -Path "$userFontsPath\$fontFileName" -PathType Leaf))
 	{
@@ -326,7 +376,7 @@ $regPaths = @(`
 		'HKCU:Console\Windows PowerShell (x86)', `
 		'HKCU:Console\Windows PowerShell', `
 		'HKCU:Console\C:_Program Files_PowerShell_7-preview_pwsh.exe'
-	'HKCU:Console\C:_Program Files_PowerShell_7_pwsh.exe'
+	    'HKCU:Console\C:_Program Files_PowerShell_7_pwsh.exe'
 )
 
 # Settings in a shortcut override settings in the registry
@@ -512,4 +562,4 @@ If ($UpdateShortcuts)
 }
 
 $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
-Write-PSFMessage "$scriptName duration: $scriptDuration"
+Out-Log "$scriptName duration: $scriptDuration"
