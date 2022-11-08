@@ -4,6 +4,7 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 === 2022-11-02 start ===
+Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1
 Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
 schtasks /create /xml Watch-RDPFiles.xml /tn \Watch-RDPFiles /ru $userName /rp $password
 Register-ScheduledTask -xml (Get-Content Watch-RDPFiles.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath "\" -User $userName –Password $password -Force
