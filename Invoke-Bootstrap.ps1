@@ -303,7 +303,9 @@ Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypa
 if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
 {
     $currentBuild = [environment]::OSVersion.Version.Build
-    if ($currentBuild -lt 9600)
+    #if ($currentBuild -lt 9600)
+    # Run this for all Windows versions since the reg values appear to be the same even in Win11 so should work?
+    if ($true)
     {
         Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles' | ForEach-Object {
 
@@ -317,7 +319,8 @@ if ((Get-WmiObject -Class Win32_Baseboard).Product -eq 'Virtual Machine')
     }
     else
     {
-        Invoke-ExpressionWithLogging -command 'Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private'
+        # This is hanging for some reason - maybe it's not able to run as a post-setup script
+        # Invoke-ExpressionWithLogging -command 'Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private'
     }
 }
 
