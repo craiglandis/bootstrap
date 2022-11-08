@@ -4,7 +4,7 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 === 2022-11-02 start ===
-asdf
+Disable system sounds/startup sound
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
 schtasks /create /xml Watch-RDPFiles.xml /tn \Watch-RDPFiles /ru $userName /rp $password
