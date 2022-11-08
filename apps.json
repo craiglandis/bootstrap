@@ -3,61 +3,71 @@
     "Name": ".NET Desktop Runtime 6.0.1",
     "ChocolateyName": "dotnet-desktopruntime",
     "WingetName": "",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": ".NET Framework 4.8",
     "ChocolateyName": "dotnetfx",
     "WingetName": "Microsoft.dotNetFramework",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Audacity",
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "AutoHotkey",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Bicep CLI",
     "ChocolateyName": "bicep",
     "WingetName": "Microsoft.Bicep",
-    "Groups": ["PC"]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Cascadia Font Family",
     "ChocolateyName": "cascadia-code-nerd-font",
     "WingetName": "ALCPU.CoreTemp",
-    "Groups": ["PC"]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "CoreTemp",
@@ -77,27 +87,29 @@
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
-    "Groups": ["PC"]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Docker Desktop",
     "ChocolateyName": "docker-desktop",
     "WingetName": "Docker.DockerDesktop",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Draw.io Desktop",
     "ChocolateyName": "",
     "WingetName": "JGraph.Draw",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "EA Desktop",
@@ -110,82 +122,77 @@
     "Name": "Epic Games Launcher",
     "ChocolateyName": "epicgameslauncher",
     "WingetName": "EpicGames.EpicGamesLauncher",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything",
-    "Groups": [
-      "PC",
-      "VM"
-    ],
+    "Groups": ["PC","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
     "ChocolateyName": "es",
     "WingetName": "",
-    "Groups": [
-      "PC",
-      "VM"
-    ],
+    "Groups": ["PC","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
   {
     "Name": "Fiddler",
     "ChocolateyName": "fiddler",
     "WingetName": "Telerik.Fiddler",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "ffmpeg",
     "ChocolateyName": "ffmpeg",
     "WingetName": "",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "foobar2000",
     "ChocolateyName": "foobar2000",
     "WingetName": "PeterPawlowski.foobar2000",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "GeForce Experience",
     "ChocolateyName": "geforce-experience",
     "WingetName": "Nvidia.GeForceExperience",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "GeForce Game Ready Driver",
     "ChocolateyName": "geforce-game-ready-driver",
     "WingetName": "",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Google Chrome",
     "ChocolateyName": "googlechrome",
     "WingetName": "Google.Chrome",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Graphviz",
     "ChocolateyName": "graphviz",
     "WingetName": "Graphviz.Graphviz",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Greenshot",
@@ -198,79 +205,77 @@
     "Name": "GPU-Z",
     "ChocolateyName": "gpu-z",
     "WingetName": "TechPowerUp.GPU-Z",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "ImDisk Toolkit",
     "ChocolateyName": "ImDisk-Toolkit",
     "WingetName": "",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "iPerf3",
     "ChocolateyName": "iperf3",
     "WingetName": "",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "iTunes",
     "ChocolateyName": "iTunes",
     "WingetName": "Apple.iTunes",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "kubectl",
     "ChocolateyName": "kubernetes-cli",
     "WingetName": "",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Lenovo System Update",
     "ChocolateyName": "lenovo-thinkvantage-system-update",
     "WingetName": "Lenovo.SystemUpdate",
-    "Groups": ["LAPTOP"]
+    "Groups": ["LAPTOP"],
+    "Notes": ""
   },
   {
     "Name": "LessMSI",
     "ChocolateyName": "lessmsi",
     "WingetName": "",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
-    "Groups": [
-      "PC"
-    ],
+    "Groups": ["PC"],
     "Notes": "The Winget 'Microsoft.Office' package installs x64 Microsoft 365 Apps for Enterprise, which is what I want, Chocolatey 'microsoft-office-deployment' package installs x86"
   },
   {
     "Name": "Microsoft Edge",
     "ChocolateyName": "microsoft-edge",
     "WingetName": "Microsoft.Edge",
-    "Groups": [
-      "VM"
-    ],
+    "Groups": ["VM"],
     "Notes": "Edge is still supported on Win7+ https://docs.microsoft.com/en-us/deployedge/microsoft-edge-supported-operating-systems"
   },
   {
     "Name": "Microsoft Teams",
     "ChocolateyName": "microsoft-teams",
     "WingetName": "Microsoft.Teams",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Nmap",
     "ChocolateyName": "",
     "WingetName": "Insecure.Nmap",
-    "Groups": [
-      "VM"
-    ],
+    "Groups": ["VM"],
     "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent."
   },
   {
@@ -284,25 +289,29 @@
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
-    "Groups": [
-      "PC",
-      "VM",
-      "VSAW"
-    ]
+    "Groups": ["PC","VM","VSAW"],
+    "Notes": ""
   },
   {
     "Name": "OneNote for Windows 10",
     "ChocolateyName": "9WZDNCRFHVJL",
     "WingetName": "Microsoft.PowerBI",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "Parsec",
+    "ChocolateyName": "parsec",
+    "WingetName": "Parsec.Parsec",
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "PowerShell 7",
@@ -330,10 +339,8 @@
     "Name": "Python",
     "ChocolateyName": "python",
     "WingetName": "Python.Python.3",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "Rufus",
@@ -346,95 +353,77 @@
     "Name": "ScreenToGif",
     "ChocolateyName": "screentogif",
     "WingetName": "NickeManarin.ScreenToGif",
-    "Groups": [
-      "VM"
-    ],
+    "Groups": ["VM"],
     "Notes": "ScreenToGif requires .NET Desktop Runtime 6.0.1+ https://download.visualstudio.microsoft.com/download/pr/bf058765-6f71-4971-aee1-15229d8bfb3e/c3366e6b74bec066487cd643f915274d/windowsdesktop-runtime-6.0.1-win-x64.exe"
   },
   {
     "Name": "SetUserFTA",
     "ChocolateyName": "setuserfta",
     "WingetName": "",
-    "Groups": [
-      "PC",
-      "VM"
-    ],
+    "Groups": ["PC","VM"],
     "Notes": ""
   },
   {
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
     "WingetName": "",
-    "Groups": [
-      "PC",
-      "VM"
-    ],
+    "Groups": ["PC","VM"],
     "Notes": ""
   },
   {
     "Name": "Steam",
     "ChocolateyName": "steam-client",
     "WingetName": "Valve.Steam",
-    "Groups": [
-      "PC"
-    ]
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Storage Explorer",
     "ChocolateyName": "microsoftazurestorageexplorer",
     "WingetName": "Microsoft.AzureStorageExplorer",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Sysinternals Suite",
     "ChocolateyName": "sysinternals",
 	  "ChocolateyParams": "\/InstallDir:TOOLSPATH",
     "WingetName": "9P7KNL5RWT25",
-    "Groups": [
-      "PC",
-      "VM",
-      "VSAW"
-    ],
+    "Groups": ["PC","VM","VSAW"],
     "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
   },
   {
     "Name": "Ubisoft Connect",
     "ChocolateyName": "ubisoft-connect",
     "WingetName": "Ubisoft.Connect",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
-    "Groups": [
-      "PC",
-      "VM"
-    ]
+    "Groups": ["PC","VM"]
   },
   {
     "Name": "Visual Studio 2022 Enterprise",
     "ChocolateyName": "visualstudio2022enterprise",
     "WingetName": "Microsoft.VisualStudio.2022.Enterprise",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "WinDbg",
     "ChocolateyName": "",
     "WingetName": "9PGJGD53TN86",
-    "Groups": [
-      "VM"
-    ],
+    "Groups": ["VM"],
     "Notes": "The windbg chocolatey package doesn't work, returns 404, description says This package is likely not broken for licensed users - see https://docs.chocolatey.org/en-us/features/private-cdn"
   },
   {
     "Name": "Windows Admin Center",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsAdminCenter",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Windows Driver Kit 11",
@@ -447,9 +436,8 @@
     "Name": "Windows Management Framework and PowerShell",
     "ChocolateyName": "powershell",
     "WingetName": "",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "Windows Terminal",
@@ -469,30 +457,28 @@
     "Name": "WinSCP",
     "ChocolateyName": "winscp",
     "WingetName": "WinSCP.WinSCP",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "Wireshark",
     "ChocolateyName": "wireshark",
     "WingetName": "WiresharkFoundation.Wireshark",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "WizTree",
     "ChocolateyName": "wiztree",
     "WingetName": "AntibodySoftware.WizTree",
-    "Groups": [
-      "VM"
-    ]
+    "Groups": ["VM"],
+    "Notes": ""
   },
   {
     "Name": "Zoom",
     "ChocolateyName": "zoom",
     "WingetName": "Zoom.Zoom",
-    "Groups": []
+    "Groups": [],
+    "Notes": ""
   }
 ]

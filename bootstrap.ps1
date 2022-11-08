@@ -1221,6 +1221,7 @@ process
 
     if ($isPC -or $isVM)
     {
+        Out-Log "Checking if bootstrap task exists"
         $taskName = 'bootstrap'
         $scheduleService = New-Object -ComObject Schedule.Service
         $scheduleService.Connect()
@@ -1231,6 +1232,10 @@ process
         {
             Out-Log "Found $taskName scheduled task from previous script run, deleting it"
             $rootFolder.DeleteTask($taskName, 0)
+        }
+        else
+        {
+            Out-Log "Didn't find bootstrap scheduled task"
         }
     }
 
