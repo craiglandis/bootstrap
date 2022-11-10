@@ -1,5 +1,19 @@
 [
   {
+    "Name": ".NET 7.0 SDK",
+    "ChocolateyName": "dotnet-7.0-sdk",
+    "WingetName": "Microsoft.DotNet.SDK.7",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": ".NET Desktop Runtime 7.0",
+    "ChocolateyName": "dotnet-7.0-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.7",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": ".NET Desktop Runtime 6.0.1",
     "ChocolateyName": "dotnet-desktopruntime",
     "WingetName": "",
