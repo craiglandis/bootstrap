@@ -1281,21 +1281,27 @@ Remove-Item -Path c:\onedrive -Recurse -Force -ErrorAction SilentlyContinue
 '@
     $removeTempOnedriveAndMyFoldersScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
 
-    # Tasks get updated and start successfully but AHK isn't running?
+    # The non-elevated one starts successfully but isn't actually running?
 $setAutoHotKeyScheduledTasksScriptContents = @'
+$userId = 'clandis@microsoft.com'
+
 Stop-Process -Name AutoHotkey -Force -ErrorAction SilentlyContinue
 
-$autoHotKeyTask = Get-ScheduledTask -TaskName AutoHotkey
+$autoHotKeyTaskName = 'AutoHotkey'
+$autoHotKeyTask = Get-ScheduledTask -TaskName $autoHotKeyTaskName
 $autoHotKeyTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\Autohotkey.ahk'
-$autoHotKeyTaskPrincipal = New-ScheduledTaskPrincipal -UserId $env:userdomain\$env:username -RunLevel Highest -LogonType Interactive
-Set-ScheduledTask -TaskName AutoHotkey_Not_Elevated -Action $autoHotKeyTaskAction | select Actions -ExpandProperty Actions | select Execute,Arguments
-Start-ScheduledTask -TaskName AutoHotkey
+$autoHotKeyTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Highest -LogonType Interactive
+$autoHotKeyTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
+Set-ScheduledTask -TaskName $autoHotKeyTaskName -Action $autoHotKeyTaskAction -Principal $autoHotKeyTaskPrincipal -Trigger $autoHotKeyTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
+Start-ScheduledTask -TaskName $autoHotKeyTaskName
 
-$autoHotKeyNotElevatedTask = Get-ScheduledTask -TaskName AutoHotkey_Not_Elevated
+$autoHotKeyNotElevatedTaskName = 'AutoHotkey_Not_Elevated'
+$autoHotKeyNotElevatedTask = Get-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
 $autoHotKeyNotElevatedTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
-$autoHotKeyNotElevatedTaskPrincipal = New-ScheduledTaskPrincipal -UserId $env:userdomain\$env:username -RunLevel Limited -LogonType Interactive
-Set-ScheduledTask -TaskName AutoHotkey_Not_Elevated -Action $autoHotKeyNotElevatedTaskAction -Principal $autoHotKeyNotElevatedTaskPrincipal | select Actions -ExpandProperty Actions | select Execute,Arguments
-Start-ScheduledTask -TaskName AutoHotkey_Not_Elevated
+$autoHotKeyNotElevatedTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Limited -LogonType Interactive
+$autoHotKeyNotElevatedTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
+Set-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName -Action $autoHotKeyNotElevatedTaskAction -Principal $autoHotKeyNotElevatedTaskPrincipal -Trigger $autoHotKeyNotElevatedTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
+Start-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
 '@
     $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
 
