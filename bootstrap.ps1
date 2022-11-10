@@ -1273,6 +1273,25 @@ process
 
     Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
 
+$script1Contents = @'
+Remove-Item -Path c:\my -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path c:\od -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path c:\bin -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path c:\onedrive -Recurse -Force -ErrorAction SilentlyContinue
+'@
+    $script1Contents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
+
+    # Couldn't actually get this to work, still had to right-click the folder and set it
+$script2Contents = @'
+attrib +p "C:\OneDrive\AHK"
+attrib +p "C:\OneDrive\bin"
+attrib +p "C:\OneDrive\My"
+attrib +p "C:\OneDrive\PDF"
+attrib +p "C:\OneDrive\Screens"
+attrib +p "C:\OneDrive\Tools"
+'@
+    $script2Contents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
+
     Out-Log 'Running Invoke-GetWindowsUpdate'
     Invoke-GetWindowsUpdate
     Out-Log 'Done running Invoke-GetWindowsUpdate'
