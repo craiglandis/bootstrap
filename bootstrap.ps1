@@ -1273,16 +1273,34 @@ process
 
     Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
 
-$script1Contents = @'
+$removeTempOnedriveAndMyFoldersScriptContents = @'
 Remove-Item -Path c:\my -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\od -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\bin -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\onedrive -Recurse -Force -ErrorAction SilentlyContinue
 '@
-    $script1Contents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
+    $removeTempOnedriveAndMyFoldersScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
+
+    # Tasks get updated and start successfully but AHK isn't running?
+$setAutoHotKeyScheduledTasksScriptContents = @'
+Stop-Process -Name AutoHotkey -Force -ErrorAction SilentlyContinue
+
+$autoHotKeyTask = Get-ScheduledTask -TaskName AutoHotkey
+$autoHotKeyTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\Autohotkey.ahk'
+$autoHotKeyTaskPrincipal = New-ScheduledTaskPrincipal -UserId $env:userdomain\$env:username -RunLevel Highest -LogonType Interactive
+Set-ScheduledTask -TaskName AutoHotkey_Not_Elevated -Action $autoHotKeyTaskAction | select Actions -ExpandProperty Actions | select Execute,Arguments
+Start-ScheduledTask -TaskName AutoHotkey
+
+$autoHotKeyNotElevatedTask = Get-ScheduledTask -TaskName AutoHotkey_Not_Elevated
+$autoHotKeyNotElevatedTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
+$autoHotKeyNotElevatedTaskPrincipal = New-ScheduledTaskPrincipal -UserId $env:userdomain\$env:username -RunLevel Limited -LogonType Interactive
+Set-ScheduledTask -TaskName AutoHotkey_Not_Elevated -Action $autoHotKeyNotElevatedTaskAction -Principal $autoHotKeyNotElevatedTaskPrincipal | select Actions -ExpandProperty Actions | select Execute,Arguments
+Start-ScheduledTask -TaskName AutoHotkey_Not_Elevated
+'@
+    $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
 
     # Couldn't actually get this to work, still had to right-click the folder and set it
-$script2Contents = @'
+$setAlwaysKeepOnThisDeviceScriptContents = @'
 attrib +p "C:\OneDrive\AHK"
 attrib +p "C:\OneDrive\bin"
 attrib +p "C:\OneDrive\My"
@@ -1290,7 +1308,7 @@ attrib +p "C:\OneDrive\PDF"
 attrib +p "C:\OneDrive\Screens"
 attrib +p "C:\OneDrive\Tools"
 '@
-    $script2Contents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
+    $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
 
     Out-Log 'Running Invoke-GetWindowsUpdate'
     Invoke-GetWindowsUpdate
