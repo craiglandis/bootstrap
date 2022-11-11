@@ -1319,7 +1319,7 @@ attrib +p "C:\OneDrive\Tools"
     # Add reg value for Sysinternals tools to avoid license agreement prompt
     reg add "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\AccessEnum" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\AdExplorer" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Active Directory Explorer" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\AdInsight" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\AdRestore" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Autologon" /v EulaAccepted /t REG_DWORD /d 1 /f
@@ -1331,14 +1331,17 @@ attrib +p "C:\OneDrive\Tools"
     reg add "HKCU\Software\Sysinternals\Contig" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Coreinfo" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Ctrl2cap" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\DebugView" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\DbgView" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Desktops" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Disk Usage" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Disk2vhd" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\DiskExt" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Diskmon" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\DiskView" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Du" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\EFSDump" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\EulaAccepted" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\FindLinks" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Handle" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Hex2dec" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\Junction" /v EulaAccepted /t REG_DWORD /d 1 /f
@@ -1366,6 +1369,7 @@ attrib +p "C:\OneDrive\Tools"
     reg add "HKCU\Software\Sysinternals\PsLoggedOn" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\PsLogList" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\PsPasswd" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsPing" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\PsService" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\PsShutdown" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\PsSuspend" /v EulaAccepted /t REG_DWORD /d 1 /f
