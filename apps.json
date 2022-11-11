@@ -17,7 +17,7 @@
     "Name": ".NET Core 3.1 Desktop Runtime",
     "ChocolateyName": "dotnetcore-3.1-desktopruntime",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
