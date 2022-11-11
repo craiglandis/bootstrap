@@ -1316,6 +1316,78 @@ attrib +p "C:\OneDrive\Tools"
 '@
     $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
 
+    # Add reg value for Sysinternals tools to avoid license agreement prompt
+    reg add "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\AccessEnum" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\AdExplorer" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\AdInsight" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\AdRestore" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Autologon" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Autoruns" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\BgInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\BlueScreen" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\CacheSet" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ClockRes" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Contig" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Coreinfo" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Ctrl2cap" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\DebugView" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Desktops" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Disk Usage" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Disk2vhd" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\DiskExt" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Diskmon" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\DiskView" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\EFSDump" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Handle" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Hex2dec" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Junction" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\LDMDump" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ListDLLs" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\LiveKd" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\LoadOrder" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\LogonSessions" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\MoveFile" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\NTFSInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PageDefrag" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PendMoves" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PipeList" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PortMon" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ProcDump" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Process Explorer" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Process Monitor" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ProcFeatures" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsExec" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsFile" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsGetSid" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsKill" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsList" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsLoggedOn" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsLogList" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsPasswd" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsService" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsShutdown" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsSuspend" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\PsTools" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\RAMMap" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\RegDelNull" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\RegJump" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\RootkitRevealer" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\SDelete" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ShareEnum" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ShellRunas" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Sigcheck" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Streams" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Strings" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Sync" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\TCPView" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\VMMap" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\VolumeId" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\Whois" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\WinObj" /v EulaAccepted /t REG_DWORD /d 1 /f
+    reg add "HKCU\Software\Sysinternals\ZoomIt" /v EulaAccepted /t REG_DWORD /d 1 /f
+
     Out-Log 'Running Invoke-GetWindowsUpdate'
     Invoke-GetWindowsUpdate
     Out-Log 'Done running Invoke-GetWindowsUpdate'
