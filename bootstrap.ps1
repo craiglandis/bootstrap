@@ -1388,6 +1388,19 @@ attrib +p "C:\OneDrive\Tools"
     reg add "HKCU\Software\Sysinternals\WinObj" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\ZoomIt" /v EulaAccepted /t REG_DWORD /d 1 /f
 
+    # Create desktop shortcut for running "choco upgrade all -y"
+    $objShell = New-Object -ComObject Wscript.Shell
+    $shortcutPath = "$env:userprofile\Desktop\choco_upgrade_all.lnk"
+    $shortCut = $objShell.CreateShortCut($shortcutPath)
+    $shortCut.Description = 'choco upgrade all -y'
+    $shortCut.TargetPath = '%ProgramFiles%\PowerShell\7\pwsh.exe'
+    $shortCut.Arguments = '-NoLogo -NoProfile -NoExit -Command choco upgrade all -y'
+    $shortCut.WindowStyle = 3 # 1 = Normal, 3 = Maximized, 7 = Minimized
+    $shortCut.Save()
+    $bytes = [System.IO.File]::ReadAllBytes($shortcutPath)
+    $bytes[0x15] = $bytes[0x15] -bor 0x20
+    [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
+
     Out-Log 'Running Invoke-GetWindowsUpdate'
     Invoke-GetWindowsUpdate
     Out-Log 'Done running Invoke-GetWindowsUpdate'
