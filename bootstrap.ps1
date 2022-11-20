@@ -68,7 +68,6 @@ begin
 }
 process
 {
-
     function Out-Log
     {
         param(
@@ -962,7 +961,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
         Invoke-ExpressionWithLogging -command $scriptFilePath
     }
-
+ 
     $regFileUrls = @(
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_auto_extract_downloaded_zip.reg',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_double-click_extract_to_folder.reg'
