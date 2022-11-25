@@ -1,0 +1,83 @@
+{
+	"$schema" : "https://aka.ms/winget-packages.schema.2.0.json",
+	"CreationDate" : "2022-11-24T23:33:47.248-00:00",
+	"Sources" :
+	[
+		{
+			"Packages" :
+			[
+				{
+					"PackageIdentifier" : "7zip.7zip"
+				},
+				{
+					"PackageIdentifier" : "Lexikos.AutoHotkey"
+				},
+				{
+					"PackageIdentifier" : "ScooterSoftware.BeyondCompare4"
+				},
+				{
+					"PackageIdentifier" : "CrystalDewWorld.CrystalDiskMark"
+				},
+				{
+					"PackageIdentifier" : "Git.Git"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.Edge"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.EdgeWebView2Runtime"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.WindowsTerminal.Preview"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.WindowsTerminal"
+				},
+				{
+					"PackageIdentifier" : "Notepad++.Notepad++"
+				},
+				{
+					"PackageIdentifier" : "AntibodySoftware.WizTree"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.PowerShell.Preview"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.AzureStorageExplorer"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.OpenSSH.Beta"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.VisualStudioCode"
+				}
+			],
+			"SourceDetails" :
+			{
+				"Argument" : "https://cdn.winget.microsoft.com/cache",
+				"Identifier" : "Microsoft.Winget.Source_8wekyb3d8bbwe",
+				"Name" : "winget",
+				"Type" : "Microsoft.PreIndexed.Package"
+			}
+		},
+		{
+			"Packages" :
+			[
+				{
+					"PackageIdentifier" : "9WZDNCRFHVJL"
+				},
+				{
+					"PackageIdentifier" : "XPFFZHVGQWWLHB"
+				}
+			],
+			"SourceDetails" :
+			{
+				"Argument" : "https://storeedgefd.dsx.mp.microsoft.com/v9.0",
+				"Identifier" : "StoreEdgeFD",
+				"Name" : "msstore",
+				"Type" : "Microsoft.Rest"
+			}
+		}
+	],
+	"WinGetVersion" : "1.4.3132-preview"
+}
