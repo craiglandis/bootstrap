@@ -961,7 +961,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
         Invoke-ExpressionWithLogging -command $scriptFilePath
     }
- 
+
     $regFileUrls = @(
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_auto_extract_downloaded_zip.reg',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/7-zip_double-click_extract_to_folder.reg'
@@ -1115,14 +1115,16 @@ process
     $pwshFilePath = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
     if (Test-Path -Path $pwshFilePath -PathType Leaf)
     {
+        Invoke-ExpressionWithLogging -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Set-ExecutionPolicy -ExecutionPolicy Bypass -Force"
         Invoke-ExpressionWithLogging -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Update-Help -Force -ErrorAction SilentlyContinue"
     }
 
     if ($isPC -or $isVM)
     {
-        Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
-        Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\my -Target $env:SystemDrive\OneDrive\My -ErrorAction SilentlyContinue | Out-Null"
-        Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\bin -Target $env:SystemDrive\OneDrive\Tools -ErrorAction SilentlyContinue | Out-Null"
+        # These can't be run at this point, they need to be run after OneDrive is set to sync to C:\OneDrive, which is a step I have yet to find out how to automate
+        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
+        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\my -Target $env:SystemDrive\OneDrive\My -ErrorAction SilentlyContinue | Out-Null"
+        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\bin -Target $env:SystemDrive\OneDrive\Tools -ErrorAction SilentlyContinue | Out-Null"
 
         # To remove the symbolic links (Remove-Item won't do it):
         #(Get-Item -Path "$env:SystemDrive\od").Delete()
