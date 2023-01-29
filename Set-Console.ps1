@@ -41,54 +41,14 @@ function Out-Log
 
 function Set-DefaultTerminalApp
 {
-	param
-	(
-		[Parameter(
-			Mandatory = $true,
-			ParameterSetName = 'WindowsTerminal'
-		)]
-		[switch]
-		$WindowsTerminal,
-
-		[Parameter(
-			Mandatory = $true,
-			ParameterSetName = 'ConsoleHost'
-		)]
-		[switch]
-		$ConsoleHost
-	)
-
-	switch ($PSCmdlet.ParameterSetName)
-	{
-		'WindowsTerminal'
-		{
-			if (Get-AppxPackage -Name Microsoft.WindowsTerminal)
-			{
-				if (-not (Test-Path -Path 'HKCU:\Console\%%Startup'))
-				{
-					New-Item -Path 'HKCU:\Console\%%Startup' -Force
-				}
-
-				# Find the current GUID of Windows Terminal
-				$PackageFullName = (Get-AppxPackage -Name Microsoft.WindowsTerminal).PackageFullName
-				Get-ChildItem -Path "HKLM:\SOFTWARE\Classes\PackagedCom\Package\$PackageFullName\Class" | ForEach-Object -Process {
-					if ((Get-ItemPropertyValue -Path $_.PSPath -Name ServerId) -eq 0)
-					{
-						New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name DelegationConsole -PropertyType String -Value $_.PSChildName -Force
-					}
-
-					if ((Get-ItemPropertyValue -Path $_.PSPath -Name ServerId) -eq 1)
-					{
-						New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name DelegationTerminal -PropertyType String -Value $_.PSChildName -Force
-					}
-				}
-			}
-		}
-		'ConsoleHost'
-		{
-			New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name DelegationConsole -PropertyType String -Value '{00000000-0000-0000-0000-000000000000}' -Force
-			New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name DelegationTerminal -PropertyType String -Value '{00000000-0000-0000-0000-000000000000}' -Force
-		}
+    if (Get-AppxPackage -Name Microsoft.WindowsTerminal -ErrorAction SilentlyContinue)
+    {
+        # https://support.microsoft.com/en-us/windows/command-prompt-and-windows-powershell-for-windows-11-6453ce98-da91-476f-8651-5c14d5777c20
+        # Since the GUIDs are in the KB article and make no mention of them being different for different WT versions, I suspect they won't be changing and will always be the ones to use to specify WT
+		New-Item -Path 'HKCU:\Console\%%Startup' -ErrorAction SilentlyContinue
+		New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name 'DelegationConsole' -PropertyType 'String' -Value '{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}' -Force
+		New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name 'DelegationTerminal' -PropertyType 'String' -Value '{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}' -Force
+		# & "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.WindowsTerminal_8wekyb3d8bbwe\wt.exe" --maximized
 	}
 }
 
