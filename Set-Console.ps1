@@ -41,14 +41,22 @@ function Out-Log
 
 function Set-DefaultTerminalApp
 {
-    if (Get-AppxPackage -Name Microsoft.WindowsTerminal -ErrorAction SilentlyContinue)
-    {
-        # https://support.microsoft.com/en-us/windows/command-prompt-and-windows-powershell-for-windows-11-6453ce98-da91-476f-8651-5c14d5777c20
-        # Since the GUIDs are in the KB article and make no mention of them being different for different WT versions, I suspect they won't be changing and will always be the ones to use to specify WT
+	$wtInstalled = [bool](Get-AppxPackage -Name Microsoft.WindowsTerminal -ErrorAction SilentlyContinue)
+	$win1122H2BuildNumber = 22621
+	$atLeastWin1122H2 = [environment]::OSVersion.Version.Build -ge $win1122H2BuildNumber
+	if ($wtInstalled -and $atLeastWin1122H2)
+	{
+		# https://support.microsoft.com/en-us/windows/command-prompt-and-windows-powershell-for-windows-11-6453ce98-da91-476f-8651-5c14d5777c20
+		# Since the GUIDs are in the KB article and make no mention of them being different for different WT versions, I suspect they won't be changing and will always be the ones to use to specify WT
 		New-Item -Path 'HKCU:\Console\%%Startup' -ErrorAction SilentlyContinue
 		New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name 'DelegationConsole' -PropertyType 'String' -Value '{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}' -Force
 		New-ItemProperty -Path 'HKCU:\Console\%%Startup' -Name 'DelegationTerminal' -PropertyType 'String' -Value '{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}' -Force
 		# & "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.WindowsTerminal_8wekyb3d8bbwe\wt.exe" --maximized
+	}
+	else
+	{
+    	Out-Log "wtInstalled: $wtInstalled"
+    	Out-Log "atLeastWin1122H2: $atLeastWin1122H2"
 	}
 }
 
@@ -183,10 +191,7 @@ if ($isVM -or $isPC)
 	}
 }
 
-if (Test-Path -Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe" -PathType Leaf)
-{
-	Set-DefaultTerminalApp -WindowsTerminal
-}
+Set-DefaultTerminalApp -WindowsTerminal
 
 $faceName = 'Lucida Console'
 
