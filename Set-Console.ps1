@@ -55,9 +55,35 @@ function Set-DefaultTerminalApp
 	}
 	else
 	{
-    	Out-Log "wtInstalled: $wtInstalled"
-    	Out-Log "atLeastWin1122H2: $atLeastWin1122H2"
+    	    Out-Log "wtInstalled: $wtInstalled"
+    	    Out-Log "atLeastWin1122H2: $atLeastWin1122H2"
 	}
+}
+
+function Set-WindowsTerminalSettings
+{
+	$settingsFilePath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+	$settingsFileBackupPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json.$(Get-Date -Format yyyyMMddHHmmss)"
+	Copy-Item -Path $settingsFilePath -Destination $settingsFileBackupPath
+	Out-Log "Windows Terminal settings.json: $settingsFilePath"
+	Out-Log "Windows Terminal settings.json backup: $settingsFileBackupPath"
+	$terminalSettings = Get-Content $settingsFilePath | ConvertFrom-Json
+	$terminalSettings | Add-Member -MemberType NoteProperty -Name 'launchMode' -Value 'maximized' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'altGrAliasing' -Value $true -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'antialiasingMode' -Value 'grayscale' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'bellStyle' -Value 'none' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'closeOnExit' -Value 'always' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'cursorShape' -Value 'bar' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'colorScheme' -Value 'Campbell Powershell' -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'font' -Value @{face = 'Lucida Console';size = '14'} -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'hidden' -Value $false -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'historySize' -Value 9999 -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'padding' -Value "8, 8, 8, 8" -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'snapOnInput' -Value $true -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'startingDirectory' -Value "C:\\" -Force
+	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'useAcrylic' -Value $false -Force
+	$terminalSettingsJsonString = $terminalSettings | ConvertTo-Json -Depth 10
+	Set-Content $settingsFilePath -Value $terminalSettingsJsonString
 }
 
 function Invoke-ExpressionWithLogging
@@ -191,7 +217,11 @@ if ($isVM -or $isPC)
 	}
 }
 
-Set-DefaultTerminalApp -WindowsTerminal
+if (Test-Path -Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.WindowsTerminal_8wekyb3d8bbwe\wt.exe" -PathType Leaf)
+{
+    Set-DefaultTerminalApp
+    Set-WindowsTerminalSettings
+}
 
 $faceName = 'Lucida Console'
 
