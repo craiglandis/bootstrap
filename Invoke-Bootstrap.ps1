@@ -1,5 +1,5 @@
-# (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1");Invoke-Expression -command $env:SystemDrive\Invoke-Bootstrap.ps1
-# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
+# [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-Bootstrap.ps1', "$env:SystemDrive\Invoke-Bootstrap.ps1");Invoke-Expression -command $env:SystemDrive\Invoke-Bootstrap.ps1
+# [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072;Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\Invoke-Bootstrap.ps1 -userName craig -password $password -bootstrapScriptUrl https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1
 param(
     [string]$userName,
     [string]$password,
