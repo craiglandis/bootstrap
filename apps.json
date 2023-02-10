@@ -321,11 +321,11 @@
     "Notes": ""
   },
   {
-    "Name": "Parsec",
-    "ChocolateyName": "parsec",
-    "WingetName": "Parsec.Parsec",
-    "Groups": [],
-    "Notes": ""
+    "Name": "OpenSSH Beta",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.OpenSSH.Beta",
+    "Groups": ["PC","VM","LAPTOP"],
+    "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release"
   },
   {
     "Name": "Power BI Desktop",
