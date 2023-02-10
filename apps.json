@@ -461,6 +461,13 @@
     "Notes": ""
   },
   {
+    "Name": "Windows Notepad",
+    "ChocolateyName": "",
+    "WingetName": "9MSMLRH6LZF3",
+    "Groups": ["PC","VM","LAPTOP"],
+    "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
+  },
+  {
     "Name": "Windows Terminal",
     "ChocolateyName": "",
     "WingetName": "9N0DX20HK701",
