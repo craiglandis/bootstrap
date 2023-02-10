@@ -42,10 +42,17 @@
     "Notes": ""
   },
   {
-    "Name": "AutoHotkey",
+    "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","VM","LAPTOP"],
+    "Notes": ""
+  },
+  {
+    "Name": "AutoHotkey v2",
+    "ChocolateyName": "autohotkey.portable",
+    "WingetName": "AutoHotkey.AutoHotkey",
+    "Groups": ["PC","VM","LAPTOP"],
     "Notes": ""
   },
   {
