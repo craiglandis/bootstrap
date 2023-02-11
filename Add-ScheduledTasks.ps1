@@ -367,11 +367,12 @@ if ($isPC -or $isVM)
     $vscodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
     if (Test-Path -Path $vscodeUserPath -PathType Leaf)
     {
-        $regFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/AutoHotkeyScript_Edit_Command_VSCode_If_Installed_In_Users_username_AppData_Local_Programs_Microsoft_VS_Code.reg'
+        $regFileUrl = 'AutoHotkeyScript_Edit_Command_VSCode_If_Installed_In_Users_username_AppData_Local_Programs_Microsoft_VS_Code.reg'
+        
     }
     elseif (Test-Path -Path $vscodeSystemPath -PathType Leaf)
     {
-        $regFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/AutoHotkeyScript_Edit_Command_VSCode_If_Installed_In_Program_Files_Microsoft_VS_Code.reg'
+        $regFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/AutoHotkeyScript_Edit_Command_VSCode_If_Installed_In_Program_Files_Microsoft_VS_Code.reg'
     }
     else
     {
