@@ -279,6 +279,13 @@
     "Notes": ""
   },
   {
+    "Name": "Libre Hardware Monitor (fork of Open Hardware Monitor)",
+    "ChocolateyName": "Libre Hardware Monitor",
+    "WingetName": "",
+    "Groups": ["PC","LAPTOP"],
+    "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
+  },	
+  {
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
