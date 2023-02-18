@@ -1008,8 +1008,8 @@ process
 
     if ($isWin11 -and $group -eq 'PC')
     {
-        # I've seen this inexplicably prompt for elevation when it was called from an elevated prompt
-	# If that happens script progress is stuck waiting on you to click through the elevation prompt
+        # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
+	# https://github.com/microsoft/WSL/issues/9032 
 	Invoke-ExpressionWithLogging -command 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
