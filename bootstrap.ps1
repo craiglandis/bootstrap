@@ -1012,8 +1012,8 @@ process
 	# If that happens script progress is stuck waiting on you to click through the elevation prompt
 	Invoke-ExpressionWithLogging -command 'wsl --install'
         # /All enables all parent features of the specified feature
-        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All'
-        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All'
+        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
+        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
     }
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
