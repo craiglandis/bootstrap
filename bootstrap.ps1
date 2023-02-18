@@ -15,7 +15,7 @@ Why did PS 7.0 get installed instead of 7.2?
 Why is the font not getting installed?
 Why aren't 7-zip file associations getting updated?
 Docker Desktop - supress subscription service agreement
-Docker Desktop - throws error "WSL 2 installation is incomplete" - wants WSL2 kernel update - https://aka.ms/wsl2kernel (https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
+Docker Desktop - throws error "2 installation is incomplete" - wants WSL2 kernel update - https://aka.ms/wsl2kernel (https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
 Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong color
 Steam - steam logon prompt comes up, no obvious way to surpress without stopping Steam from starting at boot, so no big deal, leave as-is
 PowerShell - profile is not created
@@ -1008,7 +1008,9 @@ process
 
     if ($isWin11 -and $group -eq 'PC')
     {
-        Invoke-ExpressionWithLogging -command 'wsl --install'
+        # I've seen this inexplicably prompt for elevation when it was called from an elevated prompt
+	# If that happens script progress is stuck waiting on you to click through the elevation prompt
+	Invoke-ExpressionWithLogging -command 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All'
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All'
