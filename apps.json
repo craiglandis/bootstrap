@@ -384,10 +384,10 @@
   },
   {
     "Name": "OneNote for Windows 10",
-    "ChocolateyName": "9WZDNCRFHVJL",
-    "WingetName": "Microsoft.PowerBI",
+    "ChocolateyName": "",
+    "WingetName": "9WZDNCRFHVJL",
     "Groups": ["PC"],
-    "Notes": ""
+    "Notes": "OneNote for Windows 10 is still installable via winget though doesn't show up when searching for it."
   },
   {
     "Name": "OpenSSH Beta",
