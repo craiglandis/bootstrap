@@ -101,7 +101,7 @@
     "Name": "CoreTemp",
     "ChocolateyName": "coretemp",
     "WingetName": "ALCPU.CoreTemp",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
