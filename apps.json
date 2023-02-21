@@ -14,6 +14,13 @@
     "Notes": ""
   },
   {
+    "Name": ".NET Desktop Runtime 6.0",
+    "ChocolateyName": "dotnet-6.0-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.6",
+    "Groups": ["PC","VM"],
+    "Notes": ""
+  },
+  {
     "Name": ".NET Core 3.1 Desktop Runtime",
     "ChocolateyName": "dotnetcore-3.1-desktopruntime",
     "WingetName": "",
@@ -86,14 +93,14 @@
   {
     "Name": "Cascadia Font Family",
     "ChocolateyName": "cascadia-code-nerd-font",
-    "WingetName": "ALCPU.CoreTemp",
+    "WingetName": "",
     "Groups": ["PC"],
     "Notes": ""
   },
   {
     "Name": "CoreTemp",
     "ChocolateyName": "coretemp",
-    "WingetName": "",
+    "WingetName": "ALCPU.CoreTemp",
     "Groups": ["PC"],
     "Notes": ""
   },
@@ -103,6 +110,13 @@
     "WingetName": "CPUID.CPU-Z",
     "Groups": ["VM"],
     "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason."
+  },
+  {
+    "Name": "CrystalDiskInfo",
+    "ChocolateyName": "crystaldiskinfo.portable",
+    "WingetName": "CrystalDewWorld.CrystalDiskInfo",
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "CrystalDiskMark",
@@ -115,6 +129,13 @@
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "diskspd",
+    "ChocolateyName": "diskspd",
+    "WingetName": "",
     "Groups": ["PC"],
     "Notes": ""
   },
@@ -209,6 +230,12 @@
     "Groups": ["PC","VM"]
   },
   {
+    "Name": "GitHub CLI",
+    "ChocolateyName": "gh",
+    "WingetName": "GitHub.cli",
+    "Groups": ["PC","VM"]
+  },
+  {
     "Name": "Google Chrome",
     "ChocolateyName": "googlechrome",
     "WingetName": "Google.Chrome",
@@ -280,7 +307,7 @@
   },
   {
     "Name": "Libre Hardware Monitor (fork of Open Hardware Monitor)",
-    "ChocolateyName": "Libre Hardware Monitor",
+    "ChocolateyName": "librehardwaremonitor",
     "WingetName": "",
     "Groups": ["PC","LAPTOP"],
     "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
@@ -307,11 +334,25 @@
     "Notes": ""
   },
   {
+    "Name": "mpvio",
+    "ChocolateyName": "mpvio",
+    "WingetName": "",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Nmap",
     "ChocolateyName": "",
     "WingetName": "Insecure.Nmap",
     "Groups": ["VM"],
     "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent."
+  },
+  {
+    "Name": "nerd-fonts-CascadiaCode",
+    "ChocolateyName": "nerd-fonts-CascadiaCode",
+    "WingetName": "",
+    "Groups": ["PC","VM"],
+    "Notes": ""
   },
   {
     "Name": "nodejs",
@@ -325,6 +366,20 @@
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
     "Groups": ["PC","VM","VSAW"],
+    "Notes": ""
+  },
+  {
+    "Name": "oh-my-posh",
+    "ChocolateyName": "oh-my-posh",
+    "WingetName": "JanDeDobbeleer.OhMyPosh",
+    "Groups": ["PC"],
+    "Notes": ""
+  },	
+  {
+    "Name": "obs-studio",
+    "ChocolateyName": "obs-studio",
+    "WingetName": "XPFFH613W8V6LV",
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
@@ -345,7 +400,7 @@
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
@@ -381,14 +436,14 @@
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
     "Name": "ScreenToGif",
-    "ChocolateyName": "screentogif",
+    "ChocolateyName": "screentogif.portable",
     "WingetName": "NickeManarin.ScreenToGif",
-    "Groups": ["VM"],
+    "Groups": ["PC","VM"],
     "Notes": "ScreenToGif requires .NET Desktop Runtime 6.0.1+ https://download.visualstudio.microsoft.com/download/pr/bf058765-6f71-4971-aee1-15229d8bfb3e/c3366e6b74bec066487cd643f915274d/windowsdesktop-runtime-6.0.1-win-x64.exe"
   },
   {
@@ -421,7 +476,7 @@
   {
     "Name": "Sysinternals Suite",
     "ChocolateyName": "sysinternals",
-	  "ChocolateyParams": "\/InstallDir:TOOLSPATH",
+    "ChocolateyParams": "\/InstallDir:TOOLSPATH",
     "WingetName": "9P7KNL5RWT25",
     "Groups": ["PC","VM","VSAW"],
     "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
@@ -497,9 +552,9 @@
   },
   {
     "Name": "WinSCP",
-    "ChocolateyName": "winscp",
+    "ChocolateyName": "winscp.portable",
     "WingetName": "WinSCP.WinSCP",
-    "Groups": ["VM"],
+    "Groups": ["PC","VM"],
     "Notes": ""
   },
   {
@@ -513,14 +568,14 @@
     "Name": "WizTree",
     "ChocolateyName": "wiztree",
     "WingetName": "AntibodySoftware.WizTree",
-    "Groups": ["VM"],
+    "Groups": ["PC","VM"],
     "Notes": ""
   },
   {
     "Name": "Zoom",
     "ChocolateyName": "zoom",
     "WingetName": "Zoom.Zoom",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   }
 ]
