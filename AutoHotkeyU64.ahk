@@ -24,7 +24,7 @@ else if WinExist("ahk_exe pwsh.exe")
     WinActivate
 }
 else if FileExist(pwshPreview)
-{    
+{
     Run %pwshPreview% -NoLogo -WindowStyle Maximized -NoExit -WorkingDirectory C:\
 }
 else if FileExist(pwsh)
@@ -36,7 +36,7 @@ else if WinExist("ahk_exe powershell.exe")
     WinActivate
 }
 else
-{    
+{
     Run %powershell% -NoLogo -WindowStyle Maximized -NoExit -Command Set-Location -Path C:\
 }
 Return
@@ -49,7 +49,7 @@ if WinExist("ahk_exe powershell.exe")
     WinActivate
 }
 else
-{    
+{
     Run %powershell% -NoLogo -WindowStyle Maximized -NoExit -Command Set-Location -Path C:\
 }
 Return
@@ -62,7 +62,8 @@ if WinExist("ahk_exe Code.exe")
 }
 Else
 {
-    Run, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio Code\Visual Studio Code.lnk"
+    Run, "C:\Program Files\Microsoft VS Code\Code.exe"
+    ;Run, "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio Code\Visual Studio Code.lnk"
     ;Run, "C:\Users\clandis\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Visual Studio Code\Visual Studio Code.lnk"
 }
 Return
