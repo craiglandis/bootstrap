@@ -38,7 +38,7 @@
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -59,14 +59,14 @@
     "Name": "AutoHotkey v2",
     "ChocolateyName": "autohotkey.portable",
     "WingetName": "AutoHotkey.AutoHotkey",
-    "Groups": ["PC","VM","LAPTOP"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -83,25 +83,17 @@
     "Groups": ["PC","VM"],
     "Notes": ""
   },
-
   {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "Bicep CLI",
     "ChocolateyName": "bicep",
     "WingetName": "Microsoft.Bicep",
-    "Groups": ["PC"],
-    "Notes": ""
-  },
-  {
-    "Name": "Cascadia Font Family",
-    "ChocolateyName": "cascadia-code-nerd-font",
-    "WingetName": "",
     "Groups": ["PC"],
     "Notes": ""
   },
@@ -179,14 +171,14 @@
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
     "ChocolateyName": "es",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
   {
@@ -221,14 +213,14 @@
     "Name": "GeForce Experience",
     "ChocolateyName": "geforce-experience",
     "WingetName": "Nvidia.GeForceExperience",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
     "Name": "GeForce Game Ready Driver",
     "ChocolateyName": "geforce-game-ready-driver",
     "WingetName": "",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
@@ -331,7 +323,7 @@
     "Name": "Microsoft Edge",
     "ChocolateyName": "microsoft-edge",
     "WingetName": "Microsoft.Edge",
-    "Groups": ["VM"],
+    "Groups": ["QUICKVM","VM"],
     "Notes": "Edge is still supported on Win7+ https://docs.microsoft.com/en-us/deployedge/microsoft-edge-supported-operating-systems"
   },
   {
@@ -356,11 +348,11 @@
     "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent."
   },
   {
-    "Name": "nerd-fonts-CascadiaCode",
+    "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
     "Groups": ["PC","VM"],
-    "Notes": ""
+    "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {
     "Name": "nodejs",
@@ -373,7 +365,7 @@
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
-    "Groups": ["PC","VM","VSAW"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -401,7 +393,7 @@
     "Name": "OpenSSH Beta",
     "ChocolateyName": "",
     "WingetName": "Microsoft.OpenSSH.Beta",
-    "Groups": ["PC","VM","LAPTOP"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release"
   },
   {
@@ -479,14 +471,14 @@
     "Name": "Storage Explorer",
     "ChocolateyName": "microsoftazurestorageexplorer",
     "WingetName": "Microsoft.AzureStorageExplorer",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","QUICKVM","VM"]
   },
   {
     "Name": "Sysinternals Suite",
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "\/InstallDir:TOOLSPATH",
     "WingetName": "9P7KNL5RWT25",
-    "Groups": ["PC","VM","VSAW"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
   },
   {
@@ -500,7 +492,7 @@
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","QUICKVM","VM"]
   },
   {
     "Name": "Visual Studio 2022 Enterprise",
@@ -513,7 +505,7 @@
     "Name": "WinDbg",
     "ChocolateyName": "",
     "WingetName": "9PGJGD53TN86",
-    "Groups": ["VM"],
+    "Groups": ["QUICKVM","VM"],
     "Notes": "The windbg chocolatey package doesn't work, returns 404, description says This package is likely not broken for licensed users - see https://docs.chocolatey.org/en-us/features/private-cdn"
   },
   {
@@ -534,14 +526,14 @@
     "Name": "Windows Management Framework and PowerShell",
     "ChocolateyName": "powershell",
     "WingetName": "",
-    "Groups": ["VM"],
+    "Groups": ["QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "Windows Notepad",
     "ChocolateyName": "",
     "WingetName": "9MSMLRH6LZF3",
-    "Groups": ["PC","VM","LAPTOP"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
   },
   {
@@ -569,14 +561,14 @@
     "Name": "Wireshark",
     "ChocolateyName": "wireshark",
     "WingetName": "WiresharkFoundation.Wireshark",
-    "Groups": ["VM"],
+    "Groups": ["QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "WizTree",
     "ChocolateyName": "wiztree",
     "WingetName": "AntibodySoftware.WizTree",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
