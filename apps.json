@@ -151,7 +151,7 @@
     "Name": "Docker Desktop",
     "ChocolateyName": "docker-desktop",
     "WingetName": "Docker.DockerDesktop",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
