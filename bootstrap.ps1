@@ -35,7 +35,7 @@ Incorporate Helper module to minimize code redundancy
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('PC', 'VM', 'VSAW', 'All')]
+    [ValidateSet('PC', 'QUICKVM', 'VM', 'ALL')]
     [string]$group,
     [switch]$show,
     [string]$toolsPath = 'C:\OneDrive\Tools',
@@ -453,6 +453,10 @@ process
         }
         Out-Log "`$isPC: $isPC `$isVM: $isVM `$isSAW: $isSAW"
     }
+    else
+    {
+        Out-Log "`$group: $group"
+    }
 
     if ($show)
     {
@@ -518,7 +522,7 @@ process
     }
 
     if ($isWin11)
-    {        
+    {
 	# Enable classic context menu
         Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
     }
@@ -1010,7 +1014,7 @@ process
     if ($isWin11 -and $group -eq 'PC')
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
-	# https://github.com/microsoft/WSL/issues/9032 
+	# https://github.com/microsoft/WSL/issues/9032
 	Invoke-ExpressionWithLogging -command 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
@@ -1083,7 +1087,7 @@ process
     # It works - the .ahk file must be named AutoHotkeyU64.ahk, then you run AutoHotkeyU64.exe
     # copy-item -Path \\tsclient\c\onedrive\ahk\AutoHotkey.ahk -Destination c:\my\ahk\AutoHotkeyU64.ahk
 
-    if ($group -eq 'VM' -or $group -eq 'PC' -or $group -eq 'LAPTOP')
+    if ($group -eq 'VM' -or $group -eq 'PC')
     {
         $installVSCodeScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCode.ps1'
         $installVSCodeScriptFileName = $installVSCodeScriptUrl.Split('/')[-1]
