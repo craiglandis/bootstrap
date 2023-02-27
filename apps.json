@@ -77,6 +77,14 @@
     "Notes": ""
   },
   {
+    "Name": "Azure PowerShell",
+    "ChocolateyName": "az.powershell",
+    "WingetName": "",
+    "Groups": ["PC","VM"],
+    "Notes": ""
+  },
+
+  {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
@@ -311,7 +319,7 @@
     "WingetName": "",
     "Groups": ["PC","LAPTOP"],
     "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
-  },	
+  },
   {
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
@@ -374,7 +382,7 @@
     "WingetName": "JanDeDobbeleer.OhMyPosh",
     "Groups": ["PC"],
     "Notes": ""
-  },	
+  },
   {
     "Name": "obs-studio",
     "ChocolateyName": "obs-studio",
