@@ -81,7 +81,7 @@
     "ChocolateyName": "az.powershell",
     "WingetName": "",
     "Groups": ["PC","VM"],
-    "Notes": ""
+    "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module"
   },
   {
     "Name": "Beyond Compare",
@@ -480,6 +480,14 @@
     "WingetName": "9P7KNL5RWT25",
     "Groups": ["PC","QUICKVM","VM"],
     "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
+  },
+  {
+    "Name": "Terminal-Icons (PowerShell Module)",
+    "ChocolateyName": "terminal-icons.powershell",
+    "ChocolateyParams": "",
+    "WingetName": "",
+    "Groups": ["PC","VM"],
+    "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number."
   },
   {
     "Name": "Ubisoft Connect",

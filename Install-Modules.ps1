@@ -273,7 +273,6 @@ Microsoft.PowerShell.GraphicalTools,True,False,False,True
 Microsoft.PowerShell.FileUtility,True,False,False,True
 Microsoft.PowerShell.SecretManagement,False,False
 NTFSSecurity,False,False
-oh-my-posh,True,False
 Profiler,False,False
 PSDevOps,False,False
 PSFramework,False,False
@@ -290,6 +289,7 @@ Terminal-Icons,True,False
 $modules = $modules.Split("`n").Trim()
 
 <#
+oh-my-posh,True,False # installed via chocolatey now
 AzurePSDrive,False,False
 Pester,False,True
 posh-git,False,False
