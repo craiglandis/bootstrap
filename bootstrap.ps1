@@ -1290,11 +1290,12 @@ process
     Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
 
 $removeTempOnedriveAndMyFoldersScriptContents = @'
-Stop-Process -Name caffeine64 -Force  -ErrorAction SilentlyContinue
+Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\my -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\od -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\bin -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path c:\onedrive -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path C:\OneDrive -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -Path C:\OneDrive -ItemType Directory -Force -ErrorAction SilentlyContinue
 '@
     $removeTempOnedriveAndMyFoldersScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
 
@@ -1324,12 +1325,11 @@ Start-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
 
     # Couldn't actually get this to work, still had to right-click the folder and set it
 $setAlwaysKeepOnThisDeviceScriptContents = @'
-attrib +p "C:\OneDrive\AHK"
-attrib +p "C:\OneDrive\bin"
-attrib +p "C:\OneDrive\My"
-attrib +p "C:\OneDrive\PDF"
-attrib +p "C:\OneDrive\Screens"
-attrib +p "C:\OneDrive\Tools"
+attrib "C:\OneDrive\My" -U +P /s
+attrib "C:\OneDrive\npp" -U +P /s
+attrib "C:\OneDrive\PDF" -U +P /s
+attrib "C:\OneDrive\Screens" -U +P /s
+attrib "C:\OneDrive\Tools" -U +P /s
 '@
     $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
 
