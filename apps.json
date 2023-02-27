@@ -52,7 +52,7 @@
     "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["PC","VM","LAPTOP"],
+    "Groups": ["PC","VM"],
     "Notes": ""
   },
   {
@@ -295,7 +295,7 @@
     "Name": "Lenovo System Update",
     "ChocolateyName": "lenovo-thinkvantage-system-update",
     "WingetName": "Lenovo.SystemUpdate",
-    "Groups": ["LAPTOP"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -309,7 +309,7 @@
     "Name": "Libre Hardware Monitor (fork of Open Hardware Monitor)",
     "ChocolateyName": "librehardwaremonitor",
     "WingetName": "",
-    "Groups": ["PC","LAPTOP"],
+    "Groups": ["PC"],
     "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
   },
   {
