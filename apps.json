@@ -469,9 +469,10 @@
   },
   {
     "Name": "Storage Explorer",
-    "ChocolateyName": "microsoftazurestorageexplorer",
+    "ChocolateyName": "",
     "WingetName": "Microsoft.AzureStorageExplorer",
-    "Groups": ["PC","QUICKVM","VM"]
+    "Groups": ["PC","QUICKVM","VM"],
+    "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },
   {
     "Name": "Sysinternals Suite",
