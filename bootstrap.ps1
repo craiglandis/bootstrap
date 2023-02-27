@@ -1290,6 +1290,7 @@ process
     Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
 
 $removeTempOnedriveAndMyFoldersScriptContents = @'
+Stop-Process -Name caffeine64 -Force  -ErrorAction SilentlyContinue
 Remove-Item -Path c:\my -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\od -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\bin -Recurse -Force -ErrorAction SilentlyContinue
