@@ -4,34 +4,22 @@
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
-=== 2022-11-02 start ===
-Disable system sounds/startup sound
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
 schtasks /create /xml Watch-RDPFiles.xml /tn \Watch-RDPFiles /ru $userName /rp $password
 Register-ScheduledTask -xml (Get-Content Watch-RDPFiles.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath "\" -User $userName –Password $password -Force
-Install container feature - Enable-WindowsOptionalFeature -Online -FeatureName Containers -All -NoRestart
-Switch Docker to use Windows containers (needs to be run after Docker installed AND currently RUNNING) & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon
 Why did PS 7.0 get installed instead of 7.2?
 Why is the font not getting installed?
 Why aren't 7-zip file associations getting updated?
-Docker Desktop - supress subscription service agreement
-Docker Desktop - throws error "2 installation is incomplete" - wants WSL2 kernel update - https://aka.ms/wsl2kernel (https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
 Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong color
 Steam - steam logon prompt comes up, no obvious way to surpress without stopping Steam from starting at boot, so no big deal, leave as-is
-PowerShell - profile is not created
-
-=== 2022-11-02 end ===
 Additional shell customizations
 Install KE https://aka.ms/ke
 Import KE connections
 Install Visio https://www.office.com/?auth=2&home=1
-wmic path Win32_TerminalServiceSetting where AllowTSConnections="0" call SetAllowTSConnections "1"
-reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 Use fileUris to download the scripts instead of doing downloads from invoke-bootstrap.ps1/bootstrap.ps1
 Log to a custom event log - PSFramework - and create a .log, .csv, or .xlsx export of the useful stuff from that at the end
-Incorporate Helper module to minimize code redundancy
+Incorporate Helper module
 #>
 [CmdletBinding()]
 param(
@@ -839,6 +827,26 @@ process
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
     Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
+    $pwshCurrentUserCurrentHostProfilePath = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+    if (Test-Path -Path $pwshCurrentUserCurrentHostProfilePath -PathType Leaf)
+    {
+        Out-Log "$pwshCurrentUserCurrentHostProfilePath already exists, don't need to create it"
+    }
+    else
+    {
+        Invoke-ExpressionWithLogging -command "New-Item -Path $pwshCurrentUserCurrentHostProfilePath -Type File -Force | Out-Null"
+    }
+    $lineLoadingProfileFromOneDrive = '. C:\OneDrive\my\Profile.ps1'
+    if (Get-Content -Path $pwshCurrentUserCurrentHostProfilePath | Select-String -SimpleMatch $lineLoadingProfileFromOneDrive)
+    {
+        Out-Log "Line to load profile from OneDrive ($lineLoadingProfileFromOneDrive) already exists in $pwshCurrentUserCurrentHostProfilePath"
+    }
+    else
+    {
+        Out-Log "Adding line to load profile from OneDrive ($lineLoadingProfileFromOneDrive) to $pwshCurrentUserCurrentHostProfilePath"
+        Add-Content -Path $pwshCurrentUserCurrentHostProfilePath -Value "`nif (Test-Path -Path C:\OneDrive\my\Profile.ps1 -PathType Leaf) {$lineLoadingProfileFromOneDrive}"
+    }
+
     if (!$apps)
     {
         $apps = Get-AppList
@@ -1288,6 +1296,7 @@ process
     Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f'
 
     Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
+    Invoke-ExpressionWithLogging -command 'powercfg /change /standby-timeout-ac 1440'
 
 $removeTempOnedriveAndMyFoldersScriptContents = @'
 Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue
@@ -1305,21 +1314,28 @@ $userId = 'clandis@microsoft.com'
 
 Stop-Process -Name AutoHotkey -Force -ErrorAction SilentlyContinue
 
-$autoHotKeyTaskName = 'AutoHotkey'
-$autoHotKeyTask = Get-ScheduledTask -TaskName $autoHotKeyTaskName
-$autoHotKeyTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\Autohotkey.ahk'
-$autoHotKeyTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Highest -LogonType Interactive
-$autoHotKeyTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
-Set-ScheduledTask -TaskName $autoHotKeyTaskName -Action $autoHotKeyTaskAction -Principal $autoHotKeyTaskPrincipal -Trigger $autoHotKeyTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
-Start-ScheduledTask -TaskName $autoHotKeyTaskName
+if ((Test-path -Path 'C:\Program Files\AutoHotkey\AutoHotkey.exe' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Autohotkey.ahk' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk' -PathType Leaf))
+{
+    $autoHotKeyTaskName = 'AutoHotkey'
+    $autoHotKeyTask = Get-ScheduledTask -TaskName $autoHotKeyTaskName
+    $autoHotKeyTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\Autohotkey.ahk'
+    $autoHotKeyTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Highest -LogonType Interactive
+    $autoHotKeyTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
+    Set-ScheduledTask -TaskName $autoHotKeyTaskName -Action $autoHotKeyTaskAction -Principal $autoHotKeyTaskPrincipal -Trigger $autoHotKeyTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
+    Start-ScheduledTask -TaskName $autoHotKeyTaskName
 
-$autoHotKeyNotElevatedTaskName = 'AutoHotkey_Not_Elevated'
-$autoHotKeyNotElevatedTask = Get-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
-$autoHotKeyNotElevatedTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
-$autoHotKeyNotElevatedTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Limited -LogonType Interactive
-$autoHotKeyNotElevatedTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
-Set-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName -Action $autoHotKeyNotElevatedTaskAction -Principal $autoHotKeyNotElevatedTaskPrincipal -Trigger $autoHotKeyNotElevatedTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
-Start-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
+    $autoHotKeyNotElevatedTaskName = 'AutoHotkey_Not_Elevated'
+    $autoHotKeyNotElevatedTask = Get-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
+    $autoHotKeyNotElevatedTaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\cmd.exe' -Argument '/c Start "C:\Program Files\AutoHotkey\AutoHotkey.exe" C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
+    $autoHotKeyNotElevatedTaskPrincipal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel Limited -LogonType Interactive
+    $autoHotKeyNotElevatedTaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $userId
+    Set-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName -Action $autoHotKeyNotElevatedTaskAction -Principal $autoHotKeyNotElevatedTaskPrincipal -Trigger $autoHotKeyNotElevatedTaskTrigger | select Actions -ExpandProperty Actions | select Execute,Arguments
+    Start-ScheduledTask -TaskName $autoHotKeyNotElevatedTaskName
+}
+else
+{
+    Write-Host 'One or more of the following files was not found: C:\Program Files\AutoHotkey\AutoHotkey.exe, C:\OneDrive\My\Autohotkey.ahk, C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
+}
 '@
     $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
 
@@ -1408,6 +1424,16 @@ attrib "C:\OneDrive\Tools" -U +P /s
     reg add "HKCU\Software\Sysinternals\Whois" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\WinObj" /v EulaAccepted /t REG_DWORD /d 1 /f
     reg add "HKCU\Software\Sysinternals\ZoomIt" /v EulaAccepted /t REG_DWORD /d 1 /f
+
+    # Disable startup sound
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DisableStartupSound' -Value 1
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -Name 'DisableStartupSound' -Value 1
+    # Disable system sounds
+    Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps' | Get-ChildItem | Get-ChildItem | Where-Object {$_.PSChildName -eq '.Current'} | Set-ItemProperty -Name '(Default)' -Value ''
+
+    # Enabled remote desktop
+    $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
+    $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections=1;ModifyFirewallException=1}
 
     # Create desktop shortcut for running "choco upgrade all -y"
     $objShell = New-Object -ComObject Wscript.Shell
