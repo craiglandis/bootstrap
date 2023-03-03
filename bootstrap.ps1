@@ -6,8 +6,8 @@
 TODO:
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
-schtasks /create /xml Watch-RDPFiles.xml /tn \Watch-RDPFiles /ru $userName /rp $password
-Register-ScheduledTask -xml (Get-Content Watch-RDPFiles.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath "\" -User $userName –Password $password -Force
+schtasks /create /xml Watch-Files.xml /tn \Watch-Files /ru $userName /rp $password
+Register-ScheduledTask -xml (Get-Content Watch-Files.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath "\" -User $userName –Password $password -Force
 Why did PS 7.0 get installed instead of 7.2?
 Why is the font not getting installed?
 Why aren't 7-zip file associations getting updated?
@@ -1348,6 +1348,19 @@ attrib "C:\OneDrive\Screens" -U +P /s
 attrib "C:\OneDrive\Tools" -U +P /s
 '@
     $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
+
+$registerWatchFilesScheduledTaskScriptContents = @'
+if ((Test-path -Path 'C:\OneDrive\My\Watch-Files.ps1' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.vbs' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.xml' -PathType Leaf))
+{
+    Write-Host "Registering Watch-Files scheduled task"
+    Register-ScheduledTask -Xml (Get-Content -Path C:\OneDrive\My\Watch-Files.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath '\' -User 'clandis@microsoft.com' -Force # -Password $password -Force
+}
+else
+{
+    Write-Host 'One or more of the following files was not found: C:\OneDrive\My\Watch-Files.ps1, C:\OneDrive\My\Watch-Files.vbs, C:\OneDrive\My\Watch-Files.xml'
+}
+'@
+    $registerWatchFilesScheduledTaskScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Register-WatchFilesScheduledTask.ps1"
 
     # Add reg value for Sysinternals tools to avoid license agreement prompt
     reg add "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1 /f
