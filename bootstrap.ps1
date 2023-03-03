@@ -1354,6 +1354,7 @@ if ((Test-path -Path 'C:\OneDrive\My\Watch-Files.ps1' -PathType Leaf) -and (Test
 {
     Write-Host "Registering Watch-Files scheduled task"
     Register-ScheduledTask -Xml (Get-Content -Path C:\OneDrive\My\Watch-Files.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath '\' -User 'clandis@microsoft.com' -Force # -Password $password -Force
+    Start-ScheduledTask -TaskPath '\' -TaskName 'Watch-RDPFiles'
 }
 else
 {
