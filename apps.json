@@ -480,7 +480,7 @@
     "ChocolateyParams": "\/InstallDir:TOOLSPATH",
     "WingetName": "9P7KNL5RWT25",
     "Groups": ["PC","QUICKVM","VM"],
-    "Notes": "Creates TOOLSPATH and will fail if TOOLSPATH already exists"
+    "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1"
   },
   {
     "Name": "Terminal-Icons (PowerShell Module)",

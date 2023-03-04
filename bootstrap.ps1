@@ -247,9 +247,6 @@ process
             Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
         }
 
-        $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
-        Out-Log "$scriptName duration: $scriptDuration"
-
         <#
 		$psFrameworkLogPath = Get-PSFConfigValue -FullName PSFramework.Logging.FileSystem.LogPath
         $psFrameworkLogFile = Get-ChildItem -Path $psFrameworkLogPath | Sort-Object LastWriteTime -desc | Select-Object -First 1
@@ -258,6 +255,14 @@ process
 		#>
         Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
         Invoke-ExpressionWithLogging -command "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
+
+        Out-Log "Log file: $logFilePath"
+        $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
+        Out-Log "$scriptName duration: $scriptDuration"
+        Out-Log "Script completed. Some things may not work as expected until you sign off and on again."
+        # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
+        # so try logoff first to see if that resolves things
+        # Invoke-ExpressionWithLogging -command 'C:\Windows\system32\logoff.exe'
     }
 
     function Enable-PSLogging
@@ -1363,97 +1368,25 @@ else
 '@
     $registerWatchFilesScheduledTaskScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Register-WatchFilesScheduledTask.ps1"
 
-    # Add reg value for Sysinternals tools to avoid license agreement prompt
-    reg add "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\AccessEnum" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Active Directory Explorer" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\AdInsight" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\AdRestore" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Autologon" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Autoruns" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\BgInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\BlueScreen" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\CacheSet" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ClockRes" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Contig" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Coreinfo" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Ctrl2cap" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\DbgView" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Desktops" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Disk Usage" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Disk2vhd" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\DiskExt" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Diskmon" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\DiskView" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Du" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\EFSDump" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\EulaAccepted" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\FindLinks" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Handle" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Hex2dec" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Junction" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\LDMDump" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ListDLLs" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\LiveKd" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\LoadOrder" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\LogonSessions" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\MoveFile" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\NTFSInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PageDefrag" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PendMoves" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PipeList" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PortMon" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ProcDump" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Process Explorer" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Process Monitor" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ProcFeatures" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsExec" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsFile" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsGetSid" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsInfo" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsKill" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsList" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsLoggedOn" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsLogList" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsPasswd" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsPing" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsService" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsShutdown" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsSuspend" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\PsTools" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\RAMMap" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\RegDelNull" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\RegJump" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\RootkitRevealer" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\SDelete" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ShareEnum" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ShellRunas" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Sigcheck" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Streams" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Strings" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Sync" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\TCPView" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\VMMap" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\VolumeId" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\Whois" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\WinObj" /v EulaAccepted /t REG_DWORD /d 1 /f
-    reg add "HKCU\Software\Sysinternals\ZoomIt" /v EulaAccepted /t REG_DWORD /d 1 /f
-
-    # Disable startup sound
+    Out-Log "Disabling Windows startup sound"
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DisableStartupSound' -Value 1
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -Name 'DisableStartupSound' -Value 1
-    # Disable system sounds
+
+    Out-Log "Disabling Windows system sounds"
     Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps' | Get-ChildItem | Get-ChildItem | Where-Object {$_.PSChildName -eq '.Current'} | Set-ItemProperty -Name '(Default)' -Value ''
-    # Nuke this shortcut I never use
+
+    Out-Log "Deleting 'Send to OneNote' shortcut from Startup folder"
     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk"
-    # Remove Discord from Run keys since the app setting to stop it from starting at boot doesn't remove these
+
+    Out-Log "Deleting Discord from Run keys, even though it seems to still startup automatically without them?"
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord'
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord'
-    # Enable remote desktop
+
+    Out-Log "Enabling remote desktop"
     $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
     $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections=1;ModifyFirewallException=1}
 
-    # Create desktop shortcut for running "choco upgrade all -y"
+    Out-Log "Creating desktop shortcut for running 'choco upgrade all -y'"
     $objShell = New-Object -ComObject Wscript.Shell
     $shortcutPath = "$env:userprofile\Desktop\choco_upgrade_all.lnk"
     $shortCut = $objShell.CreateShortCut($shortcutPath)
@@ -1466,11 +1399,12 @@ else
     $bytes[0x15] = $bytes[0x15] -bor 0x20
     [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
 
-    Out-Log 'Running Invoke-GetWindowsUpdate'
-    Invoke-GetWindowsUpdate
-    Out-Log 'Done running Invoke-GetWindowsUpdate'
+    if ($isPC)
+    {
+        Out-Log 'Running Invoke-GetWindowsUpdate'
+        Invoke-GetWindowsUpdate
+        Out-Log 'Done running Invoke-GetWindowsUpdate'
+    }
 
-    # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
-    # so try logoff first to see if that resolves things
-    Invoke-ExpressionWithLogging -command 'C:\Windows\system32\logoff.exe'
+    Complete-ScriptExecution
 }
