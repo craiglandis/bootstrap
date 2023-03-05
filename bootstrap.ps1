@@ -1294,30 +1294,30 @@ process
         Invoke-ExpressionWithLogging -command 'SetUserFTA .xslt Applications\code.exe'
         Invoke-ExpressionWithLogging -command 'SetUserFTA .yaml Applications\code.exe'
         Invoke-ExpressionWithLogging -command 'SetUserFTA .yml Applications\code.exe'
+
+        $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
+        $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
+        $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
+        $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
+        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
+        Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
+
+        $tssUrl = 'https://aka.ms/getTSSv2'
+        $tssFolderPath = "$toolsPath\TSSv2"
+        $tssFilePath = "$packagesPath\TSSv2.zip"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
+        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
+
+        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
+        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
+
+        Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f'
+        Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f'
+
+        Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
+        Invoke-ExpressionWithLogging -command 'powercfg /change /standby-timeout-ac 1440'
     }
-
-    $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
-    $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
-    $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
-    $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
-    Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
-
-    $tssUrl = 'https://aka.ms/getTSSv2'
-    $tssFolderPath = "$toolsPath\TSSv2"
-    $tssFilePath = "$packagesPath\TSSv2.zip"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
-
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
-
-    Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f'
-    Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f'
-
-    Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
-    Invoke-ExpressionWithLogging -command 'powercfg /change /standby-timeout-ac 1440'
 
 $removeTempOnedriveAndMyFoldersScriptContents = @'
 Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue
