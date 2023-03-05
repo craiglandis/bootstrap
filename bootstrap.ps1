@@ -5,11 +5,6 @@
 # ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
 TODO:
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
-Import Watch-RDPFiles.xml scheduled task, which needs Watch-RDPFiles.vbs and Watch-RDPFilesSync.vbs
-schtasks /create /xml Watch-Files.xml /tn \Watch-Files /ru $userName /rp $password
-Register-ScheduledTask -xml (Get-Content Watch-Files.xml | Out-String) -TaskName Watch-RDPFiles -TaskPath "\" -User $userName –Password $password -Force
-Why did PS 7.0 get installed instead of 7.2?
-Why is the font not getting installed?
 Why aren't 7-zip file associations getting updated?
 Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong color
 Steam - steam logon prompt comes up, no obvious way to surpress without stopping Steam from starting at boot, so no big deal, leave as-is
@@ -867,6 +862,12 @@ process
         $apps = $apps | Where-Object {$_.Groups -contains $group}
     }
 
+    $adapterCompatibility = Get-CimInstance -Query 'Select AdapterCompatibility From Win32_VideoController' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty AdapterCompatibility
+    if ($adapterCompatibility -eq 'NVIDIA')
+    {
+        $nvidiaGpu = $true
+    }
+
     Out-Log 'Checking if winget is installed'
     $ErrorActionPreference = 'SilentlyContinue'
     $wingetVersion = winget -v
@@ -922,8 +923,21 @@ process
                 $command = $command.Replace('TOOLSPATH', $toolsPath)
                 $command = $command.Replace('MYPATH', $myPath)
             }
-            $command = "$command | Out-Null"
-            Invoke-ExpressionWithLogging -command $command
+
+            # These NVIDIA packages fail slowly if there is no NVIDIA GPU installed, so don't run that at all if there's no NVIDIA GPU
+            if ($command -match 'geforce-experience' -or $command -match 'geforce-game-ready-driver')
+            {
+                if ($nvidiaGpu)
+                {
+                    $command = "$command | Out-Null"
+                    Invoke-ExpressionWithLogging -command $command
+                }
+            }
+            else
+            {
+                $command = "$command | Out-Null"
+                Invoke-ExpressionWithLogging -command $command
+            }
         }
         elseif ($appName -and !$useChocolatey -and $isWingetInstalled)
         {
@@ -1084,7 +1098,8 @@ process
     $esIniFilePath = "$toolsPath\$esIniFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esIniUrl`', `'$esIniFilePath`')"
 
-    if ($group -eq 'PC' -or $group -eq 'VM')
+    # This takes ~10 minutes so skip it for $group -eq 'PC', files will be there anyway
+    if ($group -eq 'VM')
     {
         $getNirSoftToolsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'
         $getNirSoftToolsScriptFileName = $getNirSoftToolsScriptUrl.Split('/')[-1]
@@ -1201,8 +1216,9 @@ process
             Invoke-ExpressionWithLogging -command 'c:\windows\system32\cscript.exe //H:cscript'
             Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com'
             Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
-            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
-            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv'
+            # Skip since they only work if on VPN
+            # Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
+            # Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv'
         }
     }
 
@@ -1376,7 +1392,7 @@ else
     Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps' | Get-ChildItem | Get-ChildItem | Where-Object {$_.PSChildName -eq '.Current'} | Set-ItemProperty -Name '(Default)' -Value ''
 
     Out-Log "Deleting 'Send to OneNote' shortcut from Startup folder"
-    Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk"
+    Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk" -ErrorAction SilentlyContinue
 
     Out-Log "Deleting Discord from Run keys, even though it seems to still startup automatically without them?"
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord'
