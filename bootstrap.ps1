@@ -1360,7 +1360,7 @@ else
 '@
     $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
 
-    # Couldn't actually get this to work, still had to right-click the folder and set it
+    <# Couldn't actually get this to work, still had to right-click the folder and set it
 $setAlwaysKeepOnThisDeviceScriptContents = @'
 attrib "C:\OneDrive\My" -U +P /s
 attrib "C:\OneDrive\npp" -U +P /s
@@ -1369,6 +1369,7 @@ attrib "C:\OneDrive\Screens" -U +P /s
 attrib "C:\OneDrive\Tools" -U +P /s
 '@
     $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
+    #>
 
 $registerWatchFilesScheduledTaskScriptContents = @'
 if ((Test-path -Path 'C:\OneDrive\My\Watch-Files.ps1' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.vbs' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.xml' -PathType Leaf))
