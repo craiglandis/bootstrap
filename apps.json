@@ -470,7 +470,7 @@
   {
     "Name": "Storage Explorer",
     "ChocolateyName": "",
-    "WingetName": "Microsoft.AzureStorageExplorer",
+    "WingetName": "Microsoft.Azure.StorageExplorer",
     "Groups": ["PC","QUICKVM","VM"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },

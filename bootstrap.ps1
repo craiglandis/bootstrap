@@ -1205,8 +1205,8 @@ process
     $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
     $greenshotInstallerFilePath = "$packagesPath\$greenshotInstallerFileName"
     Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
-    # This is hanging the script for some reason
-    # Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
+    # Was hanging script in the past, can't repro anymore. With /VERYSILENT it still opens browser to donate page but I can't repro that blocking script execution
+    Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
 
     if ($isPC)
     {
@@ -1404,6 +1404,19 @@ else
     Out-Log "Enabling remote desktop"
     $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
     $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections=1;ModifyFirewallException=1}
+
+    Out-Log "Upgrading pip"
+    $pythonExePath = get-childitem -path "C:\Python*\python.exe" -File | sort-object CreationTime | Select-Object -last 1 | Select-Object -ExpandProperty FullName
+    Invoke-ExpressionWithLogging "$pythonExePath -m pip install --upgrade pip"
+
+    <#
+    $steamSetupUrl = 'https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe'
+    $steamSetupFileName = $steamSetupUrl.Split('/')[-1]
+    $steamSetupFilePath = "$packagesPath\$steamSetupFileName"
+    $steamSetupFolderPath = $steamSetupFilePath.Replace('.exe', '')
+    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$steamSetupUrl`', `'$steamSetupFilePath`')"
+    Invoke-ExpressionWithLogging -command "$steamSetupFilePath /s"
+    #>
 
     Out-Log "Creating desktop shortcut for running 'choco upgrade all -y'"
     $objShell = New-Object -ComObject Wscript.Shell
