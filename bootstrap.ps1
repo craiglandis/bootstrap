@@ -1398,8 +1398,8 @@ else
     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk" -ErrorAction SilentlyContinue
 
     Out-Log "Deleting Discord from Run keys, even though it seems to still startup automatically without them?"
-    Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord'
-    Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord'
+    Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -ErrorAction SilentlyContinue
 
     Out-Log "Enabling remote desktop"
     $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
