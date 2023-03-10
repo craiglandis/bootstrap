@@ -927,7 +927,7 @@ process
     Out-Log "Mode: $group"
     $appsToInstallCount = $apps.Count
     $appsToInstall = ($apps.Name | sort-object) -join "`n" | out-string
-    Out-Log "$appsToInstallCount apps to be installed:"
+    Out-Log "$appsToInstallCount apps to be installed:`n"
     Out-Log $appsToInstall -raw
     $apps | ForEach-Object {
 
@@ -1203,6 +1203,7 @@ process
         Out-Log "VSCode not installed, skipping download of $vsCodeSettingsJsonUrl"
     }
 
+    # Look at running these async since nothing needs to wait for the help to be updated
     Invoke-ExpressionWithLogging -command 'Update-Help -Force -ErrorAction SilentlyContinue'
     $pwshFilePath = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
     if (Test-Path -Path $pwshFilePath -PathType Leaf)
@@ -1350,26 +1351,29 @@ process
             $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
             $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
             $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
-            Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
+            Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
+            Invoke-ExpressionWithLogging "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
             Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
 
             $tssUrl = 'https://aka.ms/getTSSv2'
             $tssFolderPath = "$toolsPath\TSSv2"
             $tssFilePath = "$packagesPath\TSSv2.zip"
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
-            Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
+            Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
+            Invoke-ExpressionWithLogging "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
         }
 
-        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
-        Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
+        Invoke-ExpressionWithLogging "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
 
-        Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Discord /f'
-        Invoke-ExpressionWithLogging -command 'reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v BCClipboard /f'
+        Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -Force -ErrorAction SilentlyContinue"
 
-        Invoke-ExpressionWithLogging -command 'powercfg /hibernate off'
-        Invoke-ExpressionWithLogging -command 'powercfg /change /standby-timeout-ac 1440'
+        Invoke-ExpressionWithLogging 'powercfg /hibernate off'
+        Invoke-ExpressionWithLogging 'powercfg /change /standby-timeout-ac 1440'
     }
+
+    if ($isPC)
+    {
 
 $removeTempOnedriveAndMyFoldersScriptContents = @'
 Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue
@@ -1445,6 +1449,8 @@ else
     Out-Log "Disabling Windows system sounds"
     Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps' | Get-ChildItem | Get-ChildItem | Where-Object {$_.PSChildName -eq '.Current'} | Set-ItemProperty -Name '(Default)' -Value ''
     #>
+
+    }
 
     Out-Log "Deleting 'Send to OneNote' shortcut from Startup folder"
     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk" -ErrorAction SilentlyContinue
