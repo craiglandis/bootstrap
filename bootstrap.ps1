@@ -895,7 +895,10 @@ process
     }
     Out-Log "`$isWingetInstalled: $isWingetInstalled"
     Out-Log "Mode: $group"
-    Out-Log "$($apps.Count) apps to be installed: $($apps -join ',')"
+    $appsToInstallCount = $apps.Count
+    $appsToInstall = ($apps.Name | sort-object) -join "`n" | out-string
+    Out-Log "$appsToInstallCount apps to be installed:"
+    Out-Log $appsToInstall -raw
     $apps | ForEach-Object {
 
         $app = $_

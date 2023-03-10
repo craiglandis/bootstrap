@@ -450,7 +450,7 @@
     "Name": "SetUserFTA",
     "ChocolateyName": "setuserfta",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
