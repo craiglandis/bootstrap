@@ -61,35 +61,65 @@ process
     {
         param(
             [string]$text,
-            [string]$prefix = 'timespan',
-            [switch]$raw
+            [string]$prefix,
+            [switch]$raw,
+            [switch]$logonly,
+            [ValidateSet('Black','DarkBlue','DarkGreen','DarkCyan','DarkRed','DarkMagenta','DarkYellow','Gray','DarkGray','Blue','Green','Cyan','Red','Magenta','Yellow','White')]
+            [string]$color = 'White'
         )
 
         if ($raw)
         {
-            $text
-        }
-        elseif ($prefix -eq 'timespan' -and $scriptStartTime)
-        {
-            $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-            $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
-        }
-        elseif ($prefix -eq 'both' -and $scriptStartTime)
-        {
-            $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-            $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-            $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+            if ($logonly)
+            {
+                if ($global:logFilePath)
+                {
+                    $text | Out-File $global:logFilePath -Append
+                }
+            }
+            else
+            {
+                Write-Host $text -ForegroundColor $color
+                if ($global:logFilePath)
+                {
+                    $text | Out-File $global:logFilePath -Append
+                }
+            }
         }
         else
         {
-            $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-        }
-        Write-Host $prefixString -NoNewline -ForegroundColor Cyan
-        Write-Host " $text"
+            if ($prefix -eq 'timespan' -and $global:scriptStartTime)
+            {
+                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+                $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+            }
+            elseif ($prefix -eq 'both' -and $global:scriptStartTime)
+            {
+                $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+                $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+            }
+            else
+            {
+                $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+            }
 
-        if ($logFilePath)
-        {
-            "$prefixString $text" | Out-File $logFilePath -Append
+            if ($logonly)
+            {
+                if ($global:logFilePath)
+                {
+                    "$prefixString $text" | Out-File $global:logFilePath -Append
+                }
+            }
+            else
+            {
+                Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+                Write-Host " $text" -ForegroundColor $color
+                if ($global:logFilePath)
+                {
+                    "$prefixString $text" | Out-File $global:logFilePath -Append
+                }
+            }
         }
     }
 
@@ -105,7 +135,7 @@ process
         }
         catch
         {
-            Out-Log -Level Error -Message "Failed: $command" -ErrorRecord $_
+            Out-Log "Failed: $command"
             Out-Log "`$LASTEXITCODE: $LASTEXITCODE"
         }
     }
@@ -1427,9 +1457,12 @@ else
     $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
     $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections=1;ModifyFirewallException=1}
 
-    Out-Log "Upgrading pip"
-    $pythonExePath = get-childitem -path "C:\Python*\python.exe" -File | sort-object CreationTime | Select-Object -last 1 | Select-Object -ExpandProperty FullName
-    Invoke-ExpressionWithLogging "$pythonExePath -m pip install --upgrade pip"
+    $pythonExePath = get-childitem -path "C:\Python*\python.exe" -File -ErrorAction SilentlyContinue | sort-object CreationTime | Select-Object -last 1 | Select-Object -ExpandProperty FullName
+    if ($pythonExePath)
+    {
+        Out-Log "Upgrading pip"
+        Invoke-ExpressionWithLogging "$pythonExePath -m pip install --upgrade pip"
+    }
 
     <#
     $steamSetupUrl = 'https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe'
