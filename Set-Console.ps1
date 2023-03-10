@@ -7,36 +7,85 @@ param(
 
 function Out-Log
 {
-    param(
-        [string]$text,
-        [string]$prefix = 'timespan',
-        [switch]$raw
-    )
-    if ($raw)
-    {
-        $text
-    }
-    elseif ($prefix -eq 'timespan' -and $scriptStartTime)
-    {
-        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-        $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
-    }
-    elseif ($prefix -eq 'both' -and $scriptStartTime)
-    {
-        $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-        $timespan = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-        $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
-    }
-    else
-    {
-        $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-    }
-    Write-Host $prefixString -NoNewline -ForegroundColor Cyan
-    Write-Host " $text"
-    if ($logFilePath)
-    {
-        "$prefixString $text" | Out-File $logFilePath -Append
-    }
+	param(
+		[string]$text,
+		[string]$prefix,
+		[switch]$raw,
+		[switch]$logonly,
+		[ValidateSet('Black','DarkBlue','DarkGreen','DarkCyan','DarkRed','DarkMagenta','DarkYellow','Gray','DarkGray','Blue','Green','Cyan','Red','Magenta','Yellow','White')]
+		[string]$color = 'White'
+	)
+
+	if ($raw)
+	{
+		if ($logonly)
+		{
+			if ($global:logFilePath)
+			{
+				$text | Out-File $global:logFilePath -Append
+			}
+		}
+		else
+		{
+			Write-Host $text -ForegroundColor $color
+			if ($global:logFilePath)
+			{
+				$text | Out-File $global:logFilePath -Append
+			}
+		}
+	}
+	else
+	{
+		if ($prefix -eq 'timespan' -and $global:scriptStartTime)
+		{
+			$timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+			$prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+		}
+		elseif ($prefix -eq 'both' -and $global:scriptStartTime)
+		{
+			$timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+			$timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+			$prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+		}
+		else
+		{
+			$prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+		}
+
+		if ($logonly)
+		{
+			if ($global:logFilePath)
+			{
+				"$prefixString $text" | Out-File $global:logFilePath -Append
+			}
+		}
+		else
+		{
+			Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+			Write-Host " $text" -ForegroundColor $color
+			if ($global:logFilePath)
+			{
+				"$prefixString $text" | Out-File $global:logFilePath -Append
+			}
+		}
+	}
+}
+
+function Invoke-ExpressionWithLogging
+{
+	param(
+		[string]$command
+	)
+	Out-Log $command
+	try
+	{
+		Invoke-Expression -Command $command
+	}
+	catch
+	{
+		Out-Log "Failed: $command"
+		Out-Log "`$LASTEXITCODE: $LASTEXITCODE"
+	}
 }
 
 function Set-DefaultTerminalApp
@@ -84,23 +133,6 @@ function Set-WindowsTerminalSettings
 	$terminalSettings.profiles.defaults | Add-Member -MemberType NoteProperty -Name 'useAcrylic' -Value $false -Force
 	$terminalSettingsJsonString = $terminalSettings | ConvertTo-Json -Depth 10
 	Set-Content $settingsFilePath -Value $terminalSettingsJsonString
-}
-
-function Invoke-ExpressionWithLogging
-{
-	param(
-		[string]$command
-	)
-	Out-Log$command
-	try
-	{
-		Invoke-Expression -Command $command
-	}
-	catch
-	{
-		Out-Log-Level Error -Message "Failed: $command" -ErrorRecord $_
-		Out-Log "`$LASTEXITCODE: $LASTEXITCODE"
-	}
 }
 
 function Expand-Zip
@@ -245,7 +277,7 @@ if ($isPC -or $isVM)
 		if ($chocoVersion)
 		{
             Out-Log "Chocolatey $chocoVersion"
-			Out-Log'Using Chocolatey to install it since Chocolatey itself is already installed'
+			Out-Log 'Using Chocolatey to install it since Chocolatey itself is already installed'
 			$timestamp = Get-Date -Format yyyyMMddHHmmssff
 			$packageName = 'cascadia-code-nerd-font'
 			$chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
