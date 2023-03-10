@@ -80,7 +80,7 @@
     "Name": "Azure PowerShell",
     "ChocolateyName": "az.powershell",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module"
   },
   {
@@ -227,7 +227,7 @@
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": ["PC","VM"]
+    "Groups": ["PC","QUICKVM","VM"]
   },
   {
     "Name": "GitHub CLI",
@@ -407,8 +407,8 @@
     "Name": "PowerShell 7",
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
-    "Groups": [],
-    "Notes": "Scripting this install instead of using choco/winget since those packages can be stale"
+    "Groups": ["QUICKVM"],
+    "Notes": "Scripting this install instead of using choco/winget since those packages can be stale, but still using chocolatey to install it for QUICKVM"
   },
   {
     "Name": "PowerShell 7 Preview",
@@ -570,7 +570,7 @@
     "Name": "Wireshark",
     "ChocolateyName": "wireshark",
     "WingetName": "WiresharkFoundation.Wireshark",
-    "Groups": ["QUICKVM","VM"],
+    "Groups": ["VM"],
     "Notes": ""
   },
   {
