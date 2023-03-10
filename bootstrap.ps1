@@ -1,6 +1,15 @@
 <#
+<<<<<<< HEAD
+# Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1"); Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
+# [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
+# .\bootstrap.ps1 -group QUICKVM
+# [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
+# ipcsv (gci c:\bs\*.csv | sort lastwritetime -desc)[0].FullName | ft -a timestamp,message
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+=======
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1"); Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
+>>>>>>> 6e25426521ab50f2cfcf02234dbda79daf0cee28
 TODO:
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Why aren't 7-zip file associations getting updated?
@@ -730,7 +739,7 @@ process
     }
 
     # Install Windows Terminal and winget
-    if ($isWS22 -or $isWS19 -or $isWin11 -or $isWin10)
+    if (($isWS22 -or $isWS19 -or $isWin11 -or $isWin10) -and $group -ne 'QUICKVM')
     {
         # This alternate way to install Windows Terminal is only needed on WS22. For Win11/Win10, it's easier to use winget to install Windows Terminal
         # But using this same approach on WS22/Win11/Win10 simplifies the script
@@ -807,23 +816,31 @@ process
         #>
     }
 
-    $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
-    # Install PS7 release version
-    $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-    $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
-    $powerShellx64MsiFilePath = "$packagesPath\$powerShellx64MsiFileName"
-    $powerShellx64MsiLogFilePath = "$logsPath\$($powerShellx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
-    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
-    # Install PS7 preview version
-    $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
-    $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-    $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
-    $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
-    $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
-    Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+    Out-Log "`$group: $group"
+    if ($group -ne 'QUICKVM')
+    {
+        Out-Log "`$group: $group"
+        exit
+        $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
+        # Install PS7 release version
+        $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
+        $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
+        $powerShellx64MsiFilePath = "$packagesPath\$powerShellx64MsiFileName"
+        $powerShellx64MsiLogFilePath = "$logsPath\$($powerShellx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
+        Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+
+        # Install PS7 preview version
+        $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+        $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
+        $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
+        $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
+        Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+    }
+    exit
 
     $pwshCurrentUserCurrentHostProfilePath = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
     if (Test-Path -Path $pwshCurrentUserCurrentHostProfilePath -PathType Leaf)
@@ -880,7 +897,7 @@ process
     }
     Out-Log "`$isWingetInstalled: $isWingetInstalled"
     Out-Log "Mode: $group"
-    Out-Log "$($apps.Count) apps to be installed"
+    Out-Log "$($apps.Count) apps to be installed: $($apps -join ',')"
     $apps | ForEach-Object {
 
         $app = $_
@@ -989,7 +1006,7 @@ process
         # 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Add-ScheduledTasks.ps1'
-	'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Disable-StickyKeys.ps1'
+	    'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Disable-StickyKeys.ps1'
     )
 
     $scriptFileUrls | ForEach-Object {
@@ -1016,31 +1033,34 @@ process
         }
     }
 
-    $windowsTerminalSettingsUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/windows-terminal-settings.json'
+    if ($isWS22 -or $isWS19 -or $isWin11 -or $isWin10)
+    {
+        $windowsTerminalSettingsUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/windows-terminal-settings.json'
 
-    $windowsTerminalSettingsFilePaths = @(
-        "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-        "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json"
-    )
+        $windowsTerminalSettingsFilePaths = @(
+            "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+            "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json"
+        )
 
-    $windowsTerminalSettingsFilePaths | ForEach-Object {
-        $windowsTerminalSettingsFilePath = $_
-        if (Test-Path -Path $windowsTerminalSettingsFilePath -PathType Leaf)
-        {
-            Move-Item -Path $windowsTerminalSettingsFilePath -Destination "$windowsTerminalSettingsFilePath.original" -ErrorAction SilentlyContinue
+        $windowsTerminalSettingsFilePaths | ForEach-Object {
+            $windowsTerminalSettingsFilePath = $_
+            if (Test-Path -Path $windowsTerminalSettingsFilePath -PathType Leaf)
+            {
+                Move-Item -Path $windowsTerminalSettingsFilePath -Destination "$windowsTerminalSettingsFilePath.original" -ErrorAction SilentlyContinue
+            }
+            else
+            {
+                Invoke-ExpressionWithLogging -command "New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force | Out-Null"
+            }
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalSettingsUrl`', `'$windowsTerminalSettingsFilePath`')"
         }
-        else
-        {
-            Invoke-ExpressionWithLogging -command "New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force"
-        }
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalSettingsUrl`', `'$windowsTerminalSettingsFilePath`')"
     }
 
     if ($isWin11 -and $group -eq 'PC')
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
-	# https://github.com/microsoft/WSL/issues/9032
-	Invoke-ExpressionWithLogging -command 'wsl --install'
+	    # https://github.com/microsoft/WSL/issues/9032
+	    Invoke-ExpressionWithLogging -command 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
         Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
@@ -1143,7 +1163,7 @@ process
     {
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
-        Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force"
+        Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force | Out-Null"
         Out-Log "Downloading $vsCodeSettingsJsonUrl"
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
     }
@@ -1160,7 +1180,7 @@ process
         Invoke-ExpressionWithLogging -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Update-Help -Force -ErrorAction SilentlyContinue"
     }
 
-    if ($isPC -or $isVM)
+    if (($isPC -or $isVM) -and $group -ne 'QUICKVM')
     {
         # These can't be run at this point, they need to be run after OneDrive is set to sync to C:\OneDrive, which is a step I have yet to find out how to automate
         #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
@@ -1171,40 +1191,40 @@ process
         #(Get-Item -Path "$env:SystemDrive\od").Delete()
         #(Get-Item -Path "$env:SystemDrive\my").Delete()
         #(Get-Item -Path "$env:SystemDrive\bin").Delete()
-    }
 
-    $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
-    $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
-    $installModulesFilePath = "$scriptsPath\$installModulesFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installModulesFileUrl`', `'$installModulesFilePath`')"
+        $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
+        $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
+        $installModulesFilePath = "$scriptsPath\$installModulesFileName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installModulesFileUrl`', `'$installModulesFilePath`')"
 
-    if (Test-Path -Path $installModulesFilePath -PathType Leaf)
-    {
-        Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
-        Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
-        Invoke-ExpressionWithLogging -command "powershell -nologo -noprofile -File $installModulesFilePath"
-
-        if (Test-Path -Path $pwshFilePath -PathType Leaf)
+        if (Test-Path -Path $installModulesFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
-            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
-            Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
-        }
-    }
-    else
-    {
-        Out-Log "File not found: $installModulesFilePath"
-    }
+            Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
+            Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
+            Invoke-ExpressionWithLogging -command "powershell -nologo -noprofile -File $installModulesFilePath"
 
-    # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
-    $greenshotReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/greenshot/greenshot/releases'
-    $greenshotPrerelease = $greenshotReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
-    $greenshotInstallerUrl = ($greenshotPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
-    $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
-    $greenshotInstallerFilePath = "$packagesPath\$greenshotInstallerFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
-    # Was hanging script in the past, can't repro anymore. With /VERYSILENT it still opens browser to donate page but I can't repro that blocking script execution
-    Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
+            if (Test-Path -Path $pwshFilePath -PathType Leaf)
+            {
+                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
+                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
+                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
+            }
+        }
+        else
+        {
+            Out-Log "File not found: $installModulesFilePath"
+        }
+
+        # "Choco find greenshot" - package is still on 1.2.10 from 2017, no high DPI scaling support so very small icons on 4K, no obvious way to use chocolatey to install the prerelease version, so doing it manually
+        $greenshotReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/greenshot/greenshot/releases'
+        $greenshotPrerelease = $greenshotReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
+        $greenshotInstallerUrl = ($greenshotPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
+        $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
+        $greenshotInstallerFilePath = "$packagesPath\$greenshotInstallerFileName"
+        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
+        # Was hanging script in the past, can't repro anymore. With /VERYSILENT it still opens browser to donate page but I can't repro that blocking script execution
+        Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
+    }
 
     if ($isPC)
     {
@@ -1293,19 +1313,22 @@ process
         Invoke-ExpressionWithLogging -command 'SetUserFTA .yaml Applications\code.exe'
         Invoke-ExpressionWithLogging -command 'SetUserFTA .yml Applications\code.exe'
 
-        $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
-        $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
-        $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
-        $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
-        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
-        Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
+        if ($group -eq 'VM')
+        {
+            $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
+            $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
+            $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
+            $zimmermanToolsZipFolderPath = $zimmermanToolsZipFilePath.Replace('.zip', '')
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
+            Invoke-ExpressionWithLogging -command "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
+            Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
 
-        $tssUrl = 'https://aka.ms/getTSSv2'
-        $tssFolderPath = "$toolsPath\TSSv2"
-        $tssFilePath = "$packagesPath\TSSv2.zip"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
-        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
+            $tssUrl = 'https://aka.ms/getTSSv2'
+            $tssFolderPath = "$toolsPath\TSSv2"
+            $tssFilePath = "$packagesPath\TSSv2.zip"
+            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
+            Invoke-ExpressionWithLogging -command "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
+        }
 
         Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force"
         Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force"
