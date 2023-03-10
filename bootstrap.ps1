@@ -1,5 +1,4 @@
 <#
-<<<<<<< HEAD
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1"); Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
 # .\bootstrap.ps1 -group QUICKVM
@@ -9,7 +8,6 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 =======
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1"); Invoke-Expression -command $env:SystemDrive\bootstrap.ps1
 # [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy -ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
->>>>>>> 6e25426521ab50f2cfcf02234dbda79daf0cee28
 TODO:
 Get-NetConnectionProfile hangs when run from Invoke-Bootstrap.ps1 - commented it out for now
 Why aren't 7-zip file associations getting updated?
@@ -820,7 +818,7 @@ process
     if ($group -ne 'QUICKVM')
     {
         Out-Log "`$group: $group"
-        exit
+        #exit
         $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
         # Install PS7 release version
         $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -840,7 +838,7 @@ process
         Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
         Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     }
-    exit
+    #exit
 
     $pwshCurrentUserCurrentHostProfilePath = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
     if (Test-Path -Path $pwshCurrentUserCurrentHostProfilePath -PathType Leaf)
