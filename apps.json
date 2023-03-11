@@ -542,7 +542,7 @@
     "Name": "Windows Notepad",
     "ChocolateyName": "",
     "WingetName": "9MSMLRH6LZF3",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["PC","VM"],
     "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
   },
   {

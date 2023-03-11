@@ -146,7 +146,7 @@ process
         $nuget = Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -Force
         if (!$nuget -or $nuget.Version -lt [Version]'2.8.5.201')
         {
-            Invoke-ExpressionWithLogging -command 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
+            Invoke-ExpressionWithLogging 'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force'
         }
         else
         {
@@ -161,11 +161,11 @@ process
         Remove-Item -Path $appsJsonFilePath -Force -ErrorAction SilentlyContinue
         if ($isWin7 -or $isWS08R2 -or $isWS12)
         {
-            Invoke-ExpressionWithLogging -command "Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath"
+            Invoke-ExpressionWithLogging "Start-BitsTransfer -Source $appsJsonFileUrl -Destination $appsJsonFilePath"
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$appsJsonFileUrl`', `'$appsJsonFilePath`')"
+            Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$appsJsonFileUrl`', `'$appsJsonFilePath`')"
         }
 
         if (Test-Path -Path $appsJsonFilePath -PathType Leaf)
@@ -208,14 +208,14 @@ process
     function Invoke-Schtasks
     {
         $taskRun = "powershell.exe -ExecutionPolicy Bypass -File $scriptPath"
-        Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
+        Invoke-ExpressionWithLogging "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"$taskRun`" /f"
     }
 
     function Invoke-GetWindowsUpdate
     {
         $ProgressPreference = 'SilentlyContinue'
-        Invoke-ExpressionWithLogging -command 'Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope AllUsers -Force'
-        Invoke-ExpressionWithLogging -command 'Import-Module -Name PSWindowsUpdate -Force'
+        Invoke-ExpressionWithLogging 'Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope AllUsers -Force'
+        Invoke-ExpressionWithLogging 'Import-Module -Name PSWindowsUpdate -Force'
         $psWindowsUpdate = Get-Module -Name PSWindowsUpdate
         if ($psWindowsUpdate)
         {
@@ -248,14 +248,14 @@ process
             {
                 Invoke-Schtasks
                 Complete-ScriptExecution
-                Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+                Invoke-ExpressionWithLogging 'Restart-Computer -Force'
                 #exit
             }
             else
             {
-                Invoke-ExpressionWithLogging -command 'schtasks /delete /tn bootstrap /f'
+                Invoke-ExpressionWithLogging 'schtasks /delete /tn bootstrap /f'
                 Complete-ScriptExecution
-                Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+                Invoke-ExpressionWithLogging 'Restart-Computer -Force'
                 #exit
             }
         }
@@ -263,7 +263,7 @@ process
         {
             Out-Log 'Failed to install PSWindowsUpdate module'
             Complete-ScriptExecution
-            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+            Invoke-ExpressionWithLogging 'Restart-Computer -Force'
             #exit
         }
     }
@@ -272,9 +272,9 @@ process
     {
         if (Get-Module -Name Defender -ListAvailable -ErrorAction SilentlyContinue)
         {
-            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $env:temp -Force"
-            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $bootstrapPath -Force"
-            Invoke-ExpressionWithLogging -command "Remove-MpPreference -ExclusionPath $toolsPath -Force"
+            Invoke-ExpressionWithLogging "Remove-MpPreference -ExclusionPath $env:temp -Force"
+            Invoke-ExpressionWithLogging "Remove-MpPreference -ExclusionPath $bootstrapPath -Force"
+            Invoke-ExpressionWithLogging "Remove-MpPreference -ExclusionPath $toolsPath -Force"
         }
 
         <#
@@ -283,8 +283,8 @@ process
         $psFrameworkLogFilePath = $psFrameworkLogFile.FullName
         Out-Log "Log path: $psFrameworkLogFilePath"
 		#>
-        Invoke-ExpressionWithLogging -command "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
-        Invoke-ExpressionWithLogging -command "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
+        Invoke-ExpressionWithLogging "Copy-Item -Path $env:ProgramData\chocolatey\logs\chocolatey.log -Destination $logsPath"
+        Invoke-ExpressionWithLogging "New-Item -Path $bootstrapPath\ScriptRanToCompletion -ItemType File -Force | Out-Null"
 
         Out-Log "Log file: $logFilePath"
         $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
@@ -292,17 +292,17 @@ process
         Out-Log "Script completed. Some things may not work as expected until you sign off and on again."
         # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
         # so try logoff first to see if that resolves things
-        # Invoke-ExpressionWithLogging -command 'C:\Windows\system32\logoff.exe'
+        # Invoke-ExpressionWithLogging 'C:\Windows\system32\logoff.exe'
     }
 
     function Enable-PSLogging
     {
-        Invoke-ExpressionWithLogging -command '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
+        Invoke-ExpressionWithLogging '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072'
         $getPSLoggingScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-PSLogging.ps1'
         $getPSLoggingScriptName = $getPSLoggingScriptUrl.Split('/')[-1]
         $getPSLoggingScriptFilePath = "$scriptsPath\$getPSLoggingScriptName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getPSLoggingScriptUrl`', `'$getPSLoggingScriptFilePath`')"
-        Invoke-ExpressionWithLogging -Command "& `'$getPSLoggingScriptFilePath`' -Enable"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$getPSLoggingScriptUrl`', `'$getPSLoggingScriptFilePath`')"
+        Invoke-ExpressionWithLogging "& `'$getPSLoggingScriptFilePath`' -Enable"
     }
 
     $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
@@ -339,8 +339,8 @@ process
         Enable-PSLogging
     }
 
-    $windowsIdentityName = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
-    $isSystem = Invoke-ExpressionWithLogging -command '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'
+    $windowsIdentityName = Invoke-ExpressionWithLogging '[System.Security.Principal.WindowsIdentity]::GetCurrent().Name'
+    $isSystem = Invoke-ExpressionWithLogging '[System.Security.Principal.WindowsIdentity]::GetCurrent().IsSystem'
     Out-Log "Running as USER   : $windowsIdentityName"
     Out-Log "Running as SYSTEM : $isSystem"
 
@@ -422,9 +422,9 @@ process
     {
         # Temporary Defender exclusions to avoid perf issue
         # See also https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/32
-        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $env:temp -Force"
-        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $bootstrapPath -Force"
-        Invoke-ExpressionWithLogging -command "Add-MpPreference -ExclusionPath $toolsPath -Force"
+        Invoke-ExpressionWithLogging "Add-MpPreference -ExclusionPath $env:temp -Force"
+        Invoke-ExpressionWithLogging "Add-MpPreference -ExclusionPath $bootstrapPath -Force"
+        Invoke-ExpressionWithLogging "Add-MpPreference -ExclusionPath $toolsPath -Force"
     }
     $runCount = (Get-ChildItem -Path "$logsPath\$scriptBaseName-Run*" -File | Measure-Object).Count
     $runCount++
@@ -458,7 +458,7 @@ process
                 Out-Log "Creating $installDir folder for non-admin chocolatey installs"
                 New-Item -Path $installDir -ItemType Directory | Out-Null
             }
-            Invoke-ExpressionWithLogging -command "[Environment]::SetEnvironmentVariable('ChocolateyInstall', '$installDir', 'User')"
+            Invoke-ExpressionWithLogging "[Environment]::SetEnvironmentVariable('ChocolateyInstall', '$installDir', 'User')"
             $env:ChocolateyInstall = $installDir
             Out-Log "`$env:ChocolateyInstall : $env:ChocolateyInstall"
         }
@@ -540,48 +540,48 @@ process
     if ($isWindowsServer)
     {
         # Disable Server Manager from starting at Windows startup
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotOpenServerManagerAtLogon /t REG_DWORD /d 1 /f | Out-Null"
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\ServerManager' /v DoNotPopWACConsoleAtSMLaunch /t REG_DWORD /d 1 /f | Out-Null"
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\ServerManager' -Name 'DoNotOpenServerManagerAtLogon' -Value 1 -PropertyType 'DWord' -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\ServerManager' -Name 'DoNotPopWACConsoleAtSMLaunch' -Value 1 -PropertyType 'DWord' -Force | Out-Null"
     }
 
     if ($isWin11)
     {
-	# Enable classic context menu
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
+	    # Enable classic context menu
+        Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
     }
 
     if ($isWin10)
     {
         # Win10: Enable "Always show all icons in the notification area"
-        Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v EnableAutoTray /t REG_DWORD /d 0 /f | Out-Null"
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer' -Name 'EnableAutoTray' -Value 0 -PropertyType 'DWord' -Force | Out-Null"
     }
 
     # Config for all Windows versions
     # Enable dark mode
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v SystemUsesLightTheme /t REG_DWORD /d 0 /f"
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v AppsUseLightTheme /t REG_DWORD /d 0 /f"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v SystemUsesLightTheme /t REG_DWORD /d 0 /f"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v AppsUseLightTheme /t REG_DWORD /d 0 /f"
     # Set it to have no wallpaper (so solid color)
-    Invoke-ExpressionWithLogging -command "Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'WallPaper' -Value ''"    # Show file extensions
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
+    Invoke-ExpressionWithLogging "Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'WallPaper' -Value ''"    # Show file extensions
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
     # Show hidden files
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
     # Show encrypted or compressed NTFS files in color
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowEncryptCompressedColor /t REG_DWORD /d 1 /f | Out-Null"
-    #Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowEncryptCompressedColor' -Type DWord -Value 1
-        # Show protected operating system files
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowEncryptCompressedColor /t REG_DWORD /d 1 /f | Out-Null"
+    # Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowEncryptCompressedColor' -Type DWord -Value 1
+    # Show protected operating system files
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowSuperHidden /t REG_DWORD /d 1 /f | Out-Null"
     # Explorer show compressed files color
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
     # Taskbar on left instead of center
-    Invoke-ExpressionWithLogging -command "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
 
     if ($isSAW)
     {
-        Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force -Scope CurrentUser'
+        Invoke-ExpressionWithLogging 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force -Scope CurrentUser'
     }
     else
     {
-        Invoke-ExpressionWithLogging -command 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
+        Invoke-ExpressionWithLogging 'Set-ExecutionPolicy -ExecutionPolicy Bypass -Force'
     }
 
     if ($isVM)
@@ -592,7 +592,7 @@ process
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
+            Invoke-ExpressionWithLogging "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
             Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
         }
     }
@@ -603,7 +603,7 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $($profile.CurrentUserCurrentHost) -Type File -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $($profile.CurrentUserCurrentHost) -Type File -Force | Out-Null"
     }
 
     $ErrorActionPreference = 'SilentlyContinue'
@@ -624,13 +624,13 @@ process
             #Import-Module -Name BitsTransfer
             #Start-BitsTransfer -Source $installWmfScriptUrl -Destination $installWmfScriptFilePath
             (New-Object Net.WebClient).DownloadFile($installWmfScriptUrl, $installWmfScriptFilePath)
-            Invoke-ExpressionWithLogging -command $installWmfScriptFilePath
+            Invoke-ExpressionWithLogging $installWmfScriptFilePath
             # The install WMF script will issue a retart on its own
             exit
         }
         else
         {
-            Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+            Invoke-ExpressionWithLogging "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
 
             $ErrorActionPreference = 'SilentlyContinue'
             $chocoVersion = choco -v
@@ -651,7 +651,7 @@ process
     {
         Out-Log "Chocolatey $chocoVersion successfully installed"
         #Out-Log "Changing Chocolatey download cache to $packagesPath to save space on OS disk. See also https://docs.chocolatey.org/en-us/guides/usage/change-cache"
-        #Invoke-ExpressionWithLogging -command "choco config set cacheLocation $packagesPath"
+        #Invoke-ExpressionWithLogging "choco config set cacheLocation $packagesPath"
     }
     else
     {
@@ -666,7 +666,7 @@ process
         $timestamp = Get-Date -Format yyyyMMddHHmmssff
         $packageName = 'powershell'
         $chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
-        Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
+        Invoke-ExpressionWithLogging "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
         if ($LASTEXITCODE -eq 3010)
         {
             Out-Log 'Creating onstart scheduled task to run script again at startup'
@@ -682,8 +682,8 @@ process
                 Out-Log "Downloading $bootstrapScriptUrl to $bootstrapScriptFilePath"
                 (New-Object Net.Webclient).DownloadFile($bootstrapScriptUrl, $bootstrapScriptFilePath)
             }
-            Invoke-ExpressionWithLogging -command "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $bootstrapScriptFilePath`" /f"
-            Invoke-ExpressionWithLogging -command 'Restart-Computer -Force'
+            Invoke-ExpressionWithLogging "schtasks /create /tn bootstrap /sc onstart /delay 0000:30 /rl highest /ru system /tr `"powershell.exe -executionpolicy bypass -file $bootstrapScriptFilePath`" /f"
+            Invoke-ExpressionWithLogging 'Restart-Computer -Force'
         }
     }
 
@@ -691,11 +691,11 @@ process
     if ($PSEdition -eq 'Desktop')
     {
         Confirm-NugetInstalled
-        Invoke-ExpressionWithLogging -command 'Import-Module -Name Appx -ErrorAction SilentlyContinue'
+        Invoke-ExpressionWithLogging 'Import-Module -Name Appx -ErrorAction SilentlyContinue'
     }
     else
     {
-        Invoke-ExpressionWithLogging -command 'Import-Module -Name Appx -UseWindowsPowerShell -ErrorAction SilentlyContinue'
+        Invoke-ExpressionWithLogging 'Import-Module -Name Appx -UseWindowsPowerShell -ErrorAction SilentlyContinue'
     }
 
     # https://psframework.org/
@@ -709,8 +709,8 @@ process
     else
     {
         Out-Log 'PSFramework module not found, installing it'
-        Invoke-ExpressionWithLogging -command "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
-        Invoke-ExpressionWithLogging -command "Import-Module -Name PSFramework -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging "Install-Module -Name PSFramework -Repository PSGallery -Scope AllUsers -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging "Import-Module -Name PSFramework -ErrorAction SilentlyContinue"
         $psframework = Get-Module -Name PSFramework -ErrorAction SilentlyContinue
         if ($psframework)
         {
@@ -737,11 +737,11 @@ process
         if ($isSAW)
         {
             $installDir = "$env:SystemDrive:\ch"
-            Invoke-ExpressionWithLogging -command "[Environment]::SetEnvironmentVariable('ChocolateyInstall', '$installDir', 'System')"
+            Invoke-ExpressionWithLogging "[Environment]::SetEnvironmentVariable('ChocolateyInstall', '$installDir', 'System')"
             New-Item -Path $installDir -ItemType Directory | Out-Null
         }
 
-        Invoke-ExpressionWithLogging -command "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+        Invoke-ExpressionWithLogging "Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
         $ErrorActionPreference = 'SilentlyContinue'
         $chocoVersion = choco -v
         $ErrorActionPreference = 'Continue'
@@ -781,8 +781,8 @@ process
         $windowsTerminalPreviewMsixBundleUri = ($windowsTerminalPreviewRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $windowsTerminalPreviewMsixBundleFileName = $windowsTerminalPreviewMsixBundleUri.Split('/')[-1]
         $windowsTerminalPreviewMsixBundleFilePath = "$packagesPath\$windowsTerminalPreviewMsixBundleFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalPreviewMsixBundleUri`', `'$windowsTerminalPreviewMsixBundleFilePath`')"
-        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue | Out-Null"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalPreviewMsixBundleUri`', `'$windowsTerminalPreviewMsixBundleFilePath`')"
+        Invoke-ExpressionWithLogging "Add-AppxPackage -Path $windowsTerminalPreviewMsixBundleFilePath -ErrorAction SilentlyContinue | Out-Null"
         <# Release version
         $windowsTerminalRelease = $windowsTerminalReleases | Where-Object {$_.prerelease -eq $false} | Sort-Object -Property id -Descending | Select-Object -First 1
         $windowsTerminalMsixBundleUri = ($windowsTerminalRelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
@@ -798,34 +798,34 @@ process
         $vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
         $vcLibsFileName = $vcLibsUrl.Split('/')[-1]
         $vcLibsFilePath = "$packagesPath\$vcLibsFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vcLibsUrl`', `'$vcLibsFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$vcLibsUrl`', `'$vcLibsFilePath`')"
         if (Test-Path -Path $vcLibsFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command "Add-AppPackage -Path $vcLibsFilePath | Out-Null"
+            Invoke-ExpressionWithLogging "Add-AppPackage -Path $vcLibsFilePath | Out-Null"
         }
 
         $microsoftUiXamlPackageUrl = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
         $microsoftUiXamlPackageFileName = $microsoftUiXamlPackageUrl.Split('/')[-1]
         $microsoftUiXamlPackageFolderPath = "$packagesPath\$microsoftUiXamlPackageFileName"
         $microsoftUiXamlPackageFilePath = "$packagesPath\$microsoftUiXamlPackageFileName.zip"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
-        Invoke-ExpressionWithLogging -command "Expand-Zip -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$microsoftUiXamlPackageUrl`', `'$microsoftUiXamlPackageFilePath`')"
+        Invoke-ExpressionWithLogging "Expand-Zip -Path $microsoftUiXamlPackageFilePath -DestinationPath $microsoftUiXamlPackageFolderPath"
         $microsoftUiXamlAppXFilePath = "$microsoftUiXamlPackageFolderPath\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"
-        Invoke-ExpressionWithLogging -command "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath | Out-Null"
+        Invoke-ExpressionWithLogging "Add-AppxPackage -Path $microsoftUiXamlAppXFilePath | Out-Null"
 
         $wingetReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases'
         $wingetPrerelease = $wingetReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('msixbundle')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleFileName = $wingetPrereleaseMsixBundleUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleFilePath = "$packagesPath\$wingetPrereleaseMsixBundleFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleUrl`', `'$wingetPrereleaseMsixBundleFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleUrl`', `'$wingetPrereleaseMsixBundleFilePath`')"
         $wingetPrereleaseMsixBundleLicenseUrl = ($wingetPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('xml')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $wingetPrereleaseMsixBundleLicenseFileName = $wingetPrereleaseMsixBundleLicenseUrl.Split('/')[-1]
         $wingetPrereleaseMsixBundleLicenseFilePath = "$packagesPath\$wingetPrereleaseMsixBundleLicenseFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleLicenseUrl`', `'$wingetPrereleaseMsixBundleLicenseFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$wingetPrereleaseMsixBundleLicenseUrl`', `'$wingetPrereleaseMsixBundleLicenseFilePath`')"
         if ((Test-Path -Path $wingetPrereleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetPrereleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath | Out-Null"
+            Invoke-ExpressionWithLogging "Add-AppxProvisionedPackage -Online -PackagePath $wingetPrereleaseMsixBundleFilePath -LicensePath $wingetPrereleaseMsixBundleLicenseFilePath | Out-Null"
         }
         <# Release version
         $wingetrelease = $wingetReleases | Where-Object prerelease -eq $true | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -839,7 +839,7 @@ process
         (New-Object Net.WebClient).DownloadFile($wingetreleaseMsixBundleLicenseUrl, $wingetreleaseMsixBundleLicenseFilePath)
         if ((Test-Path -Path $wingetreleaseMsixBundleFilePath -PathType Leaf) -and (Test-Path -Path $wingetreleaseMsixBundleLicenseFilePath -PathType Leaf))
         {
-            Invoke-ExpressionWithLogging -command "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath | Out-Null"
+            Invoke-ExpressionWithLogging "Add-AppxProvisionedPackage -Online -PackagePath $wingetreleaseMsixBundleFilePath -LicensePath $wingetreleaseMsixBundleLicenseFilePath | Out-Null"
         }
         #>
     }
@@ -856,8 +856,8 @@ process
         $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
         $powerShellx64MsiFilePath = "$packagesPath\$powerShellx64MsiFileName"
         $powerShellx64MsiLogFilePath = "$logsPath\$($powerShellx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
-        Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
+        Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
         # Install PS7 preview version
         $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -865,8 +865,8 @@ process
         $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
         $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
         $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
-        Invoke-ExpressionWithLogging -command "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
+        Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
     }
     #exit
 
@@ -877,7 +877,7 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $pwshCurrentUserCurrentHostProfilePath -Type File -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $pwshCurrentUserCurrentHostProfilePath -Type File -Force | Out-Null"
     }
     $lineLoadingProfileFromOneDrive = '. C:\OneDrive\my\Profile.ps1'
     if (Get-Content -Path $pwshCurrentUserCurrentHostProfilePath | Select-String -SimpleMatch $lineLoadingProfileFromOneDrive)
@@ -976,13 +976,13 @@ process
                 if ($nvidiaGpu)
                 {
                     $command = "$command | Out-Null"
-                    Invoke-ExpressionWithLogging -command $command
+                    Invoke-ExpressionWithLogging $command
                 }
             }
             else
             {
                 $command = "$command | Out-Null"
-                Invoke-ExpressionWithLogging -command $command
+                Invoke-ExpressionWithLogging $command
             }
         }
         elseif ($appName -and !$useChocolatey -and $isWingetInstalled)
@@ -992,7 +992,7 @@ process
             $timestamp = Get-Date -Format yyyyMMddHHmmssff
             $wingetInstallLogFilePath = "$logsPath\winget_install_$($appName)_$($timestamp).log"
             $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements --log $wingetInstallLogFilePath | Out-Null"
-            Invoke-ExpressionWithLogging -command $command
+            Invoke-ExpressionWithLogging $command
         }
     }
 
@@ -1008,7 +1008,7 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $toolsPath -Type Directory -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $toolsPath -Type Directory -Force | Out-Null"
     }
 
     Out-Log "Checking if $myPath exists"
@@ -1018,20 +1018,20 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $myPath -Type Directory -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $myPath -Type Directory -Force | Out-Null"
     }
 
     # https://stackoverflow.com/questions/714877/setting-windows-powershell-environment-variables
     Out-Log "Adding $toolsPath and $myPath to user Path environment variable"
     $newUserPath = "$env:Path;$toolsPath;$myPath"
-    Invoke-ExpressionWithLogging -command "[Environment]::SetEnvironmentVariable('Path', '$newUserPath', 'User')"
+    Invoke-ExpressionWithLogging "[Environment]::SetEnvironmentVariable('Path', '$newUserPath', 'User')"
 
     $userPathFromRegistry = (Get-ItemProperty -Path 'HKCU:\Environment' -Name Path).Path
     $separator = "`n$('='*160)`n"
     Out-Log "$separator`$userPathFromRegistry: $userPathFromRegistry$separator"
 
-    Invoke-ExpressionWithLogging -command "Remove-Item $env:PUBLIC\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
-    Invoke-ExpressionWithLogging -command "Remove-Item $env:USERPROFILE\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-Item $env:PUBLIC\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-Item $env:USERPROFILE\Desktop\*.lnk -Force -ErrorAction SilentlyContinue"
 
     $scriptFileUrls = @(
         # 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
@@ -1044,8 +1044,8 @@ process
         $scriptFileUrl = $_
         $scriptFileName = $scriptFileUrl.Split('/')[-1]
         $scriptFilePath = "$scriptsPath\$scriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
-        Invoke-ExpressionWithLogging -command $scriptFilePath
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
+        Invoke-ExpressionWithLogging $scriptFilePath
     }
 
     $regFileUrls = @(
@@ -1057,10 +1057,10 @@ process
         $regFileUrl = $_
         $regFileName = $regFileUrl.Split('/')[-1]
         $regFilePath = "$regFilesPath\$regFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$regFileUrl`', `'$regFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$regFileUrl`', `'$regFilePath`')"
         if (Test-Path -Path $regFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command "reg import $regFilePath"
+            Invoke-ExpressionWithLogging "reg import $regFilePath"
         }
     }
 
@@ -1081,9 +1081,9 @@ process
             }
             else
             {
-                Invoke-ExpressionWithLogging -command "New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force | Out-Null"
+                Invoke-ExpressionWithLogging "New-Item -Path $windowsTerminalSettingsFilePath -ItemType File -Force | Out-Null"
             }
-            Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalSettingsUrl`', `'$windowsTerminalSettingsFilePath`')"
+            Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$windowsTerminalSettingsUrl`', `'$windowsTerminalSettingsFilePath`')"
         }
     }
 
@@ -1091,10 +1091,10 @@ process
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
 	    # https://github.com/microsoft/WSL/issues/9032
-	    Invoke-ExpressionWithLogging -command 'wsl --install'
+	    Invoke-ExpressionWithLogging 'wsl --install'
         # /All enables all parent features of the specified feature
-        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
-        Invoke-ExpressionWithLogging -command 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
+        Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
+        Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
     }
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
@@ -1112,13 +1112,13 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $nppSettingsFolderPath -Type Directory -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $nppSettingsFolderPath -Type Directory -Force | Out-Null"
     }
 
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$nppSettingsZipUrl`', `'$nppSettingsZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath"
-    Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath"
-    Invoke-ExpressionWithLogging -command "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath"
+    Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$nppSettingsZipUrl`', `'$nppSettingsZipFilePath`')"
+    Invoke-ExpressionWithLogging "Expand-Zip -Path $nppSettingsZipFilePath -DestinationPath $nppSettingsTempFolderPath"
+    Invoke-ExpressionWithLogging "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppSettingsFolderPath"
+    Invoke-ExpressionWithLogging "Copy-Item -Path $nppSettingsTempFolderPath\* -Destination $nppAppDataPath"
 
     if (Test-Path -Path $nppCloudFolderPath -PathType Container)
     {
@@ -1126,26 +1126,26 @@ process
     }
     else
     {
-        Invoke-ExpressionWithLogging -command "New-Item -Path $nppCloudFolderPath -Type Directory -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $nppCloudFolderPath -Type Directory -Force | Out-Null"
     }
-    Invoke-ExpressionWithLogging -command "Set-Content -Path $env:APPDATA\Notepad++\cloud\choice -Value $nppSettingsFolderPath -Force"
+    Invoke-ExpressionWithLogging "Set-Content -Path $env:APPDATA\Notepad++\cloud\choice -Value $nppSettingsFolderPath -Force"
 
     # The chocolatey package for Everything includes an old version (1.1.0.9) of the es.exe CLI tool
     # Delete that one, then download the latest (1.1.0.23 ) from the voidtools site
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\bin\es.exe -Force -ErrorAction SilentlyContinue"
-    Invoke-ExpressionWithLogging -command "Remove-Item -Path $env:ProgramData\chocolatey\lib\Everything\tools\es.exe -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-Item -Path $env:ProgramData\chocolatey\bin\es.exe -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-Item -Path $env:ProgramData\chocolatey\lib\Everything\tools\es.exe -Force -ErrorAction SilentlyContinue"
     $esZipUrl = 'https://www.voidtools.com/ES-1.1.0.23.zip'
     $esZipFileName = $esZipUrl.Split('/')[-1]
     $esZipFolderPath = "$packagesPath\$($esZipFileName.Replace('.zip',''))"
     $esZipFilePath = "$packagesPath\$esZipFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
-    Invoke-ExpressionWithLogging -command "Expand-Zip -Path $esZipFilePath -DestinationPath $esZipFolderPath"
+    Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$esZipUrl`', `'$esZipFilePath`')"
+    Invoke-ExpressionWithLogging "Expand-Zip -Path $esZipFilePath -DestinationPath $esZipFolderPath"
     Copy-Item -Path $esZipFolderPath\es.exe -Destination $toolsPath -Force
 
     $esIniUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/es.ini'
     $esIniFileName = $esIniUrl.Split('/')[-1]
     $esIniFilePath = "$toolsPath\$esIniFileName"
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$esIniUrl`', `'$esIniFilePath`')"
+    Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$esIniUrl`', `'$esIniFilePath`')"
 
     # This takes ~10 minutes so skip it for $group -eq 'PC', files will be there anyway
     if ($group -eq 'VM')
@@ -1153,8 +1153,8 @@ process
         $getNirSoftToolsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'
         $getNirSoftToolsScriptFileName = $getNirSoftToolsScriptUrl.Split('/')[-1]
         $getNirSoftToolsScriptFilePath = "$scriptsPath\$getNirSoftToolsScriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$getNirSoftToolsScriptUrl`', `'$getNirSoftToolsScriptFilePath`')"
-        Invoke-ExpressionWithLogging -command $getNirSoftToolsScriptFilePath
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$getNirSoftToolsScriptUrl`', `'$getNirSoftToolsScriptFilePath`')"
+        Invoke-ExpressionWithLogging $getNirSoftToolsScriptFilePath
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
@@ -1169,14 +1169,14 @@ process
         $installVSCodeScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCode.ps1'
         $installVSCodeScriptFileName = $installVSCodeScriptUrl.Split('/')[-1]
         $installVSCodeScriptFilePath = "$scriptsPath\$installVSCodeScriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeScriptUrl`', `'$installVSCodeScriptFilePath`')"
-        Invoke-ExpressionWithLogging -command $installVSCodeScriptFilePath
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeScriptUrl`', `'$installVSCodeScriptFilePath`')"
+        Invoke-ExpressionWithLogging $installVSCodeScriptFilePath
 
         $installVSCodeExtensionsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCodeExtensions.ps1'
         $installVSCodeExtensionsScriptFileName = $installVSCodeExtensionsScriptUrl.Split('/')[-1]
         $installVSCodeExtensionsScriptFilePath = "$scriptsPath\$installVSCodeExtensionsScriptFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeExtensionsScriptUrl`', `'$installVSCodeExtensionsScriptFilePath`')"
-        Invoke-ExpressionWithLogging -command $installVSCodeExtensionsScriptFilePath
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$installVSCodeExtensionsScriptUrl`', `'$installVSCodeExtensionsScriptFilePath`')"
+        Invoke-ExpressionWithLogging $installVSCodeExtensionsScriptFilePath
     }
 
     $vsCodeSystemPath = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
@@ -1194,9 +1194,9 @@ process
     {
         $vsCodeSettingsJsonUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_settings.json'
         $vsCodeSettingsJsonPath = "$env:APPDATA\Code\User\settings.json"
-        Invoke-ExpressionWithLogging -command "New-Item -Path $vsCodeSettingsJsonPath -Force | Out-Null"
+        Invoke-ExpressionWithLogging "New-Item -Path $vsCodeSettingsJsonPath -Force | Out-Null"
         Out-Log "Downloading $vsCodeSettingsJsonUrl"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
     }
     else
     {
@@ -1204,20 +1204,20 @@ process
     }
 
     # Look at running these async since nothing needs to wait for the help to be updated
-    Invoke-ExpressionWithLogging -command 'Update-Help -Force -ErrorAction SilentlyContinue'
+    Invoke-ExpressionWithLogging 'Update-Help -Force -ErrorAction SilentlyContinue'
     $pwshFilePath = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
     if (Test-Path -Path $pwshFilePath -PathType Leaf)
     {
-        Invoke-ExpressionWithLogging -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Set-ExecutionPolicy -ExecutionPolicy Bypass -Force"
-        Invoke-ExpressionWithLogging -Command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Update-Help -Force -ErrorAction SilentlyContinue"
+        Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Set-ExecutionPolicy -ExecutionPolicy Bypass -Force"
+        Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Update-Help -Force -ErrorAction SilentlyContinue"
     }
 
     if (($isPC -or $isVM) -and $group -ne 'QUICKVM')
     {
         # These can't be run at this point, they need to be run after OneDrive is set to sync to C:\OneDrive, which is a step I have yet to find out how to automate
-        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
-        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\my -Target $env:SystemDrive\OneDrive\My -ErrorAction SilentlyContinue | Out-Null"
-        #Invoke-ExpressionWithLogging -command "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\bin -Target $env:SystemDrive\OneDrive\Tools -ErrorAction SilentlyContinue | Out-Null"
+        #Invoke-ExpressionWithLogging "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
+        #Invoke-ExpressionWithLogging "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\my -Target $env:SystemDrive\OneDrive\My -ErrorAction SilentlyContinue | Out-Null"
+        #Invoke-ExpressionWithLogging "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\bin -Target $env:SystemDrive\OneDrive\Tools -ErrorAction SilentlyContinue | Out-Null"
 
         # To remove the symbolic links (Remove-Item won't do it):
         #(Get-Item -Path "$env:SystemDrive\od").Delete()
@@ -1227,19 +1227,19 @@ process
         $installModulesFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-Modules.ps1'
         $installModulesFileName = $installModulesFileUrl.Split('/')[-1]
         $installModulesFilePath = "$scriptsPath\$installModulesFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$installModulesFileUrl`', `'$installModulesFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$installModulesFileUrl`', `'$installModulesFilePath`')"
 
         if (Test-Path -Path $installModulesFilePath -PathType Leaf)
         {
-            Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
-            Invoke-ExpressionWithLogging -command 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
-            Invoke-ExpressionWithLogging -command "powershell -nologo -noprofile -File $installModulesFilePath"
+            Invoke-ExpressionWithLogging 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force'
+            Invoke-ExpressionWithLogging 'powershell -nologo -noprofile -Command [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease'
+            Invoke-ExpressionWithLogging "powershell -nologo -noprofile -File $installModulesFilePath"
 
             if (Test-Path -Path $pwshFilePath -PathType Leaf)
             {
-                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
-                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
-                Invoke-ExpressionWithLogging -command "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
+                Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force"
+                Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Install-Module -Name PowerShellGet -Scope CurrentUser -AllowClobber -Force -AllowPrerelease"
+                Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -File $installModulesFilePath"
             }
         }
         else
@@ -1253,9 +1253,9 @@ process
         $greenshotInstallerUrl = ($greenshotPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('.exe')}).browser_download_url
         $greenshotInstallerFileName = $greenshotInstallerUrl.Split('/')[-1]
         $greenshotInstallerFilePath = "$packagesPath\$greenshotInstallerFileName"
-        Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$greenshotInstallerUrl`', `'$greenshotInstallerFilePath`')"
         # Was hanging script in the past, can't repro anymore. With /VERYSILENT it still opens browser to donate page but I can't repro that blocking script execution
-        Invoke-ExpressionWithLogging -command "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
+        Invoke-ExpressionWithLogging "$greenshotInstallerFilePath /VERYSILENT /NORESTART | Out-Null"
     }
 
     if ($isPC)
@@ -1263,12 +1263,12 @@ process
         $caption = Get-WmiObject Win32_OperatingSystem | Select-Object -ExpandProperty Caption
         if ($caption -eq 'Microsoft Windows 11 Enterprise')
         {
-            Invoke-ExpressionWithLogging -command 'c:\windows\system32\cscript.exe //H:cscript'
-            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com'
-            Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
+            Invoke-ExpressionWithLogging 'c:\windows\system32\cscript.exe //H:cscript'
+            Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com'
+            Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
             # Skip since they only work if on VPN
-            # Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
-            # Invoke-ExpressionWithLogging -command 'cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv'
+            # Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
+            # Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /dlv'
         }
     }
 
@@ -1304,46 +1304,46 @@ process
         # https://kolbi.cz/blog/2017/10/25/setuserfta-userchoice-hash-defeated-set-file-type-associations-per-user/
         # HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\<extension>\OpenWithList
         # Browser
-        Invoke-ExpressionWithLogging -command 'SetUserFTA http MSEdgeHTM'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA https MSEdgeHTM'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA microsoft-edge MSEdgeHTM'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .htm MSEdgeHTM'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .html MSEdgeHTM'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .pdf MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA http MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA https MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA microsoft-edge MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA .htm MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA .html MSEdgeHTM'
+        Invoke-ExpressionWithLogging 'SetUserFTA .pdf MSEdgeHTM'
         # Logs/config
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .bas Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .cfg Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .conf Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .config Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .csv Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .inf Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .ini Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .json Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .log Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .rdp Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .reg Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .settings Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .status Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .txt Applications\notepad++.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xml Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .bas Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .cfg Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .conf Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .config Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .csv Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .inf Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .ini Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .json Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .log Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .rdp Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .reg Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .settings Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .status Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .txt Applications\notepad++.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xml Applications\notepad++.exe'
         # Code
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .bat Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .cmd Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .ps1 Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .ps1xml Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .psd1 Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .psm1 Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .py Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .sh Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .vbs Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .wsf Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xaml Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xls Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xlsm Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xsl Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .xslt Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .yaml Applications\code.exe'
-        Invoke-ExpressionWithLogging -command 'SetUserFTA .yml Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .bat Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .cmd Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .ps1 Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .ps1xml Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .psd1 Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .psm1 Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .py Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .sh Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .vbs Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .wsf Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xaml Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xls Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xlsm Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xsl Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .xslt Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .yaml Applications\code.exe'
+        Invoke-ExpressionWithLogging 'SetUserFTA .yml Applications\code.exe'
 
         if ($group -eq 'VM')
         {
@@ -1475,8 +1475,8 @@ else
     $steamSetupFileName = $steamSetupUrl.Split('/')[-1]
     $steamSetupFilePath = "$packagesPath\$steamSetupFileName"
     $steamSetupFolderPath = $steamSetupFilePath.Replace('.exe', '')
-    Invoke-ExpressionWithLogging -command "(New-Object Net.WebClient).DownloadFile(`'$steamSetupUrl`', `'$steamSetupFilePath`')"
-    Invoke-ExpressionWithLogging -command "$steamSetupFilePath /s"
+    Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$steamSetupUrl`', `'$steamSetupFilePath`')"
+    Invoke-ExpressionWithLogging "$steamSetupFilePath /s"
     #>
 
     Out-Log "Creating desktop shortcut for running 'choco upgrade all -y'"
