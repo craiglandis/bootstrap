@@ -63,7 +63,7 @@ process
             [string]$prefix,
             [switch]$raw,
             [switch]$logonly,
-            [ValidateSet('Black','DarkBlue','DarkGreen','DarkCyan','DarkRed','DarkMagenta','DarkYellow','Gray','DarkGray','Blue','Green','Cyan','Red','Magenta','Yellow','White')]
+            [ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
             [string]$color = 'White'
         )
 
@@ -288,7 +288,7 @@ process
         Out-Log "Log file: $logFilePath"
         $scriptDuration = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f (New-TimeSpan -Start $scriptStartTime -End (Get-Date))
         Out-Log "$scriptName duration: $scriptDuration"
-        Out-Log "Script completed. Some things may not work as expected until you sign off and on again."
+        Out-Log 'Script completed. Some things may not work as expected until you sign off and on again.'
         # es.exe and wt.exe don't work as expected without a reboot or maybe a logoff /logonCount
         # so try logoff first to see if that resolves things
         # Invoke-ExpressionWithLogging 'C:\Windows\system32\logoff.exe'
@@ -574,7 +574,7 @@ process
 
     if ($isWin11)
     {
-	    # Enable classic context menu
+        # Enable classic context menu
         Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
     }
 
@@ -918,7 +918,7 @@ process
         Add-Content -Path $pwshCurrentUserCurrentHostProfilePath -Value "`nif (Test-Path -Path C:\OneDrive\my\Profile.ps1 -PathType Leaf) {$lineLoadingProfileFromOneDrive}"
     }
 
-    $computer = get-ciminstance -query 'SELECT * FROM Win32_ComputerSystem' -errorAction SilentlyContinue
+    $computer = Get-CimInstance -Query 'SELECT * FROM Win32_ComputerSystem' -ErrorAction SilentlyContinue
     if ($computer)
     {
         $manufacturer = $computer.Manufacturer
@@ -939,7 +939,7 @@ process
         {
             $isThinkPad = $false
         }
-        $computerString = $computer | Remove-NullProperties | Format-List ($computer | Get-Member -MemberType Property | sort-object -property name).name | Out-String
+        $computerString = $computer | Remove-NullProperties | Format-List ($computer | Get-Member -MemberType Property | Sort-Object -Property name).name | Out-String
         $computerString = $computerString.Trim()
         Out-Log $computerString -raw
     }
@@ -948,7 +948,7 @@ process
     if ($battery)
     {
         $isLaptop = $true
-        $batteryString = $battery | Remove-NullProperties | Format-List ($battery | Get-Member -MemberType NoteProperty | sort-object -property name).name | Out-String
+        $batteryString = $battery | Remove-NullProperties | Format-List ($battery | Get-Member -MemberType NoteProperty | Sort-Object -Property name).name | Out-String
         $batteryString = $batteryString.Trim()
         Out-Log $batteryString -raw
     }
@@ -996,7 +996,7 @@ process
     Out-Log "`$isWingetInstalled: $isWingetInstalled"
     Out-Log "Mode: $group"
     $appsToInstallCount = $apps.Count
-    $appsToInstall = ($apps.Name | sort-object) -join "`n" | out-string
+    $appsToInstall = ($apps.Name | Sort-Object) -join "`n" | Out-String
     Out-Log "$appsToInstallCount apps to be installed:`n"
     Out-Log $appsToInstall -raw
     $apps | ForEach-Object {
@@ -1126,7 +1126,7 @@ process
         # 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Cursor.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Add-ScheduledTasks.ps1'
-	    'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Disable-StickyKeys.ps1'
+        'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Disable-StickyKeys.ps1'
     )
 
     $scriptFileUrls | ForEach-Object {
@@ -1179,8 +1179,8 @@ process
     if ($isWin11 -and $group -eq 'PC')
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
-	    # https://github.com/microsoft/WSL/issues/9032
-	    Invoke-ExpressionWithLogging 'wsl --install'
+        # https://github.com/microsoft/WSL/issues/9032
+        Invoke-ExpressionWithLogging 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
@@ -1464,7 +1464,7 @@ process
     if ($isPC)
     {
 
-$removeTempOnedriveAndMyFoldersScriptContents = @'
+        $removeTempOnedriveAndMyFoldersScriptContents = @'
 Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\my -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path c:\od -Recurse -Force -ErrorAction SilentlyContinue
@@ -1472,10 +1472,10 @@ Remove-Item -Path c:\bin -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path C:\OneDrive -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -Path C:\OneDrive -ItemType Directory -Force -ErrorAction SilentlyContinue
 '@
-    $removeTempOnedriveAndMyFoldersScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
+        $removeTempOnedriveAndMyFoldersScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Remove-TempOnedriveAndMyFolders.ps1"
 
-    # The non-elevated one starts successfully but isn't actually running?
-$setAutoHotKeyScheduledTasksScriptContents = @'
+        # The non-elevated one starts successfully but isn't actually running?
+        $setAutoHotKeyScheduledTasksScriptContents = @'
 $userId = 'clandis@microsoft.com'
 
 Stop-Process -Name AutoHotkey -Force -ErrorAction SilentlyContinue
@@ -1503,9 +1503,9 @@ else
     Write-Host 'One or more of the following files was not found: C:\Program Files\AutoHotkey\AutoHotkey.exe, C:\OneDrive\My\Autohotkey.ahk, C:\OneDrive\My\AutoHotkey_Not_Elevated.ahk'
 }
 '@
-    $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
+        $setAutoHotKeyScheduledTasksScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AutoHotKeyScheduledTasks.ps1"
 
-    <# Couldn't actually get this to work, still had to right-click the folder and set it
+        <# Couldn't actually get this to work, still had to right-click the folder and set it
 $setAlwaysKeepOnThisDeviceScriptContents = @'
 attrib "C:\OneDrive\My" -U +P /s
 attrib "C:\OneDrive\npp" -U +P /s
@@ -1516,7 +1516,7 @@ attrib "C:\OneDrive\Tools" -U +P /s
     $setAlwaysKeepOnThisDeviceScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Set-AlwaysKeepOnThisDevice.ps1"
     #>
 
-$registerWatchFilesScheduledTaskScriptContents = @'
+        $registerWatchFilesScheduledTaskScriptContents = @'
 if ((Test-path -Path 'C:\OneDrive\My\Watch-Files.ps1' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.vbs' -PathType Leaf) -and (Test-path -Path 'C:\OneDrive\My\Watch-Files.xml' -PathType Leaf))
 {
     Write-Host "Registering Watch-Files scheduled task"
@@ -1528,9 +1528,9 @@ else
     Write-Host 'One or more of the following files was not found: C:\OneDrive\My\Watch-Files.ps1, C:\OneDrive\My\Watch-Files.vbs, C:\OneDrive\My\Watch-Files.xml'
 }
 '@
-    $registerWatchFilesScheduledTaskScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Register-WatchFilesScheduledTask.ps1"
+        $registerWatchFilesScheduledTaskScriptContents | Out-File -FilePath "$env:USERPROFILE\Desktop\Register-WatchFilesScheduledTask.ps1"
 
-    <# Double-check this
+        <# Double-check this
     Out-Log "Disabling Windows startup sound"
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DisableStartupSound' -Value 1
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -Name 'DisableStartupSound' -Value 1
@@ -1544,18 +1544,18 @@ else
     Out-Log "Deleting 'Send to OneNote' shortcut from Startup folder"
     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk" -ErrorAction SilentlyContinue
 
-    Out-Log "Deleting Discord from Run keys, even though it seems to still startup automatically without them?"
+    Out-Log 'Deleting Discord from Run keys, even though it seems to still startup automatically without them?'
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -ErrorAction SilentlyContinue
 
-    Out-Log "Enabling remote desktop"
+    Out-Log 'Enabling remote desktop'
     $win32TerminalServiceSettings = Get-CimInstance -Namespace root/cimv2/TerminalServices -ClassName Win32_TerminalServiceSetting
-    $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections=1;ModifyFirewallException=1}
+    $win32TerminalServiceSettings | Invoke-CimMethod -MethodName SetAllowTSConnections -Arguments @{AllowTSConnections = 1; ModifyFirewallException = 1}
 
-    $pythonExePath = get-childitem -path "C:\Python*\python.exe" -File -ErrorAction SilentlyContinue | sort-object CreationTime | Select-Object -last 1 | Select-Object -ExpandProperty FullName
+    $pythonExePath = Get-ChildItem -Path 'C:\Python*\python.exe' -File -ErrorAction SilentlyContinue | Sort-Object CreationTime | Select-Object -Last 1 | Select-Object -ExpandProperty FullName
     if ($pythonExePath)
     {
-        Out-Log "Upgrading pip"
+        Out-Log 'Upgrading pip'
         Invoke-ExpressionWithLogging "$pythonExePath -m pip install --upgrade pip"
     }
 
