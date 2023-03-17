@@ -304,6 +304,35 @@ process
         Invoke-ExpressionWithLogging "& `'$getPSLoggingScriptFilePath`' -Enable"
     }
 
+    function Remove-NullProperties
+    {
+        param(
+            [parameter(Mandatory, ValueFromPipeline)]
+            [psobject] $InputObject
+        )
+
+        process
+        {
+            # Create the initially empty output object
+            $obj = [pscustomobject]::new()
+            # Loop over all input-object properties.
+            foreach ($prop in $InputObject.psobject.properties)
+            {
+                # If a property is non-$null, add it to the output object.
+                if ($null -ne $InputObject.$($prop.Name))
+                {
+                    Add-Member -InputObject $obj -NotePropertyName $prop.Name -NotePropertyValue $prop.Value
+                }
+            }
+            # Give the output object a type name that reflects the type of the input
+            # object prefixed with 'NonNull.' - note that this is purely informational, unless
+            # you define a custom output format for this type name.
+            $obj.pstypenames.Insert(0, 'NonNull.' + $InputObject.GetType().FullName)
+            # Output the output object.
+            $obj
+        }
+    }
+
     $PSDefaultParameterValues['*:ErrorAction'] = 'Stop'
     $PSDefaultParameterValues['*:WarningAction'] = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
@@ -888,6 +917,46 @@ process
         Out-Log "Adding line to load profile from OneDrive ($lineLoadingProfileFromOneDrive) to $pwshCurrentUserCurrentHostProfilePath"
         Add-Content -Path $pwshCurrentUserCurrentHostProfilePath -Value "`nif (Test-Path -Path C:\OneDrive\my\Profile.ps1 -PathType Leaf) {$lineLoadingProfileFromOneDrive}"
     }
+
+    $computer = get-ciminstance -query 'SELECT * FROM Win32_ComputerSystem' -errorAction SilentlyContinue
+    if ($computer)
+    {
+        $manufacturer = $computer.Manufacturer
+        $systemSkuNumber = $computer.SystemSKUNumber
+        if ($manufacturer -match 'LENOVO')
+        {
+            $isLenovo = $true
+        }
+        else
+        {
+            $isLenovo = $false
+        }
+        if ($systemSkuNumber -match 'ThinkPad')
+        {
+            $isThinkPad = $true
+        }
+        else
+        {
+            $isThinkPad = $false
+        }
+        $computerString = $computer | Remove-NullProperties | Format-List ($computer | Get-Member -MemberType Property | sort-object -property name).name | Out-String
+        $computerString = $computerString.Trim()
+        Out-Log $computerString -raw
+    }
+
+    $battery = Get-CimInstance -Query 'SELECT Availability,Caption,Description,Name,Status,DeviceID,PowerManagementSupported,BatteryStatus,Chemistry,DesignVoltage,EstimatedChargeRemaining,EstimatedRunTime FROM Win32_Battery' -ErrorAction SilentlyContinue
+    if ($battery)
+    {
+        $isLaptop = $true
+        $batteryString = $battery | Remove-NullProperties | Format-List ($battery | Get-Member -MemberType NoteProperty | sort-object -property name).name | Out-String
+        $batteryString = $batteryString.Trim()
+        Out-Log $batteryString -raw
+    }
+    else
+    {
+        $isLaptop = $false
+    }
+    Out-Log "`$isLaptop: $isLaptop"
 
     if (!$apps)
     {
