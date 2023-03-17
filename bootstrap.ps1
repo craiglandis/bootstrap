@@ -956,7 +956,9 @@ process
     {
         $isLaptop = $false
     }
-    Out-Log "`$isLaptop: $isLaptop"
+    Out-Log "`$isLaptop:   $isLaptop"
+    Out-Log "`$isLenovo:   $isLenovo"
+    Out-Log "`$isThinkPad: $isThinkPad"
 
     if (!$apps)
     {
@@ -1038,10 +1040,10 @@ process
                 $command = $command.Replace('MYPATH', $myPath)
             }
 
-            # These NVIDIA packages fail slowly if there is no NVIDIA GPU installed, so don't run that at all if there's no NVIDIA GPU
-            if ($command -match 'geforce-experience' -or $command -match 'geforce-game-ready-driver')
+            if ($command -match 'geforce')
             {
-                if ($nvidiaGpu)
+                # The NVIDIA packages fail slowly if no NVIDIA GPU is present, so don't run that at all if there's no NVIDIA GPU
+                if ($command -match 'geforce' -and $nvidiaGpu)
                 {
                     $command = "$command | Out-Null"
                     Invoke-ExpressionWithLogging $command
@@ -1060,7 +1062,26 @@ process
             $timestamp = Get-Date -Format yyyyMMddHHmmssff
             $wingetInstallLogFilePath = "$logsPath\winget_install_$($appName)_$($timestamp).log"
             $command = "winget install --id $appName --exact --silent --accept-package-agreements --accept-source-agreements --log $wingetInstallLogFilePath | Out-Null"
-            Invoke-ExpressionWithLogging $command
+
+            if ($command -match 'vantage')
+            {
+                # Only install Lenovo Vantage if it's a Lenovo but not a ThinkPad
+                if ($command -match 'Lenovo Vantage' -and $isLenovo -eq $true -and $isThinkPad -eq $false)
+                {
+                    $command = "$command | Out-Null"
+                    Invoke-ExpressionWithLogging $command
+                }
+                # Only install Lenovo Commercial Vantage if it's a ThinkPad
+                if ($command -match 'Lenovo Commercial Vantage' -and $isThinkPad -eq $true)
+                {
+                    $command = "$command | Out-Null"
+                    Invoke-ExpressionWithLogging $command
+                }
+            }
+            else
+            {
+                Invoke-ExpressionWithLogging $command
+            }
         }
     }
 

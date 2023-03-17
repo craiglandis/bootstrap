@@ -302,14 +302,14 @@
     "Name": "Lenovo Vantage",
     "ChocolateyName": "",
     "WingetName": "9WZDNCRFJ4MV",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
   },
   {
     "Name": "Lenovo Commercial Vantage",
     "ChocolateyName": "",
     "WingetName": "9NR5B8GVVM13",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
   },
   {
