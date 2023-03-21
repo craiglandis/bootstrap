@@ -1353,7 +1353,7 @@ process
         if ($caption -eq 'Microsoft Windows 11 Enterprise')
         {
             Invoke-ExpressionWithLogging 'c:\windows\system32\cscript.exe //H:cscript'
-            Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms RED-VL-VM.redmond.corp.microsoft.com'
+            Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms AZUSW2SLS-KMS01.redmond.corp.microsoft.com'
             Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
             # Skip since they only work if on VPN
             # Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
@@ -1450,16 +1450,16 @@ process
             Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$tssUrl`', `'$tssFilePath`')"
             Invoke-ExpressionWithLogging "Expand-Zip -Path $tssFilePath -DestinationPath $tssFolderPath"
         }
-
-        Invoke-ExpressionWithLogging "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
-        Invoke-ExpressionWithLogging "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
-
-        Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -Force -ErrorAction SilentlyContinue"
-        Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -Force -ErrorAction SilentlyContinue"
-
-        Invoke-ExpressionWithLogging 'powercfg /hibernate off'
-        Invoke-ExpressionWithLogging 'powercfg /change /standby-timeout-ac 1440'
     }
+
+    Invoke-ExpressionWithLogging "Remove-Item -Path $env:USERPROFILE\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-Item -Path $env:PUBLIC\Desktop\desktop.ini -Force -ErrorAction SilentlyContinue"
+
+    Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'Discord' -Force -ErrorAction SilentlyContinue"
+    Invoke-ExpressionWithLogging "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -Force -ErrorAction SilentlyContinue"
+
+    Invoke-ExpressionWithLogging 'powercfg /hibernate off'
+    Invoke-ExpressionWithLogging 'powercfg /change /standby-timeout-ac 300'
 
     if ($isPC)
     {
