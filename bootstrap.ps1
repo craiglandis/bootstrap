@@ -1354,6 +1354,7 @@ process
         {
             Invoke-ExpressionWithLogging 'c:\windows\system32\cscript.exe //H:cscript'
             Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /skms AZUSW2SLS-KMS01.redmond.corp.microsoft.com'
+            # https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys
             Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ipk NPPR9-FWDCX-D2C8J-H872K-2YT43'
             # Skip since they only work if on VPN
             # Invoke-ExpressionWithLogging 'cscript //NoLogo c:\windows\system32\slmgr.vbs /ato'
