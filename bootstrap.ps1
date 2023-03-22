@@ -1542,6 +1542,10 @@ else
 
     }
 
+    # https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#searchinsidebarenabled
+    Out-Log "Disabling search in sidebar which is supposed to disable 'Search Bing in sidebar' in the context menu"
+    Invoke-ExpressionWithLogging "Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Edge' -Name 'SearchInSidebarEnabled' -Type DWord -Value 2 -ErrorAction SilentlyContinue"
+
     Out-Log "Deleting 'Send to OneNote' shortcut from Startup folder"
     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Send to OneNote.lnk" -ErrorAction SilentlyContinue
 
