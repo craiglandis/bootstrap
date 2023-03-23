@@ -299,17 +299,24 @@
     "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
   },
   {
-    "Name": "Lenovo Vantage",
-    "ChocolateyName": "",
-    "WingetName": "9WZDNCRFJ4MV",
-    "Groups": ["PC"],
-    "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
-  },
-  {
     "Name": "Lenovo Commercial Vantage",
     "ChocolateyName": "",
     "WingetName": "9NR5B8GVVM13",
     "Groups": ["PC"],
+    "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
+  },
+  {
+    "Name": "Lenovo Legion Toolkit",
+    "ChocolateyName": "",
+    "WingetName": "BartoszCichecki.LenovoLegionToolkit",
+    "Groups": ["PC"],
+    "Notes": "Community built tool to use to control settings instead of using the first-party Lenovo Vantage app. https://github.com/BartoszCichecki/LenovoLegionToolkit"
+  },
+  {
+    "Name": "Lenovo Vantage",
+    "ChocolateyName": "",
+    "WingetName": "9WZDNCRFJ4MV",
+    "Groups": [],
     "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
   },
   {

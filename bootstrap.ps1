@@ -1066,7 +1066,7 @@ process
             if ($command -match 'vantage')
             {
                 # Only install Lenovo Vantage if it's a Lenovo but not a ThinkPad
-                if ($command -match 'Lenovo Vantage' -and $isLenovo -eq $true -and $isThinkPad -eq $false)
+                if ($command -match 'BartoszCichecki.LenovoLegionToolkit' -and $isLenovo -eq $true -and $isThinkPad -eq $false)
                 {
                     $command = "$command | Out-Null"
                     Invoke-ExpressionWithLogging $command
