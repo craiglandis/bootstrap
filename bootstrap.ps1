@@ -578,6 +578,12 @@ process
         Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
         # Hide Search box on Taskbar
         Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search' -Name 'SearchboxTaskbarMode' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
+        # Hide Task view on Taskbar
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowTaskViewButton' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
+        # Hide Widgets on Taskbar
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarDa' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
+        # Hide Chat on Taskbar
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarMn' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
     }
 
     if ($isWin10)
