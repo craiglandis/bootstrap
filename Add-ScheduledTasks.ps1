@@ -239,13 +239,13 @@ else
     }
 }
 
-$ahkFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/ahk.ahk'
+$ahkFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/ahk.ahk'
 $ahkFileName = $ahkFileUrl.Split('/')[-1]
 $ahkFilePath = "$myPath\$ahkFileName"
-$ahkNotElevatedFileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/ahk_not_elevated.ahk'
+$ahkNotElevatedFileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/ahk_not_elevated.ahk'
 $ahkNotElevatedFileName = $ahkNotElevatedFileUrl.Split('/')[-1]
 $ahkNotElevatedFilePath = "$myPath\$ahkNotElevatedFileName"
-$ahkU64FileUrl = 'https://raw.githubusercontent.com/craiglandis/ps/master/AutoHotkeyU64.ahk'
+$ahkU64FileUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/AutoHotkeyU64.ahk'
 $ahkU64FileName = $ahkU64FileUrl.Split('/')[-1]
 $ahkU64FilePath = "$toolsPath\$ahkU64FileName"
 
@@ -368,7 +368,7 @@ if ($isPC -or $isVM)
     if (Test-Path -Path $vscodeUserPath -PathType Leaf)
     {
         $regFileUrl = 'AutoHotkeyScript_Edit_Command_VSCode_If_Installed_In_Users_username_AppData_Local_Programs_Microsoft_VS_Code.reg'
-        
+
     }
     elseif (Test-Path -Path $vscodeSystemPath -PathType Leaf)
     {
