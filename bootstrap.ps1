@@ -651,15 +651,6 @@ process
         }
     }
 
-    if (Test-Path -Path $profile.CurrentUserCurrentHost -PathType Leaf)
-    {
-        Out-Log "$($profile.CurrentUserCurrentHost) already exists, don't need to create it"
-    }
-    else
-    {
-        Invoke-ExpressionWithLogging "New-Item -Path $($profile.CurrentUserCurrentHost) -Type File -Force | Out-Null"
-    }
-
     $ErrorActionPreference = 'SilentlyContinue'
     $chocoVersion = choco -v
     $ErrorActionPreference = 'Continue'
