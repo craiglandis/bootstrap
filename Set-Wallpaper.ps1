@@ -115,11 +115,14 @@ function get-osdetails
     }
 	#>
 
-	if ($version.StartsWith('10'))
+	$ErrorActionPreference = 'SilentlyContinue'
+	$buildNumber = [environment]::osversion.version.build
+	if ($buildNumber -ge 14393)
 	{
 		$releaseId = Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ReleaseId -ErrorAction SilentlyContinue
 		$displayVersion = Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name DisplayVersion -ErrorAction SilentlyContinue
 	}
+	$ErrorActionPreference = 'Continue'
 
 	if ($releaseId -and $displayVersion)
 	{
