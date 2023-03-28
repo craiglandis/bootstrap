@@ -1604,6 +1604,7 @@ else
     Invoke-ExpressionWithLogging "$steamSetupFilePath /s"
     #>
 
+    <#
     Out-Log "Creating desktop shortcut for running 'choco upgrade all -y'"
     $objShell = New-Object -ComObject Wscript.Shell
     $shortcutPath = "$env:userprofile\Desktop\choco_upgrade_all.lnk"
@@ -1616,6 +1617,7 @@ else
     $bytes = [System.IO.File]::ReadAllBytes($shortcutPath)
     $bytes[0x15] = $bytes[0x15] -bor 0x20
     [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
+    #>
 
     if ($isPC)
     {
