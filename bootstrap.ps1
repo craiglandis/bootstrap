@@ -631,6 +631,13 @@ process
         {
             Invoke-ExpressionWithLogging "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
             Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
+            if (Test-Path -Path 'C:\ProgramData\chocolatey\lib\es\tools\es.exe' -PathType Leaf)
+            {
+                $invokeEsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-ES.ps1'
+                $invokeEsScriptFilePath = "C:\onedrive\my\$($invokeEsScriptUrl.Split('/')[-1])"
+                (New-Object Net.WebClient).DownloadFile($invokeEsScriptUrl, $invokeEsScriptFilePath)
+                Set-Content -Value 'Set-Alias e C:\onedrive\my\Invoke-ES.ps1' -Path $profile.AllUsersAllHosts -Force
+            }
         }
     }
 

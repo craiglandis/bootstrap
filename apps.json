@@ -372,7 +372,7 @@
     "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC"],
     "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {

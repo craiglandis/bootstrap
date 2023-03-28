@@ -259,7 +259,7 @@ $faceName = 'Lucida Console'
 
 $build = [environment]::OSVersion.Version.Build
 
-if ($isPC -or $isVM)
+if ($isPC)
 {
 	$systemFontsPath = "$env:SystemRoot\Fonts"
 	$userFontsPath = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
@@ -279,7 +279,8 @@ if ($isPC -or $isVM)
             Out-Log "Chocolatey $chocoVersion"
 			Out-Log 'Using Chocolatey to install it since Chocolatey itself is already installed'
 			$timestamp = Get-Date -Format yyyyMMddHHmmssff
-			$packageName = 'cascadia-code-nerd-font'
+			#$packageName = 'cascadia-code-nerd-font'
+			$packageName = 'nerd-fonts-CascadiaCode'
 			$chocoInstallLogFilePath = "$logsPath\choco_install_$($packageName)_$($timestamp).log"
 			Invoke-ExpressionWithLogging -command "choco install $packageName --limit-output --no-progress --no-color --confirm --log-file=$chocoInstallLogFilePath | Out-Null"
 		}
@@ -346,9 +347,13 @@ if ($isPC -or $isVM)
 	#>
 }
 
-if ($isPC -or $isVM)
+if ($isPC)
 {
 	Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Console\TrueTypeFont' -Name '000' -Value $faceName
+}
+else
+{
+	Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Console\TrueTypeFont' -Name '000' -Value 'Lucida Console'
 }
 
 $fontSize = $fontSize * 65536
