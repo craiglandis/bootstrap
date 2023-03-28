@@ -885,10 +885,21 @@ process
     if ($group -ne 'QUICKVM')
     {
         Out-Log "`$group: $group"
-        #exit
         $powershellReleases = Invoke-RestMethod -Method GET -Uri 'https://api.github.com/repos/PowerShell/PowerShell/releases'
         # Install PS7 release version
-        $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
+        if ($build -ge 9600)
+        {
+            $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Sort-Object -Property id -Descending | Select-Object -First 1
+        }
+        else
+        {
+            # v7.1.7 is the last PS7 version supported on Win7/2008R2/Win8/2012, v7.2+ need WS12R2+ (9600+)
+            # https://learn.microsoft.com/en-us/powershell/scripting/install/PowerShell-Support-Lifecycle?view=powershell-7.3#supported-platforms
+            # Installing 7.2+ on Win7/2008R2/Win8/2012 - the MSI install succeeds, but running pwsh.exe fails with error:
+            # "Unhandled exception. System.TypeInitializationException: The type initializer for 'System.Management.Automation.Tracing.PSEtwLog' threw an exception."
+            # https://github.com/PowerShell/PowerShell/issues/18971
+            $powershellRelease = $powershellReleases | Where-Object prerelease -EQ $false | Where-Object tag_name -eq 'v7.1.7'
+        }
         $powerShellx64MsiUrl = ($powershellRelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
         $powerShellx64MsiFileName = $powerShellx64MsiUrl.Split('/')[-1]
         $powerShellx64MsiFilePath = "$packagesPath\$powerShellx64MsiFileName"
@@ -896,14 +907,17 @@ process
         Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
         Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
-        # Install PS7 preview version
-        $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
-        $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
-        $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
-        $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
-        $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
-        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
-        Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+        if ($group -eq 'PC')
+        {
+            # Install PS7 preview version
+            $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
+            $powerShellPreviewx64MsiUrl = ($powershellPrerelease.assets | Where-Object {$_.browser_download_url.EndsWith('win-x64.msi')}).browser_download_url | Sort-Object -Descending | Select-Object -First 1
+            $powerShellPreviewx64MsiFileName = $powerShellPreviewx64MsiUrl.Split('/')[-1]
+            $powerShellPreviewx64MsiFilePath = "$packagesPath\$powerShellPreviewx64MsiFileName"
+            $powerShellPreviewx64MsiLogFilePath = "$logsPath\$($powerShellPreviewx64MsiFileName).$(Get-Date -Format yyyyMMddHHmmssff).log"
+            Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellPreviewx64MsiUrl`', `'$powerShellPreviewx64MsiFilePath`')"
+            Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellPreviewx64MsiFilePath /quiet /L*v $powerShellPreviewx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
+        }
     }
     #exit
 
