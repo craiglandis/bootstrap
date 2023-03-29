@@ -289,6 +289,7 @@ Terminal-Icons,True,False
 $modules = $modules.Split("`n").Trim()
 
 <#
+Az.ResourceGraph
 oh-my-posh,True,False # installed via chocolatey now
 AzurePSDrive,False,False
 Pester,False,True
