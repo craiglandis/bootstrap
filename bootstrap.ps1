@@ -1596,6 +1596,16 @@ else
     }
 
     <#
+    # Urban legend is that if Windows is installed on an SSD, disabling prefetch and superfetch can actually improve performance
+    # Prefetch/Superfetch definitely help if the OS is on an HDD, but it's unclear if leaving them enabled if the OS is on an SSD actually makes any difference
+    Out-Log 'Disabling prefetch'
+    Invoke-ExpressionWithLogging "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Name 'EnablePrefetcher' -Type DWord -Value 0 -Force | Out-Null"
+    Out-Log 'Disabling superfetch'
+    Invoke-ExpressionWithLogging "Stop-Service -Name SysMain -Force"
+    Invoke-ExpressionWithLogging "Set-Service -Name SysMain -StartupType Disabled -Force"
+    #>
+
+    <#
     $steamSetupUrl = 'https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe'
     $steamSetupFileName = $steamSetupUrl.Split('/')[-1]
     $steamSetupFilePath = "$packagesPath\$steamSetupFileName"
