@@ -192,7 +192,7 @@
     "Name": "ffmpeg",
     "ChocolateyName": "ffmpeg",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -464,7 +464,7 @@
     "Name": "ScreenToGif",
     "ChocolateyName": "screentogif.portable",
     "WingetName": "NickeManarin.ScreenToGif",
-    "Groups": ["PC","VM"],
+    "Groups": [],
     "Notes": "ScreenToGif requires .NET Desktop Runtime 6.0.1+ https://download.visualstudio.microsoft.com/download/pr/bf058765-6f71-4971-aee1-15229d8bfb3e/c3366e6b74bec066487cd643f915274d/windowsdesktop-runtime-6.0.1-win-x64.exe"
   },
   {
