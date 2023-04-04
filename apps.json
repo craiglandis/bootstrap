@@ -449,7 +449,7 @@
   {
     "Name": "Python",
     "ChocolateyName": "python",
-    "WingetName": "Python.Python.3",
+    "WingetName": "Python.Python.3.12",
     "Groups": ["PC","VM"],
     "Notes": ""
   },
