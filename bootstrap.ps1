@@ -631,14 +631,18 @@ process
         {
             #Invoke-ExpressionWithLogging "New-Item -Path $($profile.AllUsersAllHosts) -Type File -Force | Out-Null"
             Invoke-ExpressionWithLogging "New-Item -Path $profile -Type File -Force | Out-Null"
-            if (Test-Path -Path 'C:\Program Files\PowerShell\7' -PathType Container)
+            $profilePs7 = 'C:\Program Files\PowerShell\7\profile.ps1'
+            if (Test-Path -Path (Split-Path -Path $profilePs7) -PathType Container)
             {
-                Invoke-ExpressionWithLogging "New-Item -Path 'C:\Program Files\PowerShell\7\profile.ps1' -Type File -Force | Out-Null"
+                Invoke-ExpressionWithLogging "New-Item -Path '$profilePs7' -Type File -Force | Out-Null"
             }
 
             #Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile.AllUsersAllHosts -Force
             Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profile -Force
-            Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path 'C:\Program Files\PowerShell\7\profile.ps1' -Force
+            if ($group -ne 'QUICKVM' -and (Test-Path -Path $profilePs7 -PathType Leaf) -eq $true)
+            {
+                Set-Content -Value '[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072' -Path $profilePs7 -Force
+            }
             if (Test-Path -Path 'C:\ProgramData\chocolatey\lib\es\tools\es.exe' -PathType Leaf)
             {
                 $invokeEsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Invoke-ES.ps1'
@@ -646,7 +650,10 @@ process
                 (New-Object Net.WebClient).DownloadFile($invokeEsScriptUrl, $invokeEsScriptFilePath)
                 #Set-Content -Value 'Set-Alias e C:\onedrive\my\Invoke-ES.ps1' -Path $profile.AllUsersAllHosts -Force
                 Set-Content -Value 'Set-Alias e C:\onedrive\my\Invoke-ES.ps1' -Path $profile -Force
-                Set-Content -Value 'Set-Alias e C:\onedrive\my\Invoke-ES.ps1' -Path 'C:\Program Files\PowerShell\7\profile.ps1' -Force
+                if ($group -ne 'QUICKVM')
+                {
+                    Set-Content -Value 'Set-Alias e C:\onedrive\my\Invoke-ES.ps1' -Path $profilePs7 -Force
+                }
             }
         }
     }
