@@ -52,14 +52,14 @@
     "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["PC","VM"],
+    "Groups": ["PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "AutoHotkey v2",
     "ChocolateyName": "autohotkey.portable",
     "WingetName": "AutoHotkey.AutoHotkey",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": [],
     "Notes": ""
   },
   {
