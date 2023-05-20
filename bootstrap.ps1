@@ -22,7 +22,7 @@ Incorporate Helper module
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('PC', 'QUICKVM', 'VM', 'ALL')]
+    [ValidateSet('HV','PC', 'QUICKVM', 'VM', 'ALL')]
     [string]$group,
     [switch]$show,
     [string]$toolsPath = 'C:\OneDrive\Tools',
@@ -922,7 +922,7 @@ process
         Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$powerShellx64MsiUrl`', `'$powerShellx64MsiFilePath`')"
         Invoke-ExpressionWithLogging "msiexec.exe /package $powerShellx64MsiFilePath /quiet /L*v $powerShellx64MsiLogFilePath ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=1 ENABLE_MU=1 | Out-Null"
 
-        if ($group -eq 'PC')
+        if ($group -in 'HV','PC')
         {
             # Install PS7 preview version
             $powershellPrerelease = $powershellReleases | Where-Object prerelease -EQ $true | Sort-Object -Property id -Descending | Select-Object -First 1
@@ -1214,7 +1214,7 @@ process
         }
     }
 
-    if ($isWin11 -and $group -eq 'PC')
+    if ($isWin11 -and $group -in 'HV','PC')
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
         # https://github.com/microsoft/WSL/issues/9032
@@ -1291,7 +1291,7 @@ process
     # It works - the .ahk file must be named AutoHotkeyU64.ahk, then you run AutoHotkeyU64.exe
     # copy-item -Path \\tsclient\c\onedrive\ahk\AutoHotkey.ahk -Destination c:\my\ahk\AutoHotkeyU64.ahk
 
-    if ($group -eq 'VM' -or $group -eq 'PC')
+    if ($group -in 'HV','PC','VM')
     {
         $installVSCodeScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Install-VSCode.ps1'
         $installVSCodeScriptFileName = $installVSCodeScriptUrl.Split('/')[-1]

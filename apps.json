@@ -3,21 +3,21 @@
     "Name": ".NET 7.0 SDK",
     "ChocolateyName": "dotnet-7.0-sdk",
     "WingetName": "Microsoft.DotNet.SDK.7",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
     "Name": ".NET Desktop Runtime 7.0",
     "ChocolateyName": "dotnet-7.0-desktopruntime",
     "WingetName": "Microsoft.DotNet.DesktopRuntime.7",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
     "Name": ".NET Desktop Runtime 6.0",
     "ChocolateyName": "dotnet-6.0-desktopruntime",
     "WingetName": "Microsoft.DotNet.DesktopRuntime.6",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -38,7 +38,7 @@
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -52,7 +52,7 @@
     "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -66,28 +66,28 @@
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
     "Name": "Azure PowerShell",
     "ChocolateyName": "az.powershell",
     "WingetName": "",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module"
   },
   {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -115,14 +115,14 @@
     "Name": "CrystalDiskInfo",
     "ChocolateyName": "crystaldiskinfo.portable",
     "WingetName": "CrystalDewWorld.CrystalDiskInfo",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -136,7 +136,7 @@
     "Name": "diskspd",
     "ChocolateyName": "diskspd",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": ["HV","PC"],
     "Notes": ""
   },
   {
@@ -171,14 +171,14 @@
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
     "ChocolateyName": "es",
     "WingetName": "",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
   {
@@ -199,7 +199,7 @@
     "Name": "Firefox",
     "ChocolateyName": "Firefox",
     "WingetName": "Mozilla.Firefox",
-    "Groups": ["PC"],
+    "Groups": ["HV","PC"],
     "Notes": ""
   },
   {
@@ -227,7 +227,7 @@
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": ["PC","QUICKVM","VM"]
+    "Groups": ["HV","PC","QUICKVM","VM"]
   },
   {
     "Name": "GitHub CLI",
@@ -372,7 +372,7 @@
     "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": ["HV","PC"],
     "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {
@@ -386,14 +386,14 @@
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "oh-my-posh",
     "ChocolateyName": "oh-my-posh",
     "WingetName": "JanDeDobbeleer.OhMyPosh",
-    "Groups": ["PC"],
+    "Groups": ["HV","PC"],
     "Notes": ""
   },
   {
@@ -414,7 +414,7 @@
     "Name": "OpenSSH Beta",
     "ChocolateyName": "",
     "WingetName": "Microsoft.OpenSSH.Beta",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release"
   },
   {
@@ -450,14 +450,14 @@
     "Name": "Python",
     "ChocolateyName": "python",
     "WingetName": "Python.Python.3.12",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": ["HV","PC"],
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
@@ -471,14 +471,14 @@
     "Name": "SetUserFTA",
     "ChocolateyName": "setuserfta",
     "WingetName": "",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -499,7 +499,7 @@
     "Name": "Storage Explorer",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Azure.StorageExplorer",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },
   {
@@ -507,7 +507,7 @@
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "",
     "WingetName": "9P7KNL5RWT25",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1"
   },
   {
@@ -515,7 +515,7 @@
     "ChocolateyName": "terminal-icons.powershell",
     "ChocolateyParams": "",
     "WingetName": "",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number."
   },
   {
@@ -529,7 +529,7 @@
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
-    "Groups": ["PC","QUICKVM","VM"]
+    "Groups": ["HV","PC","QUICKVM","VM"]
   },
   {
     "Name": "Visual Studio 2022 Enterprise",
@@ -570,7 +570,7 @@
     "Name": "Windows Notepad",
     "ChocolateyName": "",
     "WingetName": "9MSMLRH6LZF3",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
   },
   {
@@ -591,7 +591,7 @@
     "Name": "WinSCP",
     "ChocolateyName": "winscp.portable",
     "WingetName": "WinSCP.WinSCP",
-    "Groups": ["PC","VM"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -605,7 +605,7 @@
     "Name": "WizTree",
     "ChocolateyName": "wiztree",
     "WingetName": "AntibodySoftware.WizTree",
-    "Groups": ["PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
