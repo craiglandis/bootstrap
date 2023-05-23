@@ -596,7 +596,8 @@ process
 
     # Config for all Windows versions
     # Disable web search and recent search entries
-    Invoke-ExpressionWithLogging "reg add 'HKLM\Software\Policies\Microsoft\Windows\Explorer' /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f"
+    # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsExplorer::DisableSearchBoxSuggestions
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Policies\Microsoft\Windows\Explorer' /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f"
     # Enable dark mode
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v SystemUsesLightTheme /t REG_DWORD /d 0 /f"
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v AppsUseLightTheme /t REG_DWORD /d 0 /f"
