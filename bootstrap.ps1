@@ -1,4 +1,5 @@
 <#
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");.\bootstrap.ps1 -group HV
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");.\bootstrap.ps1 -group QUICKVM
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
@@ -14,6 +15,7 @@ Mouse cursor - setting cursor size/color isn't working - ends up huge and wrong 
 Steam - steam logon prompt comes up, no obvious way to surpress without stopping Steam from starting at boot, so no big deal, leave as-is
 Additional shell customizations
 Install KE https://aka.ms/ke
+reg add HKLM\Software\Policies\Microsoft\Windows\Explorer /v DisableSearchBoxSuggestions
 Import KE connections
 Install Visio https://www.office.com/?auth=2&home=1
 Use fileUris to download the scripts instead of doing downloads from invoke-bootstrap.ps1/bootstrap.ps1
@@ -593,6 +595,8 @@ process
     }
 
     # Config for all Windows versions
+    # Disable web search and recent search entries
+    Invoke-ExpressionWithLogging "reg add 'HKLM\Software\Policies\Microsoft\Windows\Explorer' /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f"
     # Enable dark mode
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v SystemUsesLightTheme /t REG_DWORD /d 0 /f"
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v AppsUseLightTheme /t REG_DWORD /d 0 /f"
