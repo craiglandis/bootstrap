@@ -1,4 +1,5 @@
 <#
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");.\bootstrap.ps1 -group VM
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");.\bootstrap.ps1 -group HV
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; (New-Object Net.Webclient).DownloadFile('https://raw.githubusercontent.com/craiglandis/bootstrap/main/bootstrap.ps1', "$env:SystemDrive\bootstrap.ps1");.\bootstrap.ps1 -group QUICKVM
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; Set-ExecutionPolicy Bypass -Force; \\tsclient\c\src\bootstrap\bootstrap.ps1
@@ -1606,6 +1607,14 @@ else
         Out-Log 'Upgrading pip'
         Invoke-ExpressionWithLogging "$pythonExePath -m pip install --upgrade pip"
     }
+
+    $activePowerPlan = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerPlan -Filter "IsActive = $true"
+    Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
+    $ultimatePerformancePowerPlan = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerPlan -Filter "ElementName = 'Ultimate Performance'"
+    Out-Log "Setting active power plan to $($ultimatePerformancePowerPlan.ElementName) $($ultimatePerformancePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
+    $activateResult = Invoke-CimMethod -InputObject $ultimatePerformancePowerPlan -MethodName Activate
+    $activePowerPlan = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerPlan -Filter "IsActive = $true"
+    Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
     <#
     # Urban legend is that if Windows is installed on an SSD, disabling prefetch and superfetch can actually improve performance
