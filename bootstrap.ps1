@@ -1616,6 +1616,23 @@ else
     $activePowerPlan = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerPlan -Filter "IsActive = $true"
     Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
+    $desiredMaximumSizeInBytes = 100MB
+    'Application','System','Security' | ForEach-Object {
+        $logName = $_
+        $eventLog = Get-WinEvent -ListLog $logName
+        $currentMaximumSizeInBytes = $eventLog.MaximumSizeInBytes
+        $currentMaximumSizeInMB = [Math]::Round($currentMaximumSizeInBytes/1MB,0)
+        if ($currentMaximumSizeInBytes -ne $desiredMaximumSizeInBytes)
+        {
+            $eventLog.MaximumSizeInBytes = $desiredMaximumSizeInBytes
+            $eventLog.SaveChanges()
+            $eventLog = Get-WinEvent -ListLog $logName
+            $newMaximumSizeInBytes = $eventLog.MaximumSizeInBytes
+            $newMaximumSizeInMB = [Math]::Round($newMaximumSizeInBytes/1MB,0)
+            Out-Log "Changed $_ log size from $($currentMaximumSizeInMB)MB to $($newMaximumSizeInMB)MB"
+        }
+    }
+
     <#
     # Urban legend is that if Windows is installed on an SSD, disabling prefetch and superfetch can actually improve performance
     # Prefetch/Superfetch definitely help if the OS is on an HDD, but it's unclear if leaving them enabled if the OS is on an SSD actually makes any difference
