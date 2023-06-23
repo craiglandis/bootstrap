@@ -457,10 +457,14 @@ $lastUpdateHotfixIdAccordingToWin32QuickFixEngineering = $lastUpdateAccordingToW
 $session = New-Object -ComObject Microsoft.Update.Session
 $searcher = $session.CreateUpdateSearcher()
 $historyCount = $searcher.GetTotalHistoryCount()
-$lastUpdateAccordingToMicrosoftUpdateSession = $searcher.QueryHistory(0, $historyCount) | Sort-Object Date -Descending | Select-Object -First 1
-$lastUpdateTimeAccordingToMicrosoftUpdateSession = Get-Date -Date $lastUpdateAccordingToMicrosoftUpdateSession.Date.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
-$lastUpdateTitleAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession.Title
-$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = (Select-String -InputObject $lastUpdateTitleAccordingToMicrosoftUpdateSession -Pattern 'KB\d{5,8}').Matches.Value.Trim()
+try {$queryHistoryResult = $searcher.QueryHistory(0, $historyCount)} catch {}
+if ($queryHistoryResult)
+{
+	$lastUpdateAccordingToMicrosoftUpdateSession = $searcher.QueryHistory(0, $historyCount) | Sort-Object Date -Descending | Select-Object -First 1
+	$lastUpdateTimeAccordingToMicrosoftUpdateSession = Get-Date -Date $lastUpdateAccordingToMicrosoftUpdateSession.Date.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
+	$lastUpdateTitleAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession.Title
+	$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = (Select-String -InputObject $lastUpdateTitleAccordingToMicrosoftUpdateSession -Pattern 'KB\d{5,8}').Matches.Value.Trim()
+}
 
 $autoUpdate = New-Object -ComObject Microsoft.Update.AutoUpdate
 $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate = Get-Date -Date $autoUpdate.Results.LastInstallationSuccessDate.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
