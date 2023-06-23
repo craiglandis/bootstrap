@@ -1183,6 +1183,12 @@ else
 }
 #>
 
+# Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
+if ($scriptFullName.Startswith('\\') -eq $false)
+{
+	$setWallpaperVbsPath = $scriptFullName.Replace('.ps1', '.vbs')
+}
+
 $setWallpaperVbsContents = @"
 Dim shell, command
 command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
@@ -1247,12 +1253,6 @@ $taskXml = @"
   </Actions>
 </Task>
 "@
-
-# Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
-if ($scriptFullName.Startswith('\\') -eq $false)
-{
-	$setWallpaperVbsPath = $scriptFullName.Replace('.ps1', '.vbs')
-}
 
 $taskName = $scriptBaseName
 $task = [bool](Enable-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)
