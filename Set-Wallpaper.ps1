@@ -3,6 +3,8 @@ Set-ExecutionPolicy Bypass -Force
 md c:\my
 curl https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
 c:\my\Set-Wallpaper.ps1
+
+copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1
 #>
 
 param(
@@ -1189,9 +1191,13 @@ if ($scriptFullName.Startswith('\\') -eq $false)
 	$setWallpaperVbsPath = $scriptFullName.Replace('.ps1', '.vbs')
 }
 
+# command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
+# Unregister-ScheduledTask -TaskName Set-Wallpaper -Confirm:$false
+
+$powerShellPath = Get-Process -Id $PID | Select-Object -ExpandProperty Path
 $setWallpaperVbsContents = @"
 Dim shell, command
-command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
+command = """$powerShellPath"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
 Set shell = CreateObject("WScript.Shell")
 shell.Run command,0
 "@
