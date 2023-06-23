@@ -1191,9 +1191,6 @@ if ($scriptFullName.Startswith('\\') -eq $false)
 	$setWallpaperVbsPath = $scriptFullName.Replace('.ps1', '.vbs')
 }
 
-# command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
-# Unregister-ScheduledTask -TaskName Set-Wallpaper -Confirm:$false
-
 $powerShellPath = Get-Process -Id $PID | Select-Object -ExpandProperty Path
 $setWallpaperVbsContents = @"
 Dim shell, command
@@ -1260,6 +1257,7 @@ $taskXml = @"
 </Task>
 "@
 
+# Unregister-ScheduledTask -TaskName Set-Wallpaper -Confirm:$false
 $taskName = $scriptBaseName
 $task = [bool](Enable-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)
 if ($task -eq $false)
