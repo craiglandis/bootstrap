@@ -1174,12 +1174,12 @@ else
 }
 #>
 
-$setWallpaperVbsContents = @'
+$setWallpaperVbsContents = @"
 Dim shell, command
-command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\OneDrive\My\Set-Wallpaper.ps1"
+command = """C:\Program Files\PowerShell\7-preview\pwsh.exe"" -NoProfile -NoLogo -ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptFullName"
 Set shell = CreateObject("WScript.Shell")
 shell.Run command,0
-'@
+"@
 
 $userId = "$env:userdomain\$env:username"
 $ntAccount = New-Object System.Security.Principal.NTAccount($userId)
@@ -1240,7 +1240,6 @@ $taskXml = @"
 "@
 
 # Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
-# Rename-Item -Path C:\onedrive\my\Set-Wallpaper.vbs -NewName Set-Wallpaper.vbs.bak
 if ($scriptFullName.Startswith('\\') -eq $false)
 {
 	$setWallpaperVbsPath = $scriptFullName.Replace('.ps1', '.vbs')
