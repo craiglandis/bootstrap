@@ -464,6 +464,11 @@ if ($queryHistoryResult)
 	$lastUpdateTimeAccordingToMicrosoftUpdateSession = Get-Date -Date $lastUpdateAccordingToMicrosoftUpdateSession.Date.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
 	$lastUpdateTitleAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession.Title
 	$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = (Select-String -InputObject $lastUpdateTitleAccordingToMicrosoftUpdateSession -Pattern 'KB\d{5,8}').Matches.Value.Trim()
+	$lastUpdateAccordingToMicrosoftUpdateSessionString = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateSession) ago $lastUpdateKBNumberAccordingToMicrosoftUpdateSession $lastUpdateTimeAccordingToMicrosoftUpdateSession (Microsoft.Update.Session)"
+}
+else
+{
+	$lastUpdateAccordingToMicrosoftUpdateSessionString = "N/A"
 }
 
 $autoUpdate = New-Object -ComObject Microsoft.Update.AutoUpdate
@@ -969,7 +974,7 @@ $objects.Add([PSCustomObject]@{Name = 'osInstallDate'; DisplayName = 'OS INSTALL
 
 $objects.Add([PSCustomObject]@{Name = 'lastCumulativeUpdate'; DisplayName = 'LAST CUMULATIVE UPDATE'; Value = $lastCumulativeUpdateString})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToWin32QuickFixEngineering'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToWin32QuickFixEngineering) ago $lastUpdateHotfixIdAccordingToWin32QuickFixEngineering $lastUpdateTimeAccordingToWin32QuickFixEngineering (Win32_QuickfixEngineering)".Trim()})
-$objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToMicrosoftUpdateSession'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateSession) ago $lastUpdateKBNumberAccordingToMicrosoftUpdateSession $lastUpdateTimeAccordingToMicrosoftUpdateSession (Microsoft.Update.Session)".Trim()})
+$objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToMicrosoftUpdateSession'; DisplayName = 'LAST UPDATE'; Value = $lastUpdateAccordingToMicrosoftUpdateSessionString})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToMicrosoftUpdateAutoUpdate'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate) ago $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate (Microsoft.Update.AutoUpdate)".Trim()})
 $objects.Add([PSCustomObject]@{Name = 'lastAntivirusSignatureUpdate'; DisplayName = 'LAST SIG UPDATE'; Value = $lastAntiVirusSignatureUpdate.Trim()})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateCheckTime'; DisplayName = 'LAST CHECK FOR UPDATES'; Value = "$(Get-Age $lastCheckForUpdatesTimeAccordingToMicrosoftUpdateAutoUpdate) ago $lastCheckForUpdatesTimeAccordingToMicrosoftUpdateAutoUpdate (Microsoft.Update.AutoUpdate)".Trim()})
