@@ -1,10 +1,10 @@
 ﻿<#
 Set-ExecutionPolicy Bypass -Force
 md c:\my
-curl https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
+invoke-webrequest https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
 c:\my\Set-Wallpaper.ps1
 
-copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1
+copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1;c:\my\Set-Wallpaper.ps1
 #>
 
 param(
@@ -303,6 +303,7 @@ $win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,Hypervis
 $win32_PageFileUsage = Get-CimInstance -Query 'SELECT Caption FROM Win32_PageFileUsage'
 $win32_Processor = Get-CimInstance -Query 'SELECT Name,MaxClockSpeed,NumberOfCores,NumberOfLogicalProcessors FROM Win32_Processor'
 $cpuProductName = $win32_Processor.Name.Split(' ')[-1].Trim()
+# $cpuProductName = $win32_Processor.Name.Split(' ') | Where-Object {$_ -match '-'}
 
 # https://github.com/toUpperCase78/intel-processors
 $intelCpusCsvUrl = 'https://raw.githubusercontent.com/toUpperCase78/intel-processors/master/intel_core_processors_v1_6.csv'
@@ -329,7 +330,8 @@ if ($intelCpuSpecs)
 		$cpu = "$cpuProductName $cores/$threads $cpuMaxTurboFreqGhz $cpuCacheMB $cpuNodeSize $cpuTdpWatts"
 	}
 }
-else
+
+if ([string]::IsNullOrEmpty($cpu))
 {
 	$cpuName = $win32_Processor.Name.Split('@')[0].Replace('(R)', '').Replace('(TM)', '').Replace('  ', ' ').Trim()
 	$baseClock = $win32_Processor.MaxClockSpeed
@@ -384,7 +386,7 @@ $displayClassSubkeyNames = $displayClassKey.GetSubKeyNames()
 foreach ($displayClassSubkeyName in $displayClassSubkeyNames)
 {
 	$displayClassSubkey = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\$displayClassSubkeyName" -ErrorAction SilentlyContinue
-	$matchingDeviceId = $displayClassSubkey | Select-Object -ExpandProperty MatchingDeviceId
+	$matchingDeviceId = $displayClassSubkey | Select-Object -ExpandProperty MatchingDeviceId -ErrorAction SilentlyContinue
 	if ($matchingDeviceId)
 	{
 		$matchingDeviceId = $matchingDeviceId.ToUpper()
@@ -477,9 +479,32 @@ $autoUpdate = New-Object -ComObject Microsoft.Update.AutoUpdate
 $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate = Get-Date -Date $autoUpdate.Results.LastInstallationSuccessDate.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
 $lastCheckForUpdatesTimeAccordingToMicrosoftUpdateAutoUpdate = Get-Date -Date $autoUpdate.Results.LastSearchSuccessDate.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
 
-$defender = Get-MpComputerStatus | Select-Object FullScanAge, FullScanStartTime, AntispywareSignatureAge, AntispywareSignatureLastUpdated, AntivirusSignatureLastUpdated, DeviceControlPoliciesLastUpdated, NISSignatureLastUpdated, QuickScanAge, QuickScanEndTime
-$antivirusSignatureLastUpdated = $defender.AntivirusSignatureLastUpdated
-$lastAntiVirusSignatureUpdate = "$(Get-Age $antivirusSignatureLastUpdated) ago $(Get-Date $antivirusSignatureLastUpdated -Format yyyy-MM-ddTHH:mm:ss)"
+# For some reason in a fresh PS session sometimes running Get-MpComputerStatus twice is needed before the implicit module loading happens
+# When it doesn't, it fails with error:
+# The 'Get-MpComputerStatus' command was found in the module 'ConfigDefender', but the module could not be loaded. For more information, run 'Import-Module ConfigDefender'
+try
+{
+	$defender = Get-MpComputerStatus -ErrorAction SilentlyContinue | Select-Object FullScanAge, FullScanStartTime, AntispywareSignatureAge, AntispywareSignatureLastUpdated, AntivirusSignatureLastUpdated, DeviceControlPoliciesLastUpdated, NISSignatureLastUpdated, QuickScanAge, QuickScanEndTime
+}
+catch
+{
+}
+
+if (!$defender)
+{
+	$defender = Get-MpComputerStatus -ErrorAction SilentlyContinue | Select-Object FullScanAge, FullScanStartTime, AntispywareSignatureAge, AntispywareSignatureLastUpdated, AntivirusSignatureLastUpdated, DeviceControlPoliciesLastUpdated, NISSignatureLastUpdated, QuickScanAge, QuickScanEndTime
+}
+
+if ($defender)
+{
+	$defender = Get-MpComputerStatus | Select-Object FullScanAge, FullScanStartTime, AntispywareSignatureAge, AntispywareSignatureLastUpdated, AntivirusSignatureLastUpdated, DeviceControlPoliciesLastUpdated, NISSignatureLastUpdated, QuickScanAge, QuickScanEndTime
+	$antivirusSignatureLastUpdated = $defender.AntivirusSignatureLastUpdated
+	$lastAntiVirusSignatureUpdate = "$(Get-Age $antivirusSignatureLastUpdated) ago $(Get-Date $antivirusSignatureLastUpdated -Format yyyy-MM-ddTHH:mm:ss)"
+}
+else
+{
+	$lastAntiVirusSignatureUpdate = "N/A"
+}
 
 $newestAppLogEventTime = Get-Date
 $oldestAppLogEventTime = Get-WinEvent -LogName Application -MaxEvents 1 -Oldest | Select-Object -ExpandProperty TimeCreated
