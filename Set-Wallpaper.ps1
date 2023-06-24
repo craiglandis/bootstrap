@@ -343,7 +343,6 @@ if ([string]::IsNullOrEmpty($cpu))
 	$currentClock = [Math]::Round($baseClock * ($processorPerformance / 100) / 1000, 2)
 	$currentClockString = ($currentClock.ToString('0.00') + 'Ghz')
 	$cpu = "$cpuName $($cores)C/$($threads)T $baseClockString base $currentClockString current"
-	$cpu = ($cpu -split 'Core')[1].Trim()
 }
 
 $win32_BIOS = Get-CimInstance -Query 'SELECT Manufacturer, Version, SMBIOSPresent, SMBIOSBIOSVersion, ReleaseDate, SMBIOSMajorVersion, SMBIOSMinorVersion, BIOSVersion FROM Win32_BIOS'
@@ -365,7 +364,9 @@ if ($hasNvidiaGPU)
 	$hasNvidiaSmi = Test-Path -Path $nvidiaSmiPath -PathType Leaf
 	if ($hasNvidiaSmi)
 	{
-		$vram = (nvidia-smi --query-gpu=memory.total, memory.used, memory.free --format=csv) | ConvertFrom-Csv
+		# "nvidia-smi --help-query-gpu" shows all possible valus to query
+		# $vram = (nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv) | ConvertFrom-Csv
+		$vram = (nvidia-smi --query-gpu=memory.total,memory.used,memory.free,name,serial,uuid,pcie.link.gen.current,pcie.link.gen.gpumax,pcie.link.gen.hostmax,pcie.link.width.current,pcie.link.width.max,vbios_version,fan.speed,pstate,clocks_event_reasons.hw_thermal_slowdown,clocks_event_reasons.hw_power_brake_slowdown,clocks_event_reasons.sw_thermal_slowdown,utilization.gpu,utilization.memory,temperature.gpu,temperature.memory,power.management,power.draw,power.draw.average,power.draw.instant,power.limit,enforced.power.limit,power.default_limit,power.max_limit,clocks.current.graphics,clocks.current.memory,clocks.max.graphics,clocks.max.memory --format=csv) | ConvertFrom-Csv
 		$freeVram = "$([Math]::Round("$($vram.'memory.free [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
 		$usedVram = "$([Math]::Round("$($vram.'memory.used [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
 		$totalVram = "$([Math]::Round("$($vram.'memory.total [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
@@ -550,14 +551,23 @@ $securityLogDetailsString = "$securityLogRecordCount events, $($securityLogFileS
 
 $lastBootUpTime = $win32_OperatingSystem.LastBootUpTime
 
-$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceDescription, InterfaceIndex, DriverDescription, DriverFileName, DriverDate, DriverVersionString, MediaConnectionState, NdisVersion, DriverInformation
+$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceAlias,InterfaceDescription,InterfaceIndex,DriverDescription,DriverFileName,DriverDate,DriverVersionString,MacAddress,MediaConnectionState,NdisVersion,DriverInformation
 $connectedPhysicalNics = $physicalNics | Where-Object MediaConnectionState -EQ 'Connected'
+$ipConfigs = Get-NetIPConfiguration -Detailed
 $ipV4Addresses = @()
 foreach ($connectedPhysicalNic in $connectedPhysicalNics)
 {
+	foreach ($ipConfig in $ipConfigs)
+	{
+		if ($ipconfig.NetAdapter.LinkLayerAddress -eq  $connectedPhysicalNic.MacAddress)
+		{
+			$ipV4Addresses += $ipconfig.IPv4Address.IPAddress | Where-Object {$_.StartsWith('169.254') -eq $false}
+		}
+	}
+
 	# -AddressState Preferred makes it so APIPA 169.254 addresses aren't returned, as they are -AddressState Tentative
-	#$ipV4Addresses += Get-NetIPAddress -InterfaceIndex $physicalNic.InterfaceIndex -AddressFamily IPv4 -AddressState Preferred | Select-Object -ExpandProperty IPAddress
-	$ipV4Addresses += Get-NetIPAddress -InterfaceIndex $connectedPhysicalNic.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IPAddress
+	# $ipV4Addresses += Get-NetIPAddress -InterfaceIndex $physicalNic.InterfaceIndex -AddressFamily IPv4 -AddressState Preferred | Select-Object -ExpandProperty IPAddress
+	# $ipV4Addresses += Get-NetIPAddress -InterfaceIndex $connectedPhysicalNic.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IPAddress
 }
 $ipV4AddressesString = $ipV4Addresses -join ','
 
