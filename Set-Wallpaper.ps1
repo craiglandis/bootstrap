@@ -6,102 +6,137 @@ c:\my\Set-Wallpaper.ps1
 
 copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1;c:\my\Set-Wallpaper.ps1
 #>
-
+[CmdletBinding(SupportsShouldProcess = $true)]
 param(
 	[string]$path = 'c:\my',
 	[int]$fontSize = 22,
 	[ValidateSet('left', 'right')]
 	[string]
 	$justify,
-	[switch]$noweather
+	[switch]$noweather,
+	[switch]$addScheduledTask,
+	[switch]$showDisconnects
 )
+
+trap
+{
+    $trappedError = $PSItem
+    $global:trappedError = $trappedError
+    $scriptLineNumber = $trappedError.InvocationInfo.ScriptLineNumber
+    $line = $trappedError.InvocationInfo.Line.Trim()
+    $exceptionMessage = $trappedError.Exception.Message
+    $trappedErrorString = $trappedError.Exception.ErrorRecord | Out-String -ErrorAction SilentlyContinue
+    Out-Log "[ERROR] $exceptionMessage Line $scriptLineNumber $line" -color Red
+    exit
+}
 
 function Out-Log
 {
-	param(
-		[string]$text,
-		[string]$prefix,
-		[switch]$raw,
-		[switch]$logonly,
-		[ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
-		[string]$color = 'White'
-	)
+    param(
+        [string]$text,
+        [switch]$verboseOnly,
+        [string]$prefix,
+        [switch]$raw,
+        [switch]$logonly,
+        [ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
+        [string]$color = 'White'
+    )
+    if ($verboseOnly)
+    {
+        if ($verbose)
+        {
+            $outputNeeded = $true
+            $foreGroundColor = 'Yellow'
+        }
+        else
+        {
+            $outputNeeded = $false
+        }
+    }
+    else
+    {
+        $outputNeeded = $true
+        $foreGroundColor = 'White'
+    }
 
-	if ($raw)
-	{
-		if ($logonly)
-		{
-			if ($global:logFilePath)
-			{
-				$text | Out-File $global:logFilePath -Append
-			}
-		}
-		else
-		{
-			Write-Host $text -ForegroundColor $color
-			if ($global:logFilePath)
-			{
-				$text | Out-File $global:logFilePath -Append
-			}
-		}
-	}
-	else
-	{
-		if ($prefix -eq 'timespan' -and $global:scriptStartTime)
-		{
-			$timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
-			$prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
-		}
-		elseif ($prefix -eq 'both' -and $global:scriptStartTime)
-		{
-			$timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-			$timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
-			$prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
-		}
-		else
-		{
-			$prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-		}
+    if ($outputNeeded)
+    {
+        if ($raw)
+        {
+            if ($logonly)
+            {
+                if ($logFilePath)
+                {
+                    $text | Out-File $logFilePath -Append
+                }
+            }
+            else
+            {
+                Write-Host $text -ForegroundColor $color
+                if ($logFilePath)
+                {
+                    $text | Out-File $logFilePath -Append
+                }
+            }
+        }
+        else
+        {
+            if ($prefix -eq 'timespan' -and $global:scriptStartTime)
+            {
+                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+                $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
+            }
+            elseif ($prefix -eq 'both' -and $global:scriptStartTime)
+            {
+                $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+                $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
+            }
+            else
+            {
+                $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
+            }
 
-		if ($logonly)
-		{
-			if ($global:logFilePath)
-			{
-				"$prefixString $text" | Out-File $global:logFilePath -Append
-			}
-		}
-		else
-		{
-			Write-Host $prefixString -NoNewline -ForegroundColor Cyan
-			Write-Host " $text" -ForegroundColor $color
-			if ($global:logFilePath)
-			{
-				"$prefixString $text" | Out-File $global:logFilePath -Append
-			}
-		}
-	}
+            if ($logonly)
+            {
+                if ($logFilePath)
+                {
+                    "$prefixString $text" | Out-File $logFilePath -Append
+                }
+            }
+            else
+            {
+                Write-Host $prefixString -NoNewline -ForegroundColor Cyan
+                Write-Host " $text" -ForegroundColor $color
+                if ($logFilePath)
+                {
+                    "$prefixString $text" | Out-File $logFilePath -Append
+                }
+            }
+        }
+    }
 }
 
 function Invoke-ExpressionWithLogging
 {
-	param(
-		[string]$command
-	)
-	Out-Log $command
-	try
-	{
-		Invoke-Expression -Command $command
-	}
-	catch
-	{
-		$global:errorRecordObject = $PSItem
-		Out-Log "`n$command`n" -raw -color Red
-		Out-Log "$global:errorRecordObject" -raw -color Red
-		if ($LASTEXITCODE)
-		{
-			Out-Log "`$LASTEXITCODE: $LASTEXITCODE`n" -raw -color Red
-		}
-	}
+    param(
+        [string]$command
+    )
+    Out-Log $command -logonly
+    try
+    {
+        Invoke-Expression -Command $command
+    }
+    catch
+    {
+        $global:errorRecordObject = $PSItem
+        Out-Log "`n$command`n" -raw -color Red
+        Out-Log "$global:errorRecordObject" -raw -color Red
+        if ($LASTEXITCODE)
+        {
+            Out-Log "`$LASTEXITCODE: $LASTEXITCODE`n" -raw -color Red
+        }
+    }
 }
 
 function Get-CustomDateTimeString
@@ -277,29 +312,84 @@ $scriptFolderPath = Split-Path -Path $scriptFullName
 $scriptName = Split-Path -Path $scriptFullName -Leaf
 $scriptBaseName = $scriptName.Split('.')[0]
 
+$currentPSDefaultParameterValues = $PSDefaultParameterValues
+if ($currentPSDefaultParameterValues)
+{
+	Remove-Variable -Name PSDefaultParameterValues -Scope Global -ErrorAction SilentlyContinue
+}
+$PSDefaultParameterValues = @{
+	'*:ErrorAction'   = 'Stop'
+	'*:WarningAction' = 'SilentlyContinue'
+}
+$ProgressPreference = 'SilentlyContinue'
+
+$verbose = [bool]$PSBoundParameters['verbose']
+$debug = [bool]$PSBoundParameters['debug']
+
+$logFilePath = "$env:TEMP\$scriptBaseName.log"
+$logFile = Get-Item -Path $logFilePath -ErrorAction SilentlyContinue
+if ($logFile -and $logFile.Length -ge 10MB)
+{
+	$logFile | Remove-Item
+}
+
+Out-Log "Getting system information"
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
+
+Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms
+
+$isRdpSession = [System.Windows.Forms.SystemInformation]::TerminalServerSession
+$monitorCount = [System.Windows.Forms.SystemInformation]::MonitorCount
+$workingArea = [System.Windows.Forms.SystemInformation]::WorkingArea
+$userInteractive = [System.Windows.Forms.SystemInformation]::UserInteractive
+$screenOrientation = [System.Windows.Forms.SystemInformation]::ScreenOrientation
+$primaryMonitorSize = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize
+$monitorsSameDisplayFormat = [System.Windows.Forms.SystemInformation]::MonitorsSameDisplayFormat
+$network = [System.Windows.Forms.SystemInformation]::Network
+Out-Log "ComputerName: $env:computername, Monitors: $monitorCount, MonitorsSameDisplayFormat: $monitorsSameDisplayFormat, screenOrientation: $screenOrientation, userInteractive: $userInteractive" -verboseOnly
+
+# 'Get-CimInstance -Query "SELECT Property1,Property FROM Win32_Something"' is slightly faster than 'Get-CimInstance -ClassName Win32_Something -Property Property,Property2'
+$win32_SystemEnclosure = Get-CimInstance -Query 'SELECT ChassisTypes,Manufacturer,SerialNumber,Version FROM Win32_SystemEnclosure'
+# https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-systemenclosure
+# 9='Laptop' 10='Notebook' 31='Convertible'
+if ($win32_SystemEnclosure.ChassisTypes -in '9','10','31')
+{
+	$deviceType = 'Laptop'
+	$isLaptop = $true
+}
+else
+{
+	$deviceType = 'Desktop'
+	$isDesktop = $true
+}
 
 $vmBusStatus = Get-Service -Name vmbus | Select-Object -ExpandProperty Status
 if ($vmBusStatus -eq 'Running')
 {
-	$isVirtualMachine = $true
+	$deviceType = 'Virtual Machine'
+	$isVm = $true
 	$isPhysicalMachine = $false
 }
 else
 {
-	$isVirtualMachine = $false
+	$isVm = $false
 	$isPhysicalMachine = $true
 }
 
-if ($isPhysicalMachine -and $noweather -eq $false)
+if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 {
-	$weather = (Invoke-RestMethod https://wttr.in/?1FQT).Split("`n")
+	$weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
+	if ($weather)
+	{
+		$weather = $weather -split "`n"
+	}
 }
 
-# 'Get-CimInstance -Query "SELECT Property1,Property FROM Win32_Something"' is slightly faster than 'Get-CimInstance -ClassName Win32_Something -Property Property,Property2'
-$win32_BaseBoard = Get-CimInstance -Query 'SELECT Product FROM Win32_BaseBoard'
+$win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
 $win32_OperatingSystem = Get-CimInstance -Query 'SELECT Caption,FreePhysicalMemory,FreeVirtualMemory,InstallDate,LastBootUpTime,SizeStoredInPagingFiles,TotalVirtualMemorySize,Version FROM Win32_OperatingSystem'
-$win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,HypervisorPresent,Name,Manufacturer,Model,SystemType,TotalPhysicalMemory,UserName FROM Win32_ComputerSystem'
+$win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,HypervisorPresent,Name,Manufacturer,Model,SystemFamily,SystemSKUNumber,SystemType,TotalPhysicalMemory,UserName FROM Win32_ComputerSystem'
 $win32_PageFileUsage = Get-CimInstance -Query 'SELECT Caption FROM Win32_PageFileUsage'
 $win32_Processor = Get-CimInstance -Query 'SELECT Name,MaxClockSpeed,NumberOfCores,NumberOfLogicalProcessors FROM Win32_Processor'
 $cpuProductName = $win32_Processor.Name.Split(' ')[-1].Trim()
@@ -311,7 +401,7 @@ $intelCpusCsvName = Split-Path -Path $intelCpusCsvUrl -Leaf
 $intelCpusCsvPath = "$env:TEMP\$intelCpusCsvName"
 if ((Test-Path -Path $intelCpusCsvPath) -eq $false)
 {
-	Out-Log "Downloading $intelCpusCsvUrl"
+	Out-Log "Downloading $intelCpusCsvUrl" -verboseOnly
     (New-Object Net.Webclient).DownloadFile($intelCpusCsvUrl, $intelCpusCsvPath)
 }
 $intelCpuSpecs = Import-Csv -Path $intelCpusCsvPath -ErrorAction SilentlyContinue
@@ -351,8 +441,10 @@ $win32_PhysicalMemory = Get-CimInstance -Query 'SELECT Capacity,ConfiguredClockS
 $win32_TPM = Get-CimInstance -Namespace root/cimv2/security/microsofttpm -Query 'SELECT IsEnabled_InitialValue,ManufacturerIdTxt,ManufacturerVersionInfo,ManufacturerVersion,SpecVersion FROM Win32_TPM'
 if ($win32_TPM)
 {
-	$tpmString = "Enabled: $($win32_TPM.IsEnabled_InitialValue) Manufacturer: $($win32_TPM.ManufacturerIdTxt) $($win32_TPM.ManufacturerVersionInfo.Trim()) $($win32_TPM.ManufacturerVersion) Version(s): $($win32_TPM.SpecVersion)"
+	$tpmString = "Enabled: $($win32_TPM.IsEnabled_InitialValue) Manufacturer: $($win32_TPM.ManufacturerIdTxt.Trim()) $($win32_TPM.ManufacturerVersionInfo.Trim()) $($win32_TPM.ManufacturerVersion) Version(s): $($win32_TPM.SpecVersion)"
+	$tpmString = $tpmString -replace '\s+', ' '
 }
+$secureBootEnabled = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
 
 $gpus = Get-CimInstance -Query 'SELECT AdapterCompatibility,CurrentHorizontalResolution,CurrentRefreshRate,CurrentVerticalResolution,DriverDate,DriverVersion,Name,PNPDeviceID FROM Win32_VideoController'
 # Win32_VideoController AdapterRAM is wrong (shows 4GB for 4090 with 24GB) plus there's no native Windows way to get free/used VRAM
@@ -366,10 +458,23 @@ if ($hasNvidiaGPU)
 	{
 		# "nvidia-smi --help-query-gpu" shows all possible valus to query
 		# $vram = (nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv) | ConvertFrom-Csv
-		$vram = (nvidia-smi --query-gpu=memory.total,memory.used,memory.free,name,serial,uuid,pcie.link.gen.current,pcie.link.gen.gpumax,pcie.link.gen.hostmax,pcie.link.width.current,pcie.link.width.max,vbios_version,fan.speed,pstate,clocks_event_reasons.hw_thermal_slowdown,clocks_event_reasons.hw_power_brake_slowdown,clocks_event_reasons.sw_thermal_slowdown,utilization.gpu,utilization.memory,temperature.gpu,temperature.memory,power.management,power.draw,power.draw.average,power.draw.instant,power.limit,enforced.power.limit,power.default_limit,power.max_limit,clocks.current.graphics,clocks.current.memory,clocks.max.graphics,clocks.max.memory --format=csv) | ConvertFrom-Csv
-		$freeVram = "$([Math]::Round("$($vram.'memory.free [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
-		$usedVram = "$([Math]::Round("$($vram.'memory.used [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
-		$totalVram = "$([Math]::Round("$($vram.'memory.total [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
+		$nvidiaSmiResult = nvidia-smi --query-gpu=memory.total,memory.used,memory.free,name,serial,uuid,pcie.link.gen.current,pcie.link.gen.gpumax,pcie.link.gen.hostmax,pcie.link.width.current,pcie.link.width.max,vbios_version,fan.speed,pstate,clocks_event_reasons.hw_thermal_slowdown,clocks_event_reasons.hw_power_brake_slowdown,clocks_event_reasons.sw_thermal_slowdown,utilization.gpu,utilization.memory,temperature.gpu,temperature.memory,power.management,power.draw,power.draw.average,power.draw.instant,power.limit,enforced.power.limit,power.default_limit,power.max_limit,clocks.current.graphics,clocks.current.memory,clocks.max.graphics,clocks.max.memory --format=csv
+		$nvidiaSmiResult = $nvidiaSmiResult | ConvertFrom-Csv
+		$global:dbgNvidiaSmiResult = $nvidiaSmiResult
+
+		$pciLaneUsageCurrent = $nvidiaSmiResult.'pcie.link.width.current'
+		$pciLaneUsageMax = $nvidiaSmiResult.'pcie.link.width.max'
+		$gpuUtilization = $nvidiaSmiResult.'utilization.gpu [%]'.Replace(' %','%')
+		$gpuMemoryUtilization = $nvidiaSmiResult.'utilization.memory [%]'.Replace(' %','%')
+		$gpuFanSpeedPercent = $nvidiaSmiResult.'fan.speed [%]'.Replace(' %','%')
+		$gpuTemperature = "$($nvidiaSmiResult.'temperature.gpu')C"
+		$gpuPowerDraw = $nvidiaSmiResult.'power.draw [W]'.Replace(' W','W')
+		$gpuPowerLimit = $nvidiaSmiResult.'power.limit [W]'.Replace(' W','W')
+		$gpuInfo = "PCIE $pciLaneUsageCurrent/$pciLaneUsageMax GPU $gpuUtilization MEM $gpuMemoryUtilization FAN $gpuFanSpeedPercent TEMP $gpuTemperature DRAW $gpuPowerDraw LIMIT $gpuPowerLimit"
+
+		$freeVram = "$([Math]::Round("$($nvidiaSmiResult.'memory.free [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
+		$usedVram = "$([Math]::Round("$($nvidiaSmiResult.'memory.used [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
+		$totalVram = "$([Math]::Round("$($nvidiaSmiResult.'memory.total [MiB]'.Replace(' MiB',''))MB"/1GB,0))GB"
 		$vram = "$totalVram ($freeVram free)"
 		$gpus | Where-Object AdapterCompatibility -EQ 'NVIDIA' | ForEach-Object {
 			$_ | Add-Member -MemberType NoteProperty -Name VRAM -Value $vram -Force -ErrorAction SilentlyContinue
@@ -377,7 +482,7 @@ if ($hasNvidiaGPU)
 	}
 	else
 	{
-		Out-Log "NVIDIA GPU detected but $nvidiaSmiPath not found so VRAM details are not available"
+		Out-Log "NVIDIA GPU detected but $nvidiaSmiPath not found so VRAM details are not available" -verboseOnly
 	}
 }
 
@@ -412,7 +517,7 @@ if ($isPhysicalMachine)
 	$memoryModuleManufacturer = $win32_PhysicalMemory | Select-Object -ExpandProperty Manufacturer -Unique
 	$memoryModuleCount = $win32_PhysicalMemory | Measure-Object | Select-Object -ExpandProperty Count
 	$memoryModuleSize = $win32_PhysicalMemory | Select-Object -ExpandProperty Capacity -Unique
-	$memoryModuleSizeGB = $memoryModuleSize / 1GB
+	$memoryModuleSizeGB = $memoryModuleSize/1GB
 	$memoryModuleSpeed = $win32_PhysicalMemory | Select-Object -ExpandProperty Speed -Unique
 	$memoryModuleConfiguredClockSpeed = $win32_PhysicalMemory | Select-Object -ExpandProperty ConfiguredClockSpeed -Unique
 	$memoryModulePartNumber = $win32_PhysicalMemory | Select-Object -ExpandProperty PartNumber -Unique
@@ -571,7 +676,7 @@ foreach ($connectedPhysicalNic in $connectedPhysicalNics)
 }
 $ipV4AddressesString = $ipV4Addresses -join ','
 
-if ($isPhysicalMachine)
+if ($showDisconnects -and ($connectedPhysicalNics.DriverDescription -match 'I226' -or $connectedPhysicalNics.DriverDescription -match 'I225'))
 {
 	# This check for disconnects/idleworkingstate value is for the Intel i225-V/i226-V NICs
 	# While I've added other NIC vendor's event providers to the query, they probably don't log a disconnect as Id 27 like Intel does
@@ -635,10 +740,6 @@ if ($isPhysicalMachine)
 	{
 		$lastBackupTime = $lastBackupTime.Replace('Backup time: ', '').Trim()
 		$lastBackupTime = "$(Get-Age -start $lastBackupTime) ago $(Get-Date $lastBackupTime -Format yyyy-MM-ddTHH:mm:ss)"
-	}
-	else
-	{
-		$lastBackupTime = 'N/A'
 	}
 }
 
@@ -831,20 +932,31 @@ $biosDate = Get-Date -Date $win32_BIOS.ReleaseDate -Format yyyy-MM-dd
 $biosDate = "$biosDate $(Get-Age -Start $win32_BIOS.ReleaseDate) old"
 $bios = "$biosVersion $biosDate"
 
-$mobo = $win32_BaseBoard.Product
 $systemManufacturer = $win32_ComputerSystem.Manufacturer
-$mobo = "$systemManufacturer $mobo"
+if ($isLaptop)
+{
+	$systemFamily = $win32_ComputerSystem.SystemFamily
+	$systemSkuNumber = $win32_ComputerSystem.SystemSkuNumber
+	$model = "$systemManufacturer $systemFamily" # $systemSkuNumber
+}
+else
+{
+	$baseBoardProduct = $win32_BaseBoard.Product
+	$baseBoardManufacturer = $win32_BaseBoard.Manufacturer
+	$mobo = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
+}
 
-$hypervisorPresent = $win32_ComputerSystem | Select-Object -ExpandProperty HypervisorPresent
+$hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
 $logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk' | Where-Object FreeSpace
-$drive = @{Name = 'Drive'; Expression = {"DRIVE $($_.DeviceID)"}}
+$drive = @{Name = 'Drive'; Expression = {"DRIVE $($_.DeviceID.Replace(':',''))"}}
 $free = @{Name = 'Free'; Expression = {"$([Math]::Round($_.FreeSpace/1GB, 0))GB"}}
 $used = @{Name = 'Used'; Expression = {"$([Math]::Round(($_.Size-$_.FreeSpace)/1GB, 0))GB"}}
 $size = @{Name = 'Size'; Expression = {"$([Math]::Round($_.Size/1GB, 0))GB"}}
 $details = @{Name = 'Details'; Expression = {"Free:$((([Math]::Round($_.FreeSpace/1GB, 0)).ToString('N0')).PadLeft(6, ' '))GB Used:$((([Math]::Round(($_.Size-$_.FreeSpace)/1GB, 0)).ToString('N0')).PadLeft(6, ' '))GB Total:$((([Math]::Round($_.Size/1GB, 0)).ToString('N0')).PadLeft(6, ' '))GB"}}
 $logicalDisks = $logicalDisks | Select-Object $drive, $free, $used, $size, $details
 $logicalDisksTable = $logicalDisks | Format-Table -AutoSize | Out-String
+# TODO: Get-BitLockerVolume
 
 $letter = $systemDrive.DeviceID
 $systemDrive = "$letter $($size)GB ($($free)GB Free)"
@@ -887,10 +999,18 @@ $freeVirtualMemory = $win32_OperatingSystem.FreeVirtualMemory
 $computerName = $env:computername
 $userName = "$env:userdomain\$env:username"
 
-$ram = ([string]([math]::round([Int64]$win32_ComputerSystem.TotalPhysicalMemory / 1GB, 0)) + 'GB')
-if ($memoryModuleManufacturer -ne 'Microsoft Corporation')
+$ram = ([string]([math]::round([Int64]$win32_ComputerSystem.TotalPhysicalMemory/1GB, 0)) + 'GB')
+if ($isPhysicalMachine)
 {
-	$ram = "$ram $($memoryModuleCount)x$($memoryModuleSizeGB)GB $($memoryModuleConfiguredClockSpeed)Mhz $memoryModuleManufacturer $memoryModulePartNumber"
+	# Thinkpad X1 Yoga reported **8** modules 4GB each, which is wrong or at least isn't being reported the way most machines do, so special-casing that
+	if (($isLaptop -and $memoryModuleCount -gt 2) -or $isVm)
+	{
+		$ram = "$ram $($memoryModuleConfiguredClockSpeed)Mhz $memoryModuleManufacturer $memoryModulePartNumber"
+	}
+	else
+	{
+		$ram = "$ram $($memoryModuleCount)x$($memoryModuleSizeGB)GB $($memoryModuleConfiguredClockSpeed)Mhz $memoryModuleManufacturer $memoryModulePartNumber"
+	}
 	$ram = $ram.Replace('Intl', '').Replace('  ', ' ')
 }
 $strPageFile = $win32_PageFileUsage.Caption
@@ -900,7 +1020,7 @@ $biosVersion = $win32_BIOS.SMBIOSBIOSVersion
 $biosReleaseDate = $win32_BIOS.ReleaseDate
 $strBIOSVersion = "$biosManufacturer $biosVersion $biosReleaseDate"
 
-if ($isVirtualMachine)
+if ($isVm)
 {
 	$containerId = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty 'VirtualMachineName'
 	if ([string]::IsNullOrEmpty($containerId))
@@ -961,7 +1081,11 @@ $weather | ForEach-Object {
 }
 $objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'Name'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"})
 $objects.Add([PSCustomObject]@{Name = 'osVersion'; DisplayName = 'OS'; Value = $osVersion})
+$objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
+$objects.Add([PSCustomObject]@{Name = 'osInstallDate'; DisplayName = 'OS INSTALLED'; Value = $osInstallDateString})
 $objects.Add([PSCustomObject]@{Name = 'joinType'; DisplayName = 'JOIN TYPE'; Value = $joinType})
+$objects.Add([PSCustomObject]@{Name = 'deviceType'; DisplayName = 'DEVICE TYPE'; Value = $deviceType; EmptyLineAfter = $true})
+
 $objects.Add([PSCustomObject]@{Name = 'cpu'; DisplayName = 'CPU'; Value = $cpu})
 $gpus | Where-Object {$_.Name -ne 'Microsoft Remote Display Adapter' -and $_.Name -notmatch 'Hyper-V'} | ForEach-Object {
 	$gpu = $_
@@ -975,9 +1099,16 @@ $gpus | Where-Object {$_.Name -ne 'Microsoft Remote Display Adapter' -and $_.Nam
 	$gpuDescription = "$gpuName $vram $refreshRate $gpuDriver" -replace '\s+', ' '
 	$objects.Add([PSCustomObject]@{Name = 'gpu'; DisplayName = 'GPU'; Value = $gpuDescription})
 }
+if ($hasNvidiaGPU -and [string]::IsNullOrEmpty($gpuInfo) -eq $false)
+{
+	$objects.Add([PSCustomObject]@{Name = 'gpuInfo'; DisplayName = ''; Value = $gpuInfo})
+}
 $objects.Add([PSCustomObject]@{Name = 'mem'; DisplayName = 'MEM'; Value = $ram})
-$objects.Add([PSCustomObject]@{Name = 'mobo'; DisplayName = 'MOBO'; Value = "$mobo BIOS $bios"})
+$objects.Add([PSCustomObject]@{Name = 'model'; DisplayName = 'MODEL'; Value = $model})
+$objects.Add([PSCustomObject]@{Name = 'mobo'; DisplayName = 'MOBO'; Value = $mobo})
 $objects.Add([PSCustomObject]@{Name = 'tpm'; DisplayName = 'TPM'; Value = $tpmString})
+$objects.Add([PSCustomObject]@{Name = 'secureBootEnabled'; DisplayName = 'SECURE BOOT'; Value = $secureBootEnabled})
+
 foreach ($physicalNic in $physicalNics)
 {
 	#$interfaceDescription = $physicalNic.InterfaceDescription.Replace('Intel(R) Ethernet Controller','Intel').Replace('Intel(R) Ethernet Connection','Intel').Replace('(R)','')
@@ -986,7 +1117,7 @@ foreach ($physicalNic in $physicalNics)
 	$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 }
 $objects.Add([PSCustomObject]@{Name = 'disconnectsInfo'; DisplayName = ''; Value = $disconnectsInfo})
-$objects.Add([PSCustomObject]@{Name = 'hypervisorPresent'; DisplayName = 'HYPERVISOR'; Value = $hypervisorPresent})
+$objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
 $objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER'; Value = $powerPlan; EmptyLineAfter = $true})
 foreach ($logicalDisk in $logicalDisks)
 {
@@ -1005,9 +1136,7 @@ $objects.Add([PSCustomObject]@{Name = 'securityLogDetails'; DisplayName = 'SECUR
 $objects.Add([PSCustomObject]@{Name = 'lastQuickScan'; DisplayName = 'LAST QUICK SCAN'; Value = $quickScanEndTimeString})
 $objects.Add([PSCustomObject]@{Name = 'lastFullScan'; DisplayName = 'LAST FULL SCAN'; Value = $fullScanEndTimeString; EmptyLineAfter = $true})
 
-$objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
 $objects.Add([PSCustomObject]@{Name = 'lastBackup'; DisplayName = 'LAST BACKUP'; Value = $lastBackupTime})
-$objects.Add([PSCustomObject]@{Name = 'osInstallDate'; DisplayName = 'OS INSTALLED'; Value = $osInstallDateString; EmptyLineAfter = $true})
 
 $objects.Add([PSCustomObject]@{Name = 'lastCumulativeUpdate'; DisplayName = 'LAST CUMULATIVE UPDATE'; Value = $lastCumulativeUpdateString})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToWin32QuickFixEngineering'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToWin32QuickFixEngineering) ago $lastUpdateHotfixIdAccordingToWin32QuickFixEngineering $lastUpdateTimeAccordingToWin32QuickFixEngineering (Win32_QuickfixEngineering)".Trim()})
@@ -1037,8 +1166,6 @@ public static extern uint SystemParametersInfo(
     uint fWinIni);
 '@
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
 # If we're in an RDP session, use those resolution values
 if ([bool]($gpus.Name -eq 'Microsoft Remote Display Adapter'))
 {
@@ -1050,7 +1177,7 @@ else
 	if (($gpu | Measure-Object | Select-Object -ExpandProperty Count) -gt 1)
 	{
 		$gpu = $gpu | Sort-Object CurrentHorizontalResolution -Descending | Select-Object -First 1
-		Out-Log "More than one GPU had CurrentHorizontalResolution/CurrentVerticalResolution defined, using the one with the higher resolution ($($gpu.Name) $($gpu.CurrentHorizontalResolution)x$($gpu.CurrentVerticalResolution))"
+		Out-Log "More than one GPU had CurrentHorizontalResolution/CurrentVerticalResolution defined, using the one with the higher resolution ($($gpu.Name) $($gpu.CurrentHorizontalResolution)x$($gpu.CurrentVerticalResolution))" -verboseOnly
 	}
 }
 
@@ -1062,6 +1189,7 @@ if ($currentHorizontalResolution -and $currentVerticalResolution)
 	$height = $currentVerticalResolution
 	$workingAreaWidth = $currentHorizontalResolution
 	$workingAreaHeight = ($currentVerticalResolution - 8)
+	Out-Log "$($width)x$($height) resolution, $($workingAreaWidth)x$($workingAreaHeight) working area" -verboseOnly
 }
 else
 {
@@ -1069,7 +1197,6 @@ else
 	exit
 }
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 $bitmap = New-Object System.Drawing.Bitmap($width, $height)
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
 $graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
@@ -1101,14 +1228,19 @@ else
 	$horizontalPosition = ($workingAreaWidth - ($columnWidth + 50))
 }
 
+$textOutput = New-Object Text.StringBuilder
+
 $verticalPosition = 40
 $white = New-Object Drawing.SolidBrush White
 $cyan = New-Object Drawing.SolidBrush Cyan
+
+$objects = $objects | Where-Object {[string]::IsNullOrEmpty($_.Value) -eq $false}
 foreach ($object in $objects)
 {
 	if ($object.EmptyLineBefore)
 	{
 		$verticalPosition += $fontHeight + 5
+		[void]$textOutput.Append("`n")
 	}
 
 	# Create second column if first column is full
@@ -1147,12 +1279,13 @@ foreach ($object in $objects)
 		#$string2 = $value
 
 		$graphics.DrawString($string, $font, $white, $horizontalPosition, $verticalPosition)
+		[void]$textOutput.Append("$string`n")
 
 		#$measureTextResult = [Windows.Forms.TextRenderer]::MeasureText($string1, $font).Width
-		#Out-Log "`$measureTextResult: $measureTextResult"
+		#Out-Log "`$measureTextResult: $measureTextResult" -verboseonly
 		#$horizontalPosition += $graphics.MeasureString($string1, $font, (New-Object "System.Drawing.PointF" -ArgumentList @(0, 0)), (New-Object "System.Drawing.StringFormat" -ArgumentList @([System.Drawing.StringFormat]::GenericTypographic)))
 		#$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
-		#Out-Log "`$measureStringResult:$measureStringResult"
+		#Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
 		#$horizontalPosition += $measureStringResult
 		#$graphics.DrawString($string2, $font, $cyan, $horizontalPositionp, $verticalPosition)
 	}
@@ -1162,13 +1295,13 @@ foreach ($object in $objects)
 	if ($object.EmptyLineAfter)
 	{
 		$verticalPosition += $fontHeight + 5
+		[void]$textOutput.Append("`n")
 	}
 }
 
 $wallpaperFolderPath = "$env:windir\web\wallpaper"
 $wallpaperFileName = "CustomWallpaper$($width)x$($height).png"
 $wallpaperFilePath = "$wallpaperFolderPath\$wallpaperFileName"
-Out-Log "Wallpaper file path: $wallpaperFilePath"
 
 # First set wallpaper to solid black 1x1 PNG because sometimes it doesn't refresh correctly otherwise
 $win32Utils = Add-Type -MemberDefinition $user32MemberDefinition -Name Win32Utils -Namespace SystemParametersInfo -PassThru -ErrorAction SilentlyContinue
@@ -1185,40 +1318,10 @@ $solidColorBitmap.Dispose()
 $bitmap.Save($wallpaperFilePath, [System.Drawing.Imaging.ImageFormat]::Png)
 $bitmap.Dispose()
 [void]($win32Utils::SystemParametersInfo(20, 0, $wallpaperFilePath, 3))
+
 $wallpaperFile = Get-Item -Path $wallpaperFilePath
 $wallpaperFileSizeKB = "$([Math]::Round($wallpaperFile.Length/1KB))KB"
-Out-Log "Wallpaper file size: $wallpaperFileSizeKB"
-
-<#
-if ((Test-Path -Path $path -PathType Container) -eq $false)
-{
-    New-Item -Path $path -ItemType Directory -ErrorAction Stop | Out-Null
-}
-
-if ($scriptFullName.StartsWith('\\tsclient'))
-{
-	$remoteScript = Get-Item -Path $scriptFullName
-	$remoteScriptHash = $remoteScript | Get-FileHash | Select-Object -ExpandProperty Hash
-	$localScriptPath = "$path\$scriptName"
-	if (Test-Path -Path $localScriptPath -PathType Leaf)
-	{
-		$localScript = Get-Item -Path $localScriptPath
-		$localScriptHash = $localScript | Get-FileHash | Select-Object -ExpandProperty Hash
-		if ($localScriptHash -ne $remoteScriptHash)
-		{
-			Copy-Item -Path $scriptFullName -Destination $localScriptPath -Force
-		}
-	}
-	else
-	{
-		Copy-Item -Path $scriptFullName -Destination $localScriptPath -Force
-	}
-}
-else
-{
-	$localScriptPath = $scriptFullName
-}
-#>
+Out-Log "Created $wallpaperFilePath ($wallpaperFileSizeKB)" -verboseonly
 
 # Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
 if ($scriptFullName.Startswith('\\') -eq $false)
@@ -1292,27 +1395,26 @@ $taskXml = @"
 </Task>
 "@
 
-# Unregister-ScheduledTask -TaskName Set-Wallpaper -Confirm:$false
-$taskName = $scriptBaseName
-$task = [bool](Enable-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)
-if ($task -eq $false)
+if ($addScheduledTask)
 {
+	$taskName = (Get-Culture).TextInfo.ToTitleCase($scriptBaseName)
+	Invoke-ExpressionWithLogging "Unregister-ScheduledTask -TaskName $taskName -Confirm:`$false -ErrorAction SilentlyContinue"
 	if ((Test-Path -Path $setWallpaperVbsPath -PathType Leaf) -eq $false)
 	{
-		Out-Log "$setWallpaperVbsPath not found, creating it..."
+		Out-Log "$setWallpaperVbsPath not found, creating it..." -verboseonly
 		$setWallpaperVbsContents | Out-File -FilePath $setWallpaperVbsPath -ErrorAction Stop
 	}
 	if (Test-Path -Path $setWallpaperVbsPath -PathType Leaf)
 	{
-		Out-Log "$setWallpaperVbsPath successfully created"
+		Out-Log "$setWallpaperVbsPath successfully created" -verboseonly
 		if ($taskXml)
 		{
-			Out-Log "Registering $taskName task with XML"
-			Register-ScheduledTask -TaskName $taskName -Xml $taskXml | Out-Null
+			Out-Log "Registering $taskName task with XML" -verboseonly
+			Invoke-ExpressionWithLogging "Register-ScheduledTask -TaskName $taskName -Xml '$taskXml' | Out-Null"
 		}
 		else
 		{
-			Out-Log "Registering $taskName task without XML"
+			Out-Log "Registering $taskName task without XML" -verboseonly
 			$execute = '"C:\Windows\System32\wscript.exe"'
 			$argument = $setWallpaperVbsPath
 			$userId = "$env:userdomain\$env:username"
@@ -1326,18 +1428,25 @@ if ($task -eq $false)
 			Register-ScheduledTask -TaskName $taskName -InputObject $task | Out-Null
 		}
 	}
+
 }
 
-$setAliasCommand = "Set-Alias w `"$scriptFullName`""
-Invoke-ExpressionWithLogging $setAliasCommand
-
-if (Test-Path -Path $profile -PathType Leaf)
+if ($addToProfile)
 {
-	$profileAlreadyUpdated = Get-Content $profile | Select-String -SimpleMatch $setAliasCommand -Quiet
-	if ($profileAlreadyUpdated -eq $false)
+	if ((Test-Path -Path $profile -PathType Leaf) -eq $false)
 	{
-		Out-Log "Adding '$setAliasCommand' to $profile"
-		Add-Content -Value $setAliasCommand -Path $profile -Force
+		New-Item -Path $profile -ItemType File -Force -ErrorAction SilentlyContinue | Out-Null
+	}
+	if (Test-Path -Path $profile -PathType Leaf)
+	{
+		$profileAlreadyUpdated = Get-Content $profile | Select-String -SimpleMatch $setAliasCommand -Quiet
+		if ($profileAlreadyUpdated -eq $false)
+		{
+			$setAliasCommand = "Set-Alias w `"$scriptFullName`""
+			Out-Log "Adding '$setAliasCommand' to $profile" -verboseonly
+			Add-Content -Value $setAliasCommand -Path $profile -Force
+			. $profile
+		}
 	}
 }
 
@@ -1349,6 +1458,15 @@ $global:dbgObjects = $objects
 $global:dbgWeather = $weather
 $global:cpuSpecs = $cpuSpecs
 
+Out-Log "Log file: $logFilePath"
 $scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
 $scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
 Out-Log "$scriptName duration: $scriptDuration"
+
+$textOutputString = $textOutput.ToString() | Out-String
+Out-Log $textOutputString -raw
+
+if ($currentPSDefaultParameterValues)
+{
+	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
+}
