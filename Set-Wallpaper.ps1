@@ -1,7 +1,7 @@
 ﻿<#
 Set-ExecutionPolicy Bypass -Force
 md c:\my
-invoke-webrequest https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
 c:\my\Set-Wallpaper.ps1
 
 copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1;c:\my\Set-Wallpaper.ps1
@@ -380,11 +380,9 @@ else
 
 if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 {
-	$weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
-	if ($weather)
-	{
-		$weather = $weather -split "`n"
-	}
+	# $weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
+	# https://github.com/chubin/wttr.in#one-line-output
+	$weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
 }
 
 $win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
@@ -393,6 +391,7 @@ $win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,Hypervis
 $win32_PageFileUsage = Get-CimInstance -Query 'SELECT Caption FROM Win32_PageFileUsage'
 $win32_Processor = Get-CimInstance -Query 'SELECT Name,MaxClockSpeed,NumberOfCores,NumberOfLogicalProcessors FROM Win32_Processor'
 $cpuProductName = $win32_Processor.Name.Split(' ')[-1].Trim()
+$cpuProductName = $win32_Processor.Name.Split('@')[0].Replace('(R)', '').Replace('(TM)', '').Replace('  ', ' ').Split(' ')[-1].Trim()
 # $cpuProductName = $win32_Processor.Name.Split(' ') | Where-Object {$_ -match '-'}
 
 # https://github.com/toUpperCase78/intel-processors
@@ -435,13 +434,20 @@ if ([string]::IsNullOrEmpty($cpu))
 	$cpu = "$cpuName $($cores)C/$($threads)T $baseClockString base $currentClockString current"
 }
 
+$win32_SystemDriver = Get-CimInstance -Query 'SELECT * FROM Win32_SystemDriver'
+
 $win32_BIOS = Get-CimInstance -Query 'SELECT Manufacturer, Version, SMBIOSPresent, SMBIOSBIOSVersion, ReleaseDate, SMBIOSMajorVersion, SMBIOSMinorVersion, BIOSVersion FROM Win32_BIOS'
 $win32_TimeZone = Get-CimInstance -Query 'SELECT StandardName FROM Win32_TimeZone'
 $win32_PhysicalMemory = Get-CimInstance -Query 'SELECT Capacity,ConfiguredClockSpeed,Manufacturer,PartNumber,Speed FROM Win32_PhysicalMemory'
 $win32_TPM = Get-CimInstance -Namespace root/cimv2/security/microsofttpm -Query 'SELECT IsEnabled_InitialValue,ManufacturerIdTxt,ManufacturerVersionInfo,ManufacturerVersion,SpecVersion FROM Win32_TPM'
 if ($win32_TPM)
 {
-	$tpmString = "Enabled: $($win32_TPM.IsEnabled_InitialValue) Manufacturer: $($win32_TPM.ManufacturerIdTxt.Trim()) $($win32_TPM.ManufacturerVersionInfo.Trim()) $($win32_TPM.ManufacturerVersion) Version(s): $($win32_TPM.SpecVersion)"
+	$tpmIsEnabled = $win32_TPM.IsEnabled_InitialValue
+	$tpmManufacturerVersionInfo = $win32_TPM.ManufacturerVersionInfo -replace "[^a-zA-Z0-9]", ''
+	$tpmManufacturerVersion = $win32_TPM.ManufacturerVersion
+	$tpmManufacturerId = $win32_TPM.ManufacturerIdTxt -replace "[^a-zA-Z0-9]", ''
+	$tpmSpecVersion = $win32_TPM.SpecVersion
+	$tpmString = "Enabled: $tmpIsEnabled $tpmManufacturerId $tpmManufacturerVersionInfo $tpmManufacturerVersion Version(s): $tpmSpecVersion"
 	$tpmString = $tpmString -replace '\s+', ' '
 }
 $secureBootEnabled = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
@@ -1074,11 +1080,14 @@ $objects = New-Object System.Collections.Generic.List[Object]
 $refreshTime = Get-CustomDateTimeString -dateTime $scriptStartTime -timeFirst
 $refreshDurationInSeconds = "$([Math]::Round((New-TimeSpan -Start $scriptStartTime -End (Get-Date)).TotalSeconds,2))s"
 $objects.Add([PSCustomObject]@{Name = 'refreshed'; DisplayName = 'Refreshed'; Value = "$refreshTime in $refreshDurationInSeconds"; EmptyLineAfter = $true})
+$objects.Add([PSCustomObject]@{Name = "weather"; DisplayName = ''; Value = $weather; EmptyLineAfter = $true})
+<#
 $i = 1
 $weather | ForEach-Object {
 	$objects.Add([PSCustomObject]@{Name = "weather$i"; DisplayName = ''; Value = $_})
 	$i++
 }
+#>
 $objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'Name'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"})
 $objects.Add([PSCustomObject]@{Name = 'osVersion'; DisplayName = 'OS'; Value = $osVersion})
 $objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
