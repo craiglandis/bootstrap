@@ -380,8 +380,46 @@ else
 
 if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 {
-	# $weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
-	# https://github.com/chubin/wttr.in#one-line-output
+	<# $weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
+		https://github.com/chubin/wttr.in#one-line-output
+		url wttr.in/:help
+		View options:
+
+		0                       # only current weather
+		1                       # current weather + today's forecast
+		2                       # current weather + today's + tomorrow's forecast
+		A                       # ignore User-Agent and force ANSI output format (terminal)
+		F                       # do not show the "Follow" line
+		n                       # narrow version (only day and night)
+		q                       # quiet version (no "Weather report" text)
+		Q                       # superquiet version (no "Weather report", no city name)
+		T                       # switch terminal sequences off (no colors)
+
+	$currentCondition = (Invoke-RestMethod -Uri wttr.in?format=j1).current_condition
+		FeelsLikeC       : 16
+		FeelsLikeF       : 60
+		cloudcover       : 75
+		humidity         : 90
+		localObsDateTime : 2023-06-29 06:59 AM
+		observation_time : 01:59 PM
+		precipInches     : 0.0
+		precipMM         : 0.0
+		pressure         : 1018
+		pressureInches   : 30
+		temp_C           : 15
+		temp_F           : 59
+		uvIndex          : 4
+		visibility       : 16
+		visibilityMiles  : 9
+		weatherCode      : 116
+		weatherDesc      : {@{value=Partly cloudy}}
+		weatherIconUrl   : {@{value=}}
+		winddir16Point   : SSW
+		winddirDegree    : 210
+		windspeedKmph    : 6
+		windspeedMiles   : 4
+
+		#>
 	$weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
 }
 
@@ -954,7 +992,7 @@ else
 
 $hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
-$logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk' | Where-Object FreeSpace
+$logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3'
 $drive = @{Name = 'Drive'; Expression = {"DRIVE $($_.DeviceID.Replace(':',''))"}}
 $free = @{Name = 'Free'; Expression = {"$([Math]::Round($_.FreeSpace/1GB, 0))GB"}}
 $used = @{Name = 'Used'; Expression = {"$([Math]::Round(($_.Size-$_.FreeSpace)/1GB, 0))GB"}}
