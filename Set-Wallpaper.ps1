@@ -9,7 +9,7 @@ copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1;c:\my\
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
 	[string]$path = 'c:\my',
-	[int]$fontSize = 22,
+	[int]$fontSize,
 	[ValidateSet('left', 'right')]
 	[string]
 	$justify,
@@ -335,6 +335,50 @@ if ($logFile -and $logFile.Length -ge 10MB)
 
 Out-Log "Getting system information"
 
+$getDeviceCaps = @'
+  using System;
+  using System.Runtime.InteropServices;
+  using System.Drawing;
+
+  public class DPI {
+    [DllImport("gdi32.dll")]
+    static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+    public enum DeviceCap {
+      VERTRES = 10,
+      DESKTOPVERTRES = 117
+    }
+
+    public static float scaling() {
+      Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+      IntPtr desktop = g.GetHdc();
+      int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+      int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+
+      return (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
+    }
+  }
+'@
+
+if ($PSEdition -eq 'Desktop')
+{
+	Add-Type -TypeDefinition $getDeviceCaps -ReferencedAssemblies System.Drawing.dll
+	$scale = [Math]::round([DPI]::scaling(), 2) * 100
+}
+else
+{
+	$getScalePath = "$env:temp\Get-Scale.ps1"
+	$getScaleContents = "`$getDeviceCaps = @'`n"
+	$getScaleContents += "$getDeviceCaps`n"
+	$getScaleContents += "'@`n"
+	$getScaleContents += "Add-Type -TypeDefinition `$getDeviceCaps -ReferencedAssemblies System.Drawing.dll`n"
+	$getScaleContents += "[Math]::round([DPI]::scaling(), 2) * 100"
+	# $getScaleContents | Out-File -FilePath $getScalePath -Force
+	# $scale = &"$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -noprofile -noninteractive -file $getScalePath
+	$command = "Add-Type -TypeDefinition `'$($getDeviceCaps)`' -ReferencedAssemblies System.Drawing.dll;[Math]::round([DPI]::scaling(), 2) * 100"
+	$scale = &"$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -noprofile -noninteractive -command $command # "Add-Type -TypeDefinition `'$($getDeviceCaps)`' -ReferencedAssemblies System.Drawing.dll;[Math]::round([DPI]::scaling(), 2) * 100"
+}
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 Add-Type -AssemblyName System.Drawing
@@ -425,12 +469,27 @@ if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 
 $win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
 $win32_OperatingSystem = Get-CimInstance -Query 'SELECT Caption,FreePhysicalMemory,FreeVirtualMemory,InstallDate,LastBootUpTime,SizeStoredInPagingFiles,TotalVirtualMemorySize,Version FROM Win32_OperatingSystem'
-$win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,HypervisorPresent,Name,Manufacturer,Model,SystemFamily,SystemSKUNumber,SystemType,TotalPhysicalMemory,UserName FROM Win32_ComputerSystem'
+$win32_ComputerSystem = Get-CimInstance -Query 'SELECT DaylightInEffect,HypervisorPresent,Name,Manufacturer,Model,PCSystemType,SystemFamily,SystemSKUNumber,SystemType,TotalPhysicalMemory,UserName FROM Win32_ComputerSystem'
 $win32_PageFileUsage = Get-CimInstance -Query 'SELECT Caption FROM Win32_PageFileUsage'
 $win32_Processor = Get-CimInstance -Query 'SELECT Name,MaxClockSpeed,NumberOfCores,NumberOfLogicalProcessors FROM Win32_Processor'
 $cpuProductName = $win32_Processor.Name.Split(' ')[-1].Trim()
 $cpuProductName = $win32_Processor.Name.Split('@')[0].Replace('(R)', '').Replace('(TM)', '').Replace('  ', ' ').Split(' ')[-1].Trim()
 # $cpuProductName = $win32_Processor.Name.Split(' ') | Where-Object {$_ -match '-'}
+
+switch ($pcSystemType)
+{
+	# https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystem
+	0 {$pcSystemType = 'Unspecified'}
+	1 {$pcSystemType = 'Desktop'}
+	2 {$pcSystemType = 'Mobile'}
+	3 {$pcSystemType = 'Workstation'}
+	4 {$pcSystemType = 'Enterprise Server'}
+	5 {$pcSystemType = 'SOHO Server'}
+	6 {$pcSystemType = 'Appliance PC'}
+	7 {$pcSystemType = 'Performance Server'}
+	8 {$pcSystemType = 'Maximum'}
+	Default {$pcSystemType = 'Unknown'}
+}
 
 # https://github.com/toUpperCase78/intel-processors
 $intelCpusCsvUrl = 'https://raw.githubusercontent.com/toUpperCase78/intel-processors/master/intel_core_processors_v1_6.csv'
@@ -615,10 +674,24 @@ try {$queryHistoryResult = $searcher.QueryHistory(0, $historyCount)} catch {}
 if ($queryHistoryResult)
 {
 	$lastUpdateAccordingToMicrosoftUpdateSession = $searcher.QueryHistory(0, $historyCount) | Sort-Object Date -Descending | Select-Object -First 1
-	$lastUpdateTimeAccordingToMicrosoftUpdateSession = Get-Date -Date $lastUpdateAccordingToMicrosoftUpdateSession.Date.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
-	$lastUpdateTitleAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession.Title
-	$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = (Select-String -InputObject $lastUpdateTitleAccordingToMicrosoftUpdateSession -Pattern 'KB\d{5,8}').Matches.Value.Trim()
-	$lastUpdateAccordingToMicrosoftUpdateSessionString = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateSession) ago $lastUpdateKBNumberAccordingToMicrosoftUpdateSession $lastUpdateTimeAccordingToMicrosoftUpdateSession (Microsoft.Update.Session)"
+	$global:dbglastUpdateAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession
+	if ($lastUpdateAccordingToMicrosoftUpdateSession)
+	{
+		$lastUpdateTimeAccordingToMicrosoftUpdateSession = Get-Date -Date $lastUpdateAccordingToMicrosoftUpdateSession.Date.ToLocalTime() -Format yyyy-MM-ddTHH:mm:ss
+		$global:dbglastUpdateTimeAccordingToMicrosoftUpdateSession = $lastUpdateTimeAccordingToMicrosoftUpdateSession
+
+		$lastUpdateTitleAccordingToMicrosoftUpdateSession = $lastUpdateAccordingToMicrosoftUpdateSession.Title
+		$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = Select-String -InputObject $lastUpdateTitleAccordingToMicrosoftUpdateSession -Pattern 'KB\d{5,8}'
+		if ($lastUpdateKBNumberAccordingToMicrosoftUpdateSession)
+		{
+			$lastUpdateKBNumberAccordingToMicrosoftUpdateSession = $lastUpdateKBNumberAccordingToMicrosoftUpdateSession.Matches.Value.Trim()
+		}
+		$lastUpdateAccordingToMicrosoftUpdateSessionString = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateSession) ago $lastUpdateKBNumberAccordingToMicrosoftUpdateSession $lastUpdateTimeAccordingToMicrosoftUpdateSession (Microsoft.Update.Session)"
+	}
+	else
+	{
+		$lastUpdateAccordingToMicrosoftUpdateSessionString = "N/A"
+	}
 }
 else
 {
@@ -1126,7 +1199,7 @@ $weather | ForEach-Object {
 	$i++
 }
 #>
-$objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'Name'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"})
+$objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'Name'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"; ValueColor = 'Cyan'})
 $objects.Add([PSCustomObject]@{Name = 'osVersion'; DisplayName = 'OS'; Value = $osVersion})
 $objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
 $objects.Add([PSCustomObject]@{Name = 'osInstallDate'; DisplayName = 'OS INSTALLED'; Value = $osInstallDateString})
@@ -1236,13 +1309,26 @@ if ($currentHorizontalResolution -and $currentVerticalResolution)
 	$height = $currentVerticalResolution
 	$workingAreaWidth = $currentHorizontalResolution
 	$workingAreaHeight = ($currentVerticalResolution - 8)
-	Out-Log "$($width)x$($height) resolution, $($workingAreaWidth)x$($workingAreaHeight) working area" -verboseOnly
+	$displaySettings = "$($width)x$($height)x$($scale)"
+	Out-Log "Display settings: $displaySettings"
+	Out-Log "$($workingAreaWidth)x$($workingAreaHeight) working area" -verboseOnly
 }
 else
 {
 	Out-Log 'Unable to determine current display resolution, exiting.'
 	exit
 }
+
+switch ($displaySettings) {
+	"3840x2160x100" {$fontSize = 30}
+	"3840x2160x150" {$fontSize = 28}
+	"2560x1440x100" {$fontSize = 16}
+	"2560x1440x150" {$fontSize = 20}
+	"1920x1200x100" {$fontSize = 16}
+	"1920x1200x125" {$fontSize = 14}
+	Default {$fontSize = 14}
+}
+Out-Log "Font size: $fontSize"
 
 $bitmap = New-Object System.Drawing.Bitmap($width, $height)
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
@@ -1321,20 +1407,28 @@ foreach ($object in $objects)
 			$displayName = "$($object.DisplayName): "
 		}
 		$value = $object.Value
-		$string = (Add-Padding -Text $displayName -length $length -align Left) + $value
-		#$string1 = (Add-Padding -Text $displayName -length $length -align Left)
-		#$string2 = $value
+		$valueColor = $object.ValueColor
 
-		$graphics.DrawString($string, $font, $white, $horizontalPosition, $verticalPosition)
-		[void]$textOutput.Append("$string`n")
+		if ($valueColor -eq 'foo')
+		{
+			# WORK IN PROGRESS
+			$string1 = (Add-Padding -Text $displayName -length $length -align Left)
+			$string2 = $value
 
-		#$measureTextResult = [Windows.Forms.TextRenderer]::MeasureText($string1, $font).Width
-		#Out-Log "`$measureTextResult: $measureTextResult" -verboseonly
-		#$horizontalPosition += $graphics.MeasureString($string1, $font, (New-Object "System.Drawing.PointF" -ArgumentList @(0, 0)), (New-Object "System.Drawing.StringFormat" -ArgumentList @([System.Drawing.StringFormat]::GenericTypographic)))
-		#$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
-		#Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
-		#$horizontalPosition += $measureStringResult
-		#$graphics.DrawString($string2, $font, $cyan, $horizontalPositionp, $verticalPosition)
+			$measureTextResult = [Windows.Forms.TextRenderer]::MeasureText($string1, $font).Width
+			Out-Log "`$measureTextResult: $measureTextResult" -verboseonly
+			$horizontalPosition += $graphics.MeasureString($string1, $font, (New-Object "System.Drawing.PointF" -ArgumentList @(0, 0)), (New-Object "System.Drawing.StringFormat" -ArgumentList @([System.Drawing.StringFormat]::GenericTypographic)))
+			$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
+			Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
+			$horizontalPosition += $measureStringResult
+			$graphics.DrawString($string2, $font, $cyan, $horizontalPositionp, $verticalPosition)
+		}
+		else
+		{
+			$string = (Add-Padding -Text $displayName -length $length -align Left) + $value
+			$graphics.DrawString($string, $font, $white, $horizontalPosition, $verticalPosition)
+			[void]$textOutput.Append("$string`n")
+		}
 	}
 
 	# This controls the spacing between each line. Even without adding 1 to the height there is no overlap, but it looked too cramped that way.
