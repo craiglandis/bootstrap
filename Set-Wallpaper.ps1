@@ -1323,9 +1323,11 @@ switch ($displaySettings) {
 	"3840x2160x100" {$fontSize = 30}
 	"3840x2160x150" {$fontSize = 28}
 	"2560x1440x100" {$fontSize = 16}
+	"2560x1440x125" {$fontSize = 16}
 	"2560x1440x150" {$fontSize = 20}
-	"1920x1200x100" {$fontSize = 16}
-	"1920x1200x125" {$fontSize = 14}
+	"1920x1200x100" {$fontSize = 18}
+	"1920x1200x150" {$fontSize = 14}
+	"1920x1080x100" {$fontSize = 14}
 	Default {$fontSize = 14}
 }
 Out-Log "Font size: $fontSize"
