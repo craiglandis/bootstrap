@@ -1508,6 +1508,14 @@ process
 
     if ($isPC)
     {
+        $packageProviderName = 'NuGet'
+        $packageSourceName = 'nuget.org'
+        $packageSourceLocation = 'https://www.nuget.org/api/v2'
+        $packageName = 'Microsoft.Azure.Kusto.Tools'
+
+        Invoke-ExpressionWithLogging "Register-PackageSource -Name $packageSourceName -ProviderName $packageProviderName -Location $packageSourceLocation"
+        Invoke-ExpressionWithLogging "Install-PackageProvider -Name $packageProviderName -Force"
+        Invoke-ExpressionWithLogging "Install-Package $packageName -Force"
 
         $removeTempOnedriveAndMyFoldersScriptContents = @'
 Stop-Process -Name caffeine64 -Force -ErrorAction SilentlyContinue

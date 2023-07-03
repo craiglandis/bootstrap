@@ -363,21 +363,12 @@ $getDeviceCaps = @'
 if ($PSEdition -eq 'Desktop')
 {
 	Add-Type -TypeDefinition $getDeviceCaps -ReferencedAssemblies System.Drawing.dll
-	$scale = [Math]::round([DPI]::scaling(), 2) * 100
 }
 else
 {
-	$getScalePath = "$env:temp\Get-Scale.ps1"
-	$getScaleContents = "`$getDeviceCaps = @'`n"
-	$getScaleContents += "$getDeviceCaps`n"
-	$getScaleContents += "'@`n"
-	$getScaleContents += "Add-Type -TypeDefinition `$getDeviceCaps -ReferencedAssemblies System.Drawing.dll`n"
-	$getScaleContents += "[Math]::round([DPI]::scaling(), 2) * 100"
-	# $getScaleContents | Out-File -FilePath $getScalePath -Force
-	# $scale = &"$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -noprofile -noninteractive -file $getScalePath
-	$command = "Add-Type -TypeDefinition `'$($getDeviceCaps)`' -ReferencedAssemblies System.Drawing.dll;[Math]::round([DPI]::scaling(), 2) * 100"
-	$scale = &"$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -noprofile -noninteractive -command $command # "Add-Type -TypeDefinition `'$($getDeviceCaps)`' -ReferencedAssemblies System.Drawing.dll;[Math]::round([DPI]::scaling(), 2) * 100"
+	Add-Type -TypeDefinition $getDeviceCaps -ReferencedAssemblies System.Drawing.Common.dll
 }
+$scale = [Math]::round([DPI]::scaling(), 2) * 100
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
 
@@ -464,7 +455,18 @@ if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 		windspeedMiles   : 4
 
 		#>
-	$weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
+	#$weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
+	$weather = Invoke-RestMethod -Uri 'wttr.in?format=j1'
+	$currentCondition = $weather.current_condition
+	$feelsLikeF = $currentCondition.FeelsLikeF
+	$cloudCover = $currentCondition.cloudcover
+	$humidity =$currentCondition.humidity
+	$precipInches = $currentCondition.precipInches
+	$tempF = $currentCondition.temp_F
+	$tempC = $currentCondition.temp_C
+	$uvIndex = $currentCondition.uvIndex
+	$weatherDesc = $currentCondition.weatherDesc.Value
+	$weatherString = "$weatherDesc $($tempF)F/$($tempC)C Humidity $($humidity)% Precip $($precipInches)in. UV $uvIndex Cloud cover $cloudCover"
 }
 
 $win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
@@ -531,7 +533,7 @@ if ([string]::IsNullOrEmpty($cpu))
 	$cpu = "$cpuName $($cores)C/$($threads)T $baseClockString base $currentClockString current"
 }
 
-$win32_SystemDriver = Get-CimInstance -Query 'SELECT * FROM Win32_SystemDriver'
+# $win32_SystemDriver = Get-CimInstance -Query 'SELECT * FROM Win32_SystemDriver'
 
 $win32_BIOS = Get-CimInstance -Query 'SELECT Manufacturer, Version, SMBIOSPresent, SMBIOSBIOSVersion, ReleaseDate, SMBIOSMajorVersion, SMBIOSMinorVersion, BIOSVersion FROM Win32_BIOS'
 $win32_TimeZone = Get-CimInstance -Query 'SELECT StandardName FROM Win32_TimeZone'
@@ -1191,7 +1193,7 @@ $objects = New-Object System.Collections.Generic.List[Object]
 $refreshTime = Get-CustomDateTimeString -dateTime $scriptStartTime -timeFirst
 $refreshDurationInSeconds = "$([Math]::Round((New-TimeSpan -Start $scriptStartTime -End (Get-Date)).TotalSeconds,2))s"
 $objects.Add([PSCustomObject]@{Name = 'refreshed'; DisplayName = 'Refreshed'; Value = "$refreshTime in $refreshDurationInSeconds"; EmptyLineAfter = $true})
-$objects.Add([PSCustomObject]@{Name = "weather"; DisplayName = ''; Value = $weather; EmptyLineAfter = $true})
+$objects.Add([PSCustomObject]@{Name = "weather"; DisplayName = ''; Value = $weatherString; EmptyLineAfter = $true})
 <#
 $i = 1
 $weather | ForEach-Object {
