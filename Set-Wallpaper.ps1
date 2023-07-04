@@ -15,7 +15,7 @@ param(
 	$justify,
 	[switch]$noweather,
 	[switch]$addScheduledTask,
-	[switch]$showDisconnects
+	[switch]$showDisconnects = $true
 )
 
 trap
@@ -27,7 +27,7 @@ trap
     $exceptionMessage = $trappedError.Exception.Message
     $trappedErrorString = $trappedError.Exception.ErrorRecord | Out-String -ErrorAction SilentlyContinue
     Out-Log "[ERROR] $exceptionMessage Line $scriptLineNumber $line" -color Red
-    exit
+    # exit
 }
 
 function Out-Log
@@ -138,6 +138,41 @@ function Invoke-ExpressionWithLogging
         }
     }
 }
+
+function Get-Mode
+{
+    $actual = [Guid]::NewGuid()
+    $ret = $power::PowerGetActualOverlayScheme([ref]$actual)
+    $actualMode = ConvertFrom-GuidToName $actual.Guid
+
+    $effective = [Guid]::NewGuid()
+    $ret = $power::PowerGetEffectiveOverlayScheme([ref]$effective)
+    $effectiveMode = ConvertFrom-GuidToName $effective.Guid
+
+    if ($actualMode -eq $effectiveMode)
+    {
+        return $actualMode
+    }
+    else
+    {
+        return "Actual power mode $actualMode is different than effective power mode $effectiveMode"
+    }
+}
+
+
+function ConvertFrom-GuidToName
+{
+    param(
+        $guid
+    )
+    switch ($guid) {
+        '961cc777-2547-4f9d-8174-7d86181b8a7a' {$name = 'Best power efficiency'}
+        '00000000-0000-0000-0000-000000000000' {$name = 'Balanced'}
+        'ded574b5-45a0-4f42-8737-46345c09c238' {$name = 'Best performance'}
+    }
+    return $name
+}
+
 
 function Get-CustomDateTimeString
 {
@@ -305,6 +340,52 @@ function Add-Padding
 	return $text
 }
 
+function Get-Weather
+{
+	param(
+		[string]$location
+	)
+
+	$weather = Invoke-RestMethod -Uri "wttr.in/$($location)?format=j1"
+	# $weather = Invoke-RestMethod -Uri 'wttr.in/Sydney,NSW?format=j1'
+	if ($weather)
+	{
+		$today = $weather.weather[0]
+		$tomorrow = $weather.weather[1]
+		$dayAfterTomorrow = $weather.weather[2]
+
+		$minTempF = $today.mintempF
+		$maxTempF = $today.maxtempF
+		$sunHour = $today.sunHour
+		#$areaName = $weather.nearest_area.areaName.value
+		$sunrise = $today.astronomy.sunrise
+		$sunset = $today.astronomy.sunset
+
+		$currentCondition = $weather.current_condition
+		$feelsLikeF = $currentCondition.FeelsLikeF
+		$cloudCover = $currentCondition.cloudcover
+		$humidity =$currentCondition.humidity
+		$precipInches = $currentCondition.precipInches
+		$tempF = $currentCondition.temp_F
+		$tempC = $currentCondition.temp_C
+		$uvIndex = $currentCondition.uvIndex
+		$weatherDesc = $currentCondition.weatherDesc.Value
+		$visibilityMiles = $currentCondition.visibilityMiles
+		$windspeedMiles = $currentCondition.windspeedMiles
+		$pressureInches = $currentCondition.pressureInches
+		$feelsLikeF = $currentCondition.FeelsLikeF
+		$feelsLikeC = $currentCondition.FeelsLikeC
+		# $weatherString = "$($areaName): $weatherDesc $($tempF)F/$($tempC)C Feel $($feelsLikeF)F/$($feelsLikeC)C Hum $($humidity)% Prec $($precipInches)in UV $uvIndex Clouds $cloudCover Viz $($visibilityMiles)mi Wind $($windspeedMiles)mph Press $pressureInches"
+		$weatherString = "$($tempF)F/$($tempC)C Feel $($feelsLikeF)F/$($feelsLikeC)C Hum $($humidity)% Prec $($precipInches)in UV $uvIndex Clouds $cloudCover Viz $($visibilityMiles)mi Wind $($windspeedMiles)mph Press $pressureInches $weatherDesc"
+	}
+	else
+	{
+		$weatherString = ""
+	}
+	return $weatherString
+}
+
+
 $scriptStartTime = Get-Date
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
 $scriptFullName = $MyInvocation.MyCommand.Path
@@ -359,6 +440,19 @@ $getDeviceCaps = @'
     }
   }
 '@
+
+$function = @'
+[DllImport("powrprof.dll", EntryPoint="PowerSetActiveOverlayScheme")]
+public static extern int PowerSetActiveOverlayScheme(Guid OverlaySchemeGuid);
+[DllImport("powrprof.dll", EntryPoint="PowerGetActualOverlayScheme")]
+public static extern int PowerGetActualOverlayScheme(out Guid ActualOverlayGuid);
+[DllImport("powrprof.dll", EntryPoint="PowerGetEffectiveOverlayScheme")]
+public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverlayGuid);
+'@
+
+$power = Add-Type -MemberDefinition $function -Name Power -PassThru -Namespace System.Runtime.InteropServices
+
+$currentMode = Get-Mode
 
 if ($PSEdition -eq 'Desktop')
 {
@@ -455,18 +549,15 @@ if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 		windspeedMiles   : 4
 
 		#>
-	#$weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
-	$weather = Invoke-RestMethod -Uri 'wttr.in?format=j1'
-	$currentCondition = $weather.current_condition
-	$feelsLikeF = $currentCondition.FeelsLikeF
-	$cloudCover = $currentCondition.cloudcover
-	$humidity =$currentCondition.humidity
-	$precipInches = $currentCondition.precipInches
-	$tempF = $currentCondition.temp_F
-	$tempC = $currentCondition.temp_C
-	$uvIndex = $currentCondition.uvIndex
-	$weatherDesc = $currentCondition.weatherDesc.Value
-	$weatherString = "$weatherDesc $($tempF)F/$($tempC)C Humidity $($humidity)% Precip $($precipInches)in. UV $uvIndex Cloud cover $cloudCover"
+	# $weather = Invoke-RestMethod -Uri 'https://wttr.in/?format=3' -ErrorAction SilentlyContinue
+	# $weather = Invoke-RestMethod -Uri 'wttr.in?format=j1' -ErrorAction SilentlyContinue
+	# $weather = Invoke-RestMethod -Uri 'wttr.in/Lititz,PA?format=j1'
+	# $weather = Invoke-RestMethod -Uri 'wttr.in/Rochester,MI?format=j1'
+	# $weather = Invoke-RestMethod -Uri 'wttr.in/Tucson,AZ?format=j1'
+	# $weather = Invoke-RestMethod -Uri 'wttr.in/Sydney,NSW?format=j1'
+	$redmond = Get-Weather "Redmond,WA"
+	$lititz = Get-Weather "Lititz,PA"
+	$rochester = Get-Weather "Rochester,MI"
 }
 
 $win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
@@ -549,7 +640,7 @@ if ($win32_TPM)
 	$tpmString = "Enabled: $tmpIsEnabled $tpmManufacturerId $tpmManufacturerVersionInfo $tpmManufacturerVersion Version(s): $tpmSpecVersion"
 	$tpmString = $tpmString -replace '\s+', ' '
 }
-$secureBootEnabled = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
+# $secureBootEnabled = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
 
 $gpus = Get-CimInstance -Query 'SELECT AdapterCompatibility,CurrentHorizontalResolution,CurrentRefreshRate,CurrentVerticalResolution,DriverDate,DriverVersion,Name,PNPDeviceID FROM Win32_VideoController'
 # Win32_VideoController AdapterRAM is wrong (shows 4GB for 4090 with 24GB) plus there's no native Windows way to get free/used VRAM
@@ -628,8 +719,8 @@ if ($isPhysicalMachine)
 	$memoryModulePartNumber = $win32_PhysicalMemory | Select-Object -ExpandProperty PartNumber -Unique
 }
 
-$activePowerPlan = Get-CimInstance -Namespace root\cimv2\power -Query 'SELECT ElementName,InstanceID,IsActive FROM Win32_PowerPlan WHERE IsActive="True"'
-$powerPlan = "$($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
+# $activePowerPlan = Get-CimInstance -Namespace root\cimv2\power -Query 'SELECT ElementName,InstanceID,IsActive FROM Win32_PowerPlan WHERE IsActive="True"'
+# $powerPlan = "$($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
 $msft_MpComputerStatus = Get-CimInstance -Query 'SELECT FullScanEndTime,QuickScanEndTime FROM MSFT_MpComputerStatus' -Namespace root/microsoft/windows/defender
 $quickScanEndTime = $msft_MpComputerStatus.QuickScanEndTime
@@ -1065,7 +1156,7 @@ else
 	$mobo = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
 }
 
-$hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
+# $hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
 $logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3'
 $drive = @{Name = 'Drive'; Expression = {"DRIVE $($_.DeviceID.Replace(':',''))"}}
@@ -1193,7 +1284,13 @@ $objects = New-Object System.Collections.Generic.List[Object]
 $refreshTime = Get-CustomDateTimeString -dateTime $scriptStartTime -timeFirst
 $refreshDurationInSeconds = "$([Math]::Round((New-TimeSpan -Start $scriptStartTime -End (Get-Date)).TotalSeconds,2))s"
 $objects.Add([PSCustomObject]@{Name = 'refreshed'; DisplayName = 'Refreshed'; Value = "$refreshTime in $refreshDurationInSeconds"; EmptyLineAfter = $true})
-$objects.Add([PSCustomObject]@{Name = "weather"; DisplayName = ''; Value = $weatherString; EmptyLineAfter = $true})
+$objects.Add([PSCustomObject]@{Name = "redmond"; DisplayName = 'Redmond'; Value = $redmond})
+$objects.Add([PSCustomObject]@{Name = "lititz"; DisplayName = 'Lititz'; Value = $lititz})
+$objects.Add([PSCustomObject]@{Name = "rochester"; DisplayName = 'Rochester'; Value = $rochester; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = "tucson"; DisplayName = ''; Value = $tucson; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = "lasColinas"; DisplayName = ''; Value = $lasColinas; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = "bangalore"; DisplayName = ''; Value = $bangalore; EmptyLineAfter = $true})
+
 <#
 $i = 1
 $weather | ForEach-Object {
@@ -1229,7 +1326,7 @@ $objects.Add([PSCustomObject]@{Name = 'mem'; DisplayName = 'MEM'; Value = $ram})
 $objects.Add([PSCustomObject]@{Name = 'model'; DisplayName = 'MODEL'; Value = $model})
 $objects.Add([PSCustomObject]@{Name = 'mobo'; DisplayName = 'MOBO'; Value = $mobo})
 $objects.Add([PSCustomObject]@{Name = 'tpm'; DisplayName = 'TPM'; Value = $tpmString})
-$objects.Add([PSCustomObject]@{Name = 'secureBootEnabled'; DisplayName = 'SECURE BOOT'; Value = $secureBootEnabled})
+# $objects.Add([PSCustomObject]@{Name = 'secureBootEnabled'; DisplayName = 'SECURE BOOT'; Value = $secureBootEnabled})
 
 foreach ($physicalNic in $physicalNics)
 {
@@ -1239,8 +1336,9 @@ foreach ($physicalNic in $physicalNics)
 	$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 }
 $objects.Add([PSCustomObject]@{Name = 'disconnectsInfo'; DisplayName = ''; Value = $disconnectsInfo})
-$objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
-$objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER'; Value = $powerPlan; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
+$objects.Add([PSCustomObject]@{Name = 'powerMode'; DisplayName = 'POWER MODE'; Value = $currentMode; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER'; Value = $powerPlan; EmptyLineAfter = $true})
 foreach ($logicalDisk in $logicalDisks)
 {
 	$objects.Add([PSCustomObject]@{Name = $logicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
