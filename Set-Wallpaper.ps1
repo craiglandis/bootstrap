@@ -919,11 +919,11 @@ if ($temps)
 		do
 		{
 			$cpuPackageTemp = Get-CimInstance -Query 'SELECT Value,Min,Max FROM Sensor WHERE Name="CPU Package" AND SensorType="Temperature"' -Namespace 'ROOT\LibreHardwareMonitor' -ErrorAction SilentlyContinue
-			Start-Sleep -Milliseconds 10
+			Start-Sleep -Seconds 1
 			$secondsElapsed = $stopwatch.Elapsed.Seconds
 			Out-Log $secondsElapsed -verboseOnly
 		}
-		until ($cpuPackageTemp -or $secondsElapsed -ge 10)
+		until ($cpuPackageTemp.Value -gt 0 -or $secondsElapsed -ge 10)
 
 		# Hardware class just has names and types of the hardware - CPU model, GPU model, etc.
 		# $hardware = Get-CimInstance -ClassName 'Hardware' -Namespace 'ROOT\LibreHardwareMonitor'
@@ -2070,6 +2070,10 @@ foreach ($object in $objects)
 		$value = $object.Value
 		$valueColor = $object.ValueColor
 
+		# https://github.com/search?l=PowerShell&q=Drawing.SolidBrush+DrawString+language%3APowerShell&type=code
+		# https://github.com/Fifteen15Studios/PowerShell/blob/9778d0e1e6380f47339573fe32e9f382ef7264ea/Tools/Create-LockScreenImage.ps1#L36
+		# w/ MeasureText - https://github.com/search?q=Drawing.SolidBrush+DrawString+MeasureText+language%3APowerShell&type=code
+		# w/ MeasureString - https://github.com/search?q=Drawing.SolidBrush+DrawString+MeasureString++language%3APowerShell&type=code
 		if ($valueColor -eq 'foo')
 		{
 			# WORK IN PROGRESS
@@ -2078,10 +2082,10 @@ foreach ($object in $objects)
 
 			$measureTextResult = [Windows.Forms.TextRenderer]::MeasureText($string1, $font).Width
 			Out-Log "`$measureTextResult: $measureTextResult" -verboseonly
-			$horizontalPosition += $graphics.MeasureString($string1, $font, (New-Object "System.Drawing.PointF" -ArgumentList @(0, 0)), (New-Object "System.Drawing.StringFormat" -ArgumentList @([System.Drawing.StringFormat]::GenericTypographic)))
-			$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
-			Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
-			$horizontalPosition += $measureStringResult
+			#$horizontalPosition += $graphics.MeasureString($string1, $font, (New-Object "System.Drawing.PointF" -ArgumentList @(0, 0)), (New-Object "System.Drawing.StringFormat" -ArgumentList @([System.Drawing.StringFormat]::GenericTypographic)))
+			#$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
+			#Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
+			$horizontalPosition += $measureTextResult
 			$graphics.DrawString($string2, $font, $cyan, $horizontalPositionp, $verticalPosition)
 		}
 		else
