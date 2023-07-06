@@ -15,7 +15,8 @@ param(
 	$justify,
 	[switch]$noweather,
 	[switch]$addScheduledTask,
-	[switch]$showDisconnects = $true
+	[switch]$showDisconnects = $true,
+	[switch]$temps
 )
 
 trap
@@ -139,7 +140,7 @@ function Invoke-ExpressionWithLogging
     }
 }
 
-function Get-Mode
+function Get-PowerMode
 {
     $actual = [Guid]::NewGuid()
     $ret = $power::PowerGetActualOverlayScheme([ref]$actual)
@@ -345,8 +346,9 @@ function Get-Weather
 	param(
 		[string]$location
 	)
+	Out-Log "Getting $location weather"
 
-	$weather = Invoke-RestMethod -Uri "wttr.in/$($location)?format=j1"
+	$weather = Invoke-RestMethod -Uri "wttr.in/$($location)?format=j1" -ConnectionTimeoutSeconds 5
 	# $weather = Invoke-RestMethod -Uri 'wttr.in/Sydney,NSW?format=j1'
 	if ($weather)
 	{
@@ -385,6 +387,459 @@ function Get-Weather
 	return $weatherString
 }
 
+function Get-DriveTemps
+{
+    $disks = New-Object System.Collections.Generic.List[Object]
+	$readings = New-Object System.Collections.Generic.List[Object]
+    # 'Realtek RTL9210 NVME' is the Orico Dual Bay M.2 enclosure, regardless which SSDs you swap in
+    $friendlyNames = @('INTEL SSDPE21D960GA', 'INTEL SSDPF21Q800GB', 'Samsung SSD 990 PRO 2TB', 'Samsung SSD 980 PRO 2TB', 'Realtek RTL9210 NVME', 'CT4000P3PSSD8', 'SHPP41-2000GM')
+    foreach ($friendlyName in $friendlyNames)
+    {
+        $physicalDisks = Get-PhysicalDisk -FriendlyName $friendlyName
+        foreach ($physicalDisk in $physicalDisks)
+        {
+            $storageReliabilityCounter = $physicalDisk | Get-StorageReliabilityCounter
+            $disk = [PSCustomObject]@{
+                Name     = $physicalDisk.FriendlyName
+                DeviceId = $physicalDisk.DeviceId
+                Temp     = $storageReliabilityCounter.Temperature
+                TempMax  = $storageReliabilityCounter.TemperatureMax
+            }
+            $disks.Add($disk)
+        }
+    }
+    $reading = [PSCustomObject]@{
+        Time = Get-Date
+        Reading = $disks
+    }
+    $readings.Add($reading)
+    # $disks | Format-Table Name, DeviceId, Temp, TempMax -AutoSize
+	return $disks
+}
+
+Function Get-RegKeyInfo {
+    <#
+    .SYNOPSIS
+    Gets details about a registry key.
+
+    .DESCRIPTION
+    Gets very low level details about a registry key.
+
+    .PARAMETER Path
+    The path to the registry key to get the details for. This should be a string with the hive and key path split by
+    ':', e.g. HKLM:\Software\Microsoft, HKEY_CURRENT_USER:\Console, etc. The Hive can be in the short form like HKLM or
+    the long form HKEY_LOCAL_MACHINE.
+
+    .EXAMPLE
+    Get-RegKeyInfo -Path HKLM:\SYSTEM\CurrentControlSet
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [String[]]
+        $Path
+    )
+
+    begin {
+		if ([bool]([System.Management.Automation.PSTypeName]'Registry.Key').Type -eq $false)
+		{
+        Add-Type -TypeDefinition @'
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace Registry
+{
+    internal class NativeHelpers
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_BASIC_INFORMATION
+        {
+            public Int64 LastWriteTime;
+            public UInt32 TitleIndex;
+            public Int32 NameLength;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)] public char[] Name;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_FLAGS_INFORMATION
+        {
+            // This struct isn't really documented and most of the snippets online just show the UserFlags field. For
+            // whatever reason it seems to be 12 bytes in size with the flags in the 2nd integer value. The others I
+            // have no idea what they are for.
+            public UInt32 Reserved1;
+            public KeyFlags UserFlags;
+            public UInt32 Reserved2;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_FULL_INFORMATION
+        {
+            public Int64 LastWriteTime;
+            public UInt32 TitleIndex;
+            public Int32 ClassOffset;
+            public Int32 ClassLength;
+            public Int32 SubKeys;
+            public Int32 MaxNameLen;
+            public Int32 MaxClassLen;
+            public Int32 Values;
+            public Int32 MaxValueNameLen;
+            public Int32 MaxValueDataLen;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)] public char[] Class;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_HANDLE_TAGS_INFORMATION
+        {
+            public UInt32 HandleTags;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_LAYER_INFORMATION
+        {
+            public UInt32 IsTombstone;
+            public UInt32 IsSupersedeLocal;
+            public UInt32 IsSupersedeTree;
+            public UInt32 ClassIsInherited;
+            public UInt32 Reserved;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_TRUST_INFORMATION
+        {
+            public UInt32 TrustedKey;
+            public UInt32 Reserved;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEY_VIRTUALIZATION_INFORMATION
+        {
+            public UInt32 VirtualizationCandidate;
+            public UInt32 VirtualizationEnabled;
+            public UInt32 VirtualTarget;
+            public UInt32 VirtualStore;
+            public UInt32 VirtualSource;
+            public UInt32 Reserved;
+        }
+
+        public enum KeyInformationClass : uint
+        {
+            Basic = 0,
+            Node = 1,
+            Full = 2,
+            Name = 3,
+            Cached = 4,
+            Flags = 5,
+            Virtualization = 6,
+            HandleTags = 7,
+            Trust = 8,
+            Layer = 9,
+        }
+    }
+
+    internal class NativeMethods
+    {
+        [DllImport("NtDll.dll")]
+        public static extern UInt32 NtQueryKey(
+            SafeHandle KeyHandle,
+            NativeHelpers.KeyInformationClass KeyInformationClass,
+            IntPtr KeyInformation,
+            Int32 Length,
+            out Int32 ResultLength
+        );
+
+        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode)]
+        public static extern Int32 RegOpenKeyExW(
+            SafeHandle hKey,
+            string lpSubKey,
+            KeyOptions ulOptions,
+            KeyAccessRights samDesired,
+            out SafeRegistryHandle phkResult
+        );
+
+        [DllImport("NtDll.dll")]
+        public static extern Int32 RtlNtStatusToDosError(
+            UInt32 Status
+        );
+    }
+
+    internal class SafeMemoryBuffer : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public SafeMemoryBuffer() : base(true) { }
+        public SafeMemoryBuffer(int cb) : base(true)
+        {
+            base.SetHandle(Marshal.AllocHGlobal(cb));
+        }
+        public SafeMemoryBuffer(IntPtr handle) : base(true)
+        {
+            base.SetHandle(handle);
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            Marshal.FreeHGlobal(handle);
+            return true;
+        }
+    }
+
+    [Flags]
+    public enum KeyAccessRights : uint
+    {
+        QueryValue = 0x00000001,
+        SetValue = 0x00000002,
+        CreateSubKey = 0x00000004,
+        EnumerateSubKeys = 0x00000008,
+        Notify = 0x00000010,
+        CreateLink = 0x00000020,
+        Wow6464Key = 0x00000100,
+        Wow6432Key = 0x00000200,
+
+        Delete = 0x00010000,
+        ReadControl = 0x00020000,
+        WriteDAC = 0x00040000,
+        WriteOwner = 0x00080000,
+        StandardRightsRequired = Delete | ReadControl | WriteDAC | WriteOwner,
+        AccessSystemSecurity = 0x01000000,
+
+        Read = ReadControl | QueryValue | EnumerateSubKeys | Notify,
+        Execute = Read,
+        Write = ReadControl | SetValue | CreateSubKey,
+        AllAccess = StandardRightsRequired | 0x3F
+    }
+
+    [Flags]
+    public enum KeyFlags : uint
+    {
+        None = 0x00000000,
+        Volatile = 0x00000001,
+        Symlink = 0x00000002,
+    }
+
+    [Flags]
+    public enum KeyOptions : uint
+    {
+        None = 0x00000000,
+        Volatile = 0x00000001,
+        CreateLink = 0x00000002,
+        BackupRestore = 0x00000004,
+        OpenLink = 0x00000008,
+    }
+
+    public class KeyInformation
+    {
+        public DateTime LastWriteTime { get; internal set; }
+        public UInt32 TitleIndex { get; internal set; }
+        public string Name { get; internal set; }
+        public string Class { get; internal set; }
+        public Int32 SubKeys { get; internal set; }
+        public Int32 ValueCount { get; internal set ; }
+        public KeyFlags Flags { get; internal set; }
+        public bool VirtualizationCandidate { get; internal set; }
+        public bool VirtualizationEnabled { get; internal set; }
+        public bool VirtualTarget { get; internal set; }
+        public bool VirtualStore { get; internal set; }
+        public bool VirtualSource { get; internal set; }
+        public UInt32 HandleTags { get; internal set; }
+        public bool TrustedKey { get; internal set; }
+
+        /*  Parameter is invalid
+        public bool IsTombstone { get; internal set; }
+        public bool IsSupersedeLocal { get; internal set; }
+        public bool IsSupersedeTree { get; internal set; }
+        public bool ClassIsInherited { get; internal set; }
+        */
+    }
+
+    public class Key
+    {
+        public static SafeRegistryHandle OpenKey(SafeHandle key, string subKey, KeyOptions options,
+            KeyAccessRights access)
+        {
+            SafeRegistryHandle handle;
+            Int32 res = NativeMethods.RegOpenKeyExW(key, subKey, options, access, out handle);
+            if (res != 0)
+                throw new Win32Exception(res);
+
+            return handle;
+        }
+
+        public static KeyInformation QueryInformation(SafeHandle handle)
+        {
+            KeyInformation info = new KeyInformation();
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Basic))
+            {
+                var obj = (NativeHelpers.KEY_BASIC_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_BASIC_INFORMATION));
+
+                IntPtr nameBuffer = IntPtr.Add(buffer.DangerousGetHandle(), 16);
+                byte[] nameBytes = new byte[obj.NameLength];
+                Marshal.Copy(nameBuffer, nameBytes, 0, nameBytes.Length);
+
+                info.LastWriteTime = DateTime.FromFileTimeUtc(obj.LastWriteTime);
+                info.TitleIndex = obj.TitleIndex;
+                info.Name = Encoding.Unicode.GetString(nameBytes, 0, nameBytes.Length);
+            }
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Full))
+            {
+                var obj = (NativeHelpers.KEY_FULL_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_FULL_INFORMATION));
+
+                IntPtr classBuffer = IntPtr.Add(buffer.DangerousGetHandle(), obj.ClassOffset);
+                byte[] classBytes = new byte[obj.ClassLength];
+                Marshal.Copy(classBuffer, classBytes, 0, classBytes.Length);
+
+                info.Class = Encoding.Unicode.GetString(classBytes, 0, classBytes.Length);
+                info.SubKeys = obj.SubKeys;
+                info.ValueCount = obj.Values;
+            }
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Flags))
+            {
+                var obj = (NativeHelpers.KEY_FLAGS_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_FLAGS_INFORMATION));
+
+                info.Flags = obj.UserFlags;
+            }
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Virtualization))
+            {
+                var obj = (NativeHelpers.KEY_VIRTUALIZATION_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_VIRTUALIZATION_INFORMATION));
+
+                info.VirtualizationCandidate = obj.VirtualizationCandidate == 1;
+                info.VirtualizationEnabled = obj.VirtualizationEnabled == 1;
+                info.VirtualTarget = obj.VirtualTarget == 1;
+                info.VirtualStore = obj.VirtualStore == 1;
+                info.VirtualSource = obj.VirtualSource == 1;
+            }
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.HandleTags))
+            {
+                var obj = (NativeHelpers.KEY_HANDLE_TAGS_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_HANDLE_TAGS_INFORMATION));
+
+                info.HandleTags = obj.HandleTags;
+            }
+
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Trust))
+            {
+                var obj = (NativeHelpers.KEY_TRUST_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_TRUST_INFORMATION));
+
+                info.TrustedKey = obj.TrustedKey == 1;
+            }
+
+            /*  Parameter is invalid
+            using (var buffer = NtQueryKey(handle, NativeHelpers.KeyInformationClass.Layer))
+            {
+                var obj = (NativeHelpers.KEY_LAYER_INFORMATION)Marshal.PtrToStructure(
+                    buffer.DangerousGetHandle(), typeof(NativeHelpers.KEY_LAYER_INFORMATION));
+
+                info.IsTombstone = obj.IsTombstone == 1;
+                info.IsSupersedeLocal = obj.IsSupersedeLocal == 1;
+                info.IsSupersedeTree = obj.IsSupersedeTree == 1;
+                info.ClassIsInherited = obj.ClassIsInherited == 1;
+            }
+            */
+
+            return info;
+        }
+
+        private static SafeMemoryBuffer NtQueryKey(SafeHandle handle, NativeHelpers.KeyInformationClass infoClass)
+        {
+            int resultLength;
+            UInt32 res = NativeMethods.NtQueryKey(handle, infoClass, IntPtr.Zero, 0, out resultLength);
+            // STATUS_BUFFER_OVERFLOW or STATUS_BUFFER_TOO_SMALL
+            if (!(res == 0x80000005 || res == 0xC0000023))
+                throw new Win32Exception(NativeMethods.RtlNtStatusToDosError(res));
+
+            SafeMemoryBuffer buffer = new SafeMemoryBuffer(resultLength);
+            try
+            {
+                res = NativeMethods.NtQueryKey(handle, infoClass, buffer.DangerousGetHandle(), resultLength,
+                    out resultLength);
+
+                if (res != 0)
+                    throw new Win32Exception(NativeMethods.RtlNtStatusToDosError(res));
+            }
+            catch
+            {
+                buffer.Dispose();
+                throw;
+            }
+
+            return buffer;
+        }
+    }
+}
+'@
+		}
+    }
+
+    process {
+        $resolvedPaths = $Path
+
+        foreach ($regPath in $resolvedPaths) {
+            if (-not $regPath.Contains(':')) {
+                $exp = [ArgumentException]"Registry path must contain hive and keys split by :"
+                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new(
+                    $exp, $exp.GetType().FullName, 'InvalidArgument', $regPath
+                ))
+                continue
+            }
+            $hive, $subKey = $regPath -split ':', 2
+            $hiveId = switch ($hive) {
+                { $_ -in @('HKCR', 'HKEY_CLASES_ROOT') } { 0x80000000 }
+                { $_ -in @('HKCU', 'HKEY_CURRENT_USER') } { 0x80000001 }
+                { $_ -in @('HKLM', 'HKEY_LOCAL_MACHINE') } { 0x80000002 }
+                { $_ -in @('HKU', 'HKEY_USERS') } { 0x80000003 }
+                { $_ -in @('HKPD', 'HKEY_PERFORMANCE_DATA') } { 0x80000004 }
+                { $_ -in @('HKPT', 'HKEY_PERFORMANCE_TEXT') } { 0x80000050 }
+                { $_ -in @('HKPN', 'HKEY_PERFORMANCE_NLSTEXT') } { 0x80000060 }
+                { $_ -in @('HKCC', 'HKEY_CURRENT_CONFIG') } { 0x80000005 }
+                { $_ -in @('HKDD', 'HKEY_DYN_DATA') } { 0x80000006 }
+                { $_ -in @('HKCULS', 'HKEY_CURRENT_USER_LOCAL_SETTINGS') } { 0x80000007 }
+            }
+            if (-not $hiveId) {
+                $exp = [ArgumentException]"Registry hive path is invalid"
+                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new(
+                    $exp, $exp.GetType().FullName, 'InvalidArgument', $regPath
+                ))
+                continue
+            }
+            if ($subKey.StartsWith('\')) {
+                $subKey = $subKey.Substring(1)
+            }
+
+            $hive = [Microsoft.Win32.SafeHandles.SafeRegistryHandle]::new([IntPtr]::new($hiveId), $false)
+            $key = $null
+            try {
+                # We can't use the PowerShell provider because it doesn't set OpenLink which means we couldn't detect
+                # if the path was a link as the handle would be for the target.
+                $key = [Registry.Key]::OpenKey($hive, $subKey, 'OpenLink', 'QueryValue')
+                [Registry.Key]::QueryInformation($key)
+            }
+            catch {
+                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new(
+                    $_.Exception, $_.Exception.GetType().FullName, 'NotSpecified', $regPath
+                ))
+                continue
+            }
+            finally {
+                $key.Dispose()
+            }
+        }
+    }
+}
 
 $scriptStartTime = Get-Date
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
@@ -398,10 +853,12 @@ if ($currentPSDefaultParameterValues)
 {
 	Remove-Variable -Name PSDefaultParameterValues -Scope Global -ErrorAction SilentlyContinue
 }
+<#
 $PSDefaultParameterValues = @{
 	'*:ErrorAction'   = 'Stop'
 	'*:WarningAction' = 'SilentlyContinue'
 }
+#>
 $ProgressPreference = 'SilentlyContinue'
 
 $verbose = [bool]$PSBoundParameters['verbose']
@@ -415,6 +872,72 @@ if ($logFile -and $logFile.Length -ge 10MB)
 }
 
 Out-Log "Getting system information"
+
+# 'Get-CimInstance -Query "SELECT Property1,Property FROM Win32_Something"' is slightly faster than 'Get-CimInstance -ClassName Win32_Something -Property Property,Property2'
+$win32_SystemEnclosure = Get-CimInstance -Query 'SELECT ChassisTypes,Manufacturer,SerialNumber,Version FROM Win32_SystemEnclosure'
+# https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-systemenclosure
+# 9='Laptop' 10='Notebook' 31='Convertible'
+if ($win32_SystemEnclosure.ChassisTypes -in '9','10','31')
+{
+	$deviceType = 'Laptop'
+	$isLaptop = $true
+	$temps = $true
+}
+else
+{
+	$deviceType = 'Desktop'
+	$isDesktop = $true
+}
+
+$vmBusStatus = Get-Service -Name vmbus | Select-Object -ExpandProperty Status
+if ($vmBusStatus -eq 'Running')
+{
+	$deviceType = 'Virtual Machine'
+	$isVm = $true
+	$isPhysicalMachine = $false
+}
+else
+{
+	$isVm = $false
+	$isPhysicalMachine = $true
+}
+
+if ($temps)
+{
+	$libreHardwareMonitorExePath = 'C:\ProgramData\chocolatey\lib\librehardwaremonitor\tools\LibreHardwareMonitor.exe'
+	if (Test-Path -Path $libreHardwareMonitorExePath -PathType Leaf)
+	{
+		$isLibreHardwareMonitorRunning = [bool](Get-Process -Name LibreHardwareMonitor -ErrorAction SilentlyContinue)
+		if ($isLibreHardwareMonitorRunning -eq $false)
+		{
+			# & $libreHardwareMonitorExePath
+			Start-Process -FilePath $libreHardwareMonitorExePath -WindowStyle Hidden
+		}
+		# Wait for the WMI class to be available after the process is started
+		$stopwatch = [System.Diagnostics.Stopwatch]::new()
+		$stopwatch.Start()
+		do
+		{
+			$cpuPackageTemp = Get-CimInstance -Query 'SELECT Value,Min,Max FROM Sensor WHERE Name="CPU Package" AND SensorType="Temperature"' -Namespace 'ROOT\LibreHardwareMonitor' -ErrorAction SilentlyContinue
+			Start-Sleep -Milliseconds 10
+			$secondsElapsed = $stopwatch.Elapsed.Seconds
+			Out-Log $secondsElapsed -verboseOnly
+		}
+		until ($cpuPackageTemp -or $secondsElapsed -ge 10)
+
+		# Hardware class just has names and types of the hardware - CPU model, GPU model, etc.
+		# $hardware = Get-CimInstance -ClassName 'Hardware' -Namespace 'ROOT\LibreHardwareMonitor'
+		# $hardware | sort HardwareType | ft HardwareType,Name,Identifier
+		$cpuPackageTempCurrent = $cpuPackageTemp.Value
+		$cpuPackageTempMin = $cpuPackageTemp.Min
+		$cpuPackageTempMax = $cpuPackageTemp.Max
+		$cpuTemp = "Current $($cpuPackageTempCurrent)C Min $($cpuPackageTempMin)C Max $($cpuPackageTempMax)C"
+	}
+	else
+	{
+		Out-Log "File not found: $libreHardwareMonitorExePath"
+	}
+}
 
 $getDeviceCaps = @'
   using System;
@@ -452,7 +975,10 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 
 $power = Add-Type -MemberDefinition $function -Name Power -PassThru -Namespace System.Runtime.InteropServices
 
-$currentMode = Get-Mode
+if ($isLaptop)
+{
+	$powerMode = Get-PowerMode
+}
 
 if ($PSEdition -eq 'Desktop')
 {
@@ -478,34 +1004,6 @@ $primaryMonitorSize = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSi
 $monitorsSameDisplayFormat = [System.Windows.Forms.SystemInformation]::MonitorsSameDisplayFormat
 $network = [System.Windows.Forms.SystemInformation]::Network
 Out-Log "ComputerName: $env:computername, Monitors: $monitorCount, MonitorsSameDisplayFormat: $monitorsSameDisplayFormat, screenOrientation: $screenOrientation, userInteractive: $userInteractive" -verboseOnly
-
-# 'Get-CimInstance -Query "SELECT Property1,Property FROM Win32_Something"' is slightly faster than 'Get-CimInstance -ClassName Win32_Something -Property Property,Property2'
-$win32_SystemEnclosure = Get-CimInstance -Query 'SELECT ChassisTypes,Manufacturer,SerialNumber,Version FROM Win32_SystemEnclosure'
-# https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-systemenclosure
-# 9='Laptop' 10='Notebook' 31='Convertible'
-if ($win32_SystemEnclosure.ChassisTypes -in '9','10','31')
-{
-	$deviceType = 'Laptop'
-	$isLaptop = $true
-}
-else
-{
-	$deviceType = 'Desktop'
-	$isDesktop = $true
-}
-
-$vmBusStatus = Get-Service -Name vmbus | Select-Object -ExpandProperty Status
-if ($vmBusStatus -eq 'Running')
-{
-	$deviceType = 'Virtual Machine'
-	$isVm = $true
-	$isPhysicalMachine = $false
-}
-else
-{
-	$isVm = $false
-	$isPhysicalMachine = $true
-}
 
 if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 {
@@ -558,6 +1056,11 @@ if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 	$redmond = Get-Weather "Redmond,WA"
 	$lititz = Get-Weather "Lititz,PA"
 	$rochester = Get-Weather "Rochester,MI"
+}
+
+if ($temps)
+{
+	$driveTemps = Get-DriveTemps
 }
 
 $win32_BaseBoard = Get-CimInstance -Query 'SELECT Product,Manufacturer FROM Win32_BaseBoard'
@@ -654,7 +1157,7 @@ if ($hasNvidiaGPU)
 	{
 		# "nvidia-smi --help-query-gpu" shows all possible valus to query
 		# $vram = (nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv) | ConvertFrom-Csv
-		$nvidiaSmiResult = nvidia-smi --query-gpu=memory.total,memory.used,memory.free,name,serial,uuid,pcie.link.gen.current,pcie.link.gen.gpumax,pcie.link.gen.hostmax,pcie.link.width.current,pcie.link.width.max,vbios_version,fan.speed,pstate,clocks_event_reasons.hw_thermal_slowdown,clocks_event_reasons.hw_power_brake_slowdown,clocks_event_reasons.sw_thermal_slowdown,utilization.gpu,utilization.memory,temperature.gpu,temperature.memory,power.management,power.draw,power.draw.average,power.draw.instant,power.limit,enforced.power.limit,power.default_limit,power.max_limit,clocks.current.graphics,clocks.current.memory,clocks.max.graphics,clocks.max.memory --format=csv
+		$nvidiaSmiResult = nvidia-smi --query-gpu=memory.total,memory.used,memory.free,name,serial,uuid,pcie.link.gen.gpucurrent,pcie.link.gen.gpumax,pcie.link.gen.hostmax,pcie.link.width.current,pcie.link.width.max,vbios_version,fan.speed,pstate,clocks_event_reasons.hw_thermal_slowdown,clocks_event_reasons.hw_power_brake_slowdown,clocks_event_reasons.sw_thermal_slowdown,utilization.gpu,utilization.memory,temperature.gpu,temperature.memory,power.management,power.draw,power.draw.average,power.draw.instant,power.limit,enforced.power.limit,power.default_limit,power.max_limit,clocks.current.graphics,clocks.current.memory,clocks.max.graphics,clocks.max.memory --format=csv
 		$nvidiaSmiResult = $nvidiaSmiResult | ConvertFrom-Csv
 		$global:dbgNvidiaSmiResult = $nvidiaSmiResult
 
@@ -719,8 +1222,11 @@ if ($isPhysicalMachine)
 	$memoryModulePartNumber = $win32_PhysicalMemory | Select-Object -ExpandProperty PartNumber -Unique
 }
 
-# $activePowerPlan = Get-CimInstance -Namespace root\cimv2\power -Query 'SELECT ElementName,InstanceID,IsActive FROM Win32_PowerPlan WHERE IsActive="True"'
-# $powerPlan = "$($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
+if ($isDesktop -or $isVm)
+{
+	$activePowerPlan = Get-CimInstance -Namespace root\cimv2\power -Query 'SELECT ElementName,InstanceID,IsActive FROM Win32_PowerPlan WHERE IsActive="True"'
+	$powerPlan = "$($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
+}
 
 $msft_MpComputerStatus = Get-CimInstance -Query 'SELECT FullScanEndTime,QuickScanEndTime FROM MSFT_MpComputerStatus' -Namespace root/microsoft/windows/defender
 $quickScanEndTime = $msft_MpComputerStatus.QuickScanEndTime
@@ -1134,8 +1640,28 @@ if ([bool]([System.Management.Automation.PSTypeName]'NetAPI32').Type -eq $true)
 }
 
 $lastBootUpTimeString = "$(Get-Age -Start $lastBootUpTime) ago $(Get-CustomDateTimeString $lastBootUpTime)"
-$osInstallDate = $win32_OperatingSystem.InstallDate
-$osInstallDateString = "$(Get-Age -Start $osInstallDate) ago $(Get-Date $osInstallDate -Format yyyy-MM-dd)"
+# Get-RegKeyInfo.ps1 -path "HKLM:\SYSTEM\CurrentControlSet\Services"
+# get-item C:\Windows\panther\UnattendGC\setupact.log | select creationtime
+# Profile creation may not be perfect, but so many other ways show the wrong times on some machines - WAY earlier than the OS was installed on
+# Maybe there's some registry key timestamp to use
+# Get-RegKeyInfo.ps1 -path "HKLM:\SYSTEM\CurrentControlSet\Services\vmms" | Select-Object -ExpandProperty LastWriteTime
+# Get-RegKeyInfo.ps1 -path "HKLM:\SYSTEM\CurrentControlSet\Services\w32time" | Select-Object -ExpandProperty LastWriteTime
+# $profileCreationTime = Get-Date -Date (Get-Item -Path $env:USERPROFILE -Force | Select-Object -ExpandProperty CreationTime) -Format yyyy-MM-ddTHH:mm:ss
+# get-service | where status -eq 'running' | select -expand name | %{"$_ $(Get-Date -Date (Get-RegKeyInfo.ps1 -path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" | Select-Object -ExpandProperty LastWriteTime) -Format yyyy-MM-ddTHH:mm:ss)"} | where {$_ -match '2023-07-01'}
+# SharedAccess and W32Time may be keys to use for their lastwritetime as indicative of real OS install time
+
+$w32TimeRegKeyLastWriteTime = Get-RegKeyInfo -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\w32time' | Select-Object -ExpandProperty LastWriteTime
+$w32TimeRegKeyLastWriteTime = "$(Get-Age -Start $w32TimeRegKeyLastWriteTime) ago $(Get-Date $w32TimeRegKeyLastWriteTime -Format yyyy-MM-dd)"
+
+$profileCreationTime = Get-Item -Path $env:USERPROFILE -Force | Select-Object -ExpandProperty CreationTime
+$profileCreationTime = "$(Get-Age -Start $profileCreationTime) ago $(Get-Date $profileCreationTime -Format yyyy-MM-dd)"
+
+$osInstallDateFromRegistry = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name InstallDate
+$osInstallDateFromRegistry = ([datetime]'1/1/1970').AddSeconds($osInstallDateFromRegistry)
+$osInstallDateFromRegistry = "$(Get-Age -Start $osInstallDateFromRegistry) ago $(Get-Date $osInstallDateFromRegistry -Format yyyy-MM-dd)"
+
+$osInstallDateFromWMI = $win32_OperatingSystem.InstallDate
+$osInstallDateFromWMI = "$(Get-Age -Start $osInstallDateFromWMI) ago $(Get-Date $osInstallDateFromWMI -Format yyyy-MM-dd)"
 
 $biosVersion = $win32_BIOS.Name
 $biosDate = Get-Date -Date $win32_BIOS.ReleaseDate -Format yyyy-MM-dd
@@ -1298,14 +1824,21 @@ $weather | ForEach-Object {
 	$i++
 }
 #>
-$objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'Name'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"; ValueColor = 'Cyan'})
+$objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'NAME'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"; ValueColor = 'Cyan'})
 $objects.Add([PSCustomObject]@{Name = 'osVersion'; DisplayName = 'OS'; Value = $osVersion})
 $objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
-$objects.Add([PSCustomObject]@{Name = 'osInstallDate'; DisplayName = 'OS INSTALLED'; Value = $osInstallDateString})
-$objects.Add([PSCustomObject]@{Name = 'joinType'; DisplayName = 'JOIN TYPE'; Value = $joinType})
-$objects.Add([PSCustomObject]@{Name = 'deviceType'; DisplayName = 'DEVICE TYPE'; Value = $deviceType; EmptyLineAfter = $true})
+$objects.Add([PSCustomObject]@{Name = 'osInstallDateFromWMI'; DisplayName = 'OS INSTALLED (WMI)'; Value = $osInstallDateFromWMI})
+$objects.Add([PSCustomObject]@{Name = 'osInstallDateFromRegistry'; DisplayName = 'OS INSTALLED (REG)'; Value = $osInstallDateFromRegistry})
+$objects.Add([PSCustomObject]@{Name = 'profileCreationTime'; DisplayName = 'PROFILE CREATED'; Value = $profileCreationTime})
+$objects.Add([PSCustomObject]@{Name = 'w32TimeRegKeyLastWriteTime'; DisplayName = 'W32TIME KEY LAST WRITE'; Value = $w32TimeRegKeyLastWriteTime})
+$objects.Add([PSCustomObject]@{Name = 'joinType'; DisplayName = 'JOIN TYPE'; Value = $joinType; EmptyLineAfter = $true})
+# $objects.Add([PSCustomObject]@{Name = 'deviceType'; DisplayName = 'DEVICE TYPE'; Value = $deviceType; EmptyLineAfter = $true})
 
 $objects.Add([PSCustomObject]@{Name = 'cpu'; DisplayName = 'CPU'; Value = $cpu})
+if ($cpuTemp)
+{
+	$objects.Add([PSCustomObject]@{Name = 'cpuTemp'; DisplayName = 'CPU TEMP'; Value = $cpuTemp})
+}
 $gpus | Where-Object {$_.Name -ne 'Microsoft Remote Display Adapter' -and $_.Name -notmatch 'Hyper-V'} | ForEach-Object {
 	$gpu = $_
 	$gpuName = $gpu.Name.Replace('(R)', '')
@@ -1337,12 +1870,32 @@ foreach ($physicalNic in $physicalNics)
 }
 $objects.Add([PSCustomObject]@{Name = 'disconnectsInfo'; DisplayName = ''; Value = $disconnectsInfo})
 # $objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
-$objects.Add([PSCustomObject]@{Name = 'powerMode'; DisplayName = 'POWER MODE'; Value = $currentMode; EmptyLineAfter = $true})
-# $objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER'; Value = $powerPlan; EmptyLineAfter = $true})
+if ($isDesktop -or $isVm)
+{
+	$objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER PLAN'; Value = $powerPlan; EmptyLineAfter = $true})
+}
+else
+{
+	$objects.Add([PSCustomObject]@{Name = 'powerMode'; DisplayName = 'POWER MODE'; Value = $powerMode; EmptyLineAfter = $true})
+}
+
 foreach ($logicalDisk in $logicalDisks)
 {
 	$objects.Add([PSCustomObject]@{Name = $logicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
 }
+
+if ($temps)
+{
+	$objects.Add([PSCustomObject]@{Name = 'foo'; DisplayName = ''; Value = "`n"})
+	foreach ($driveTemp in $driveTemps)
+	{
+		$driveName = $driveTemp.Name
+		$driveTempCurrent = $driveTemp.Temp
+		$driveTempMax = $driveTemp.TempMax
+		$objects.Add([PSCustomObject]@{Name = $driveName; DisplayName = $driveName; Value = "Temp $($driveTempCurrent)C Max $($driveTempMax)C"})
+	}
+}
+
 $objects.Add([PSCustomObject]@{Name = 'lastAppCrash'; DisplayName = 'LAST APP CRASH'; Value = $lastAppCrashString; EmptyLineBefore = $true})
 $objects.Add([PSCustomObject]@{Name = 'lastSystemCrash'; DisplayName = 'LAST SYSTEM CRASH'; Value = $lastSystemCrashString})
 $objects.Add([PSCustomObject]@{Name = 'lastBadShutdown'; DisplayName = 'LAST BAD SHUTDOWN'; Value = $lastBadShutdownString})
@@ -1362,7 +1915,7 @@ $objects.Add([PSCustomObject]@{Name = 'lastCumulativeUpdate'; DisplayName = 'LAS
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToWin32QuickFixEngineering'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToWin32QuickFixEngineering) ago $lastUpdateHotfixIdAccordingToWin32QuickFixEngineering $lastUpdateTimeAccordingToWin32QuickFixEngineering (Win32_QuickfixEngineering)".Trim()})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToMicrosoftUpdateSession'; DisplayName = 'LAST UPDATE'; Value = $lastUpdateAccordingToMicrosoftUpdateSessionString})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateAccordingToMicrosoftUpdateAutoUpdate'; DisplayName = 'LAST UPDATE'; Value = "$(Get-Age $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate) ago $lastUpdateTimeAccordingToMicrosoftUpdateAutoUpdate (Microsoft.Update.AutoUpdate)".Trim()})
-$objects.Add([PSCustomObject]@{Name = 'lastAntivirusSignatureUpdate'; DisplayName = 'LAST SIG UPDATE'; Value = $lastAntiVirusSignatureUpdate.Trim()})
+$objects.Add([PSCustomObject]@{Name = 'lastAntivirusSignatureUpdate'; DisplayName = 'LAST SIGNATURE UPDATE'; Value = $lastAntiVirusSignatureUpdate.Trim()})
 $objects.Add([PSCustomObject]@{Name = 'lastUpdateCheckTime'; DisplayName = 'LAST CHECK FOR UPDATES'; Value = "$(Get-Age $lastCheckForUpdatesTimeAccordingToMicrosoftUpdateAutoUpdate) ago $lastCheckForUpdatesTimeAccordingToMicrosoftUpdateAutoUpdate (Microsoft.Update.AutoUpdate)".Trim()})
 
 $objects.Add([PSCustomObject]@{Name = 'vmId'; DisplayName = 'VMID'; Value = $vmId; EmptyLineBefore = $true})
