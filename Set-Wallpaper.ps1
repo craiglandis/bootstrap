@@ -1422,7 +1422,7 @@ if ($showDisconnects -and ($connectedPhysicalNics.DriverDescription -match 'I226
 }
 
 $checkIpUrl = 'https://checkip.amazonaws.com'
-$checkIpResult = Invoke-RestMethod -Uri https://checkip.amazonaws.com
+$checkIpResult = Invoke-RestMethod -Uri $checkIpUrl
 if ($checkIpResult)
 {
 	$wan = $checkIpResult.Trim()
