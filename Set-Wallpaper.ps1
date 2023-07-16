@@ -1981,6 +1981,7 @@ if ([string]::IsNullOrEmpty($PSBoundParameters['fontSize']))
 		"3840x2160x150" {$fontSize = 24}
 		"2560x1600x100" {$fontSize = 20}
 		"2560x1600x150" {$fontSize = 20}
+		"2560x1600x200" {$fontSize = 18}
 		"2560x1440x100" {$fontSize = 16}
 		"2560x1440x125" {$fontSize = 16}
 		"2560x1440x150" {$fontSize = 20}
