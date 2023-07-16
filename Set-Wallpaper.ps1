@@ -1430,7 +1430,8 @@ if ($checkIpResult)
 $lan = (Get-NetIPAddress | Where-Object AddressFamily -EQ IPv4 | Where-Object PrefixOrigin -EQ Dhcp | Select-Object -First 1 -ExpandProperty IPAddress)
 if ($isPhysicalMachine)
 {
-	$vpnName = 'MSFTVPN-Manual'
+	# $vpnName = 'MSFTVPN-Manual'
+	$vpnName = 'Azure VPN'
 	$vpnConnections = Get-VpnConnection
 	if ($vpnConnections -and $vpnConnections.Name -eq $vpnName)
 	{
@@ -1442,7 +1443,7 @@ if ($isPhysicalMachine)
 		}
 		else
 		{
-			$vpn = 'Not Connected'
+			$vpn = 'Disconnected'
 		}
 	}
 }
