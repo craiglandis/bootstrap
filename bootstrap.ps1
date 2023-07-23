@@ -1675,6 +1675,8 @@ else
     [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
     #>
 
+    Invoke-ExpressionWithLogging "Remove-Item -Path '$env:ProgramFiles\AutoHotkey\Compiler' -Recurse -Force -ErrorAction SilentlyContinue"
+
     if ($isPC)
     {
         Out-Log 'Running Invoke-GetWindowsUpdate'

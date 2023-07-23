@@ -349,6 +349,7 @@ function Get-Weather
 	Out-Log "Getting $location weather"
 
 	$weather = Invoke-RestMethod -Uri "wttr.in/$($location)?format=j1" -ConnectionTimeoutSeconds 5
+	# Invoke-RestMethod -Uri "wttr.in/Redmond,WA?format=j1" -ConnectionTimeoutSeconds 5
 	# $weather = Invoke-RestMethod -Uri 'wttr.in/Sydney,NSW?format=j1'
 	if ($weather)
 	{
@@ -1053,9 +1054,9 @@ if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
 	# $weather = Invoke-RestMethod -Uri 'wttr.in/Rochester,MI?format=j1'
 	# $weather = Invoke-RestMethod -Uri 'wttr.in/Tucson,AZ?format=j1'
 	# $weather = Invoke-RestMethod -Uri 'wttr.in/Sydney,NSW?format=j1'
-	$redmond = Get-Weather "Redmond,WA"
-	$lititz = Get-Weather "Lititz,PA"
-	$rochester = Get-Weather "Rochester,MI"
+	$redmond = Get-Weather -location "Redmond,WA"
+	$lititz = Get-Weather -location "Lititz,PA"
+	$rochester = Get-Weather -location "Rochester,MI"
 }
 
 if ($temps)
@@ -1322,6 +1323,7 @@ if ($defender)
 	$defender = Get-MpComputerStatus | Select-Object FullScanAge, FullScanStartTime, AntispywareSignatureAge, AntispywareSignatureLastUpdated, AntivirusSignatureLastUpdated, DeviceControlPoliciesLastUpdated, NISSignatureLastUpdated, QuickScanAge, QuickScanEndTime
 	$antivirusSignatureLastUpdated = $defender.AntivirusSignatureLastUpdated
 	$lastAntiVirusSignatureUpdate = "$(Get-Age $antivirusSignatureLastUpdated) ago $(Get-Date $antivirusSignatureLastUpdated -Format yyyy-MM-ddTHH:mm:ss)"
+	$lastThreatDetected = Get-MpThreatDetection | Sort-Object InitialDetectionTime -Descending | Select-Object ProcessName,Resources,ThreatID,ThreatStatusErrorCode,InitialDetectionTime,RemediationTime,LastThreatStatusChangeTime -First 1
 }
 else
 {
@@ -2236,7 +2238,6 @@ if ($addScheduledTask)
 			Register-ScheduledTask -TaskName $taskName -InputObject $task | Out-Null
 		}
 	}
-
 }
 
 if ($addToProfile)
