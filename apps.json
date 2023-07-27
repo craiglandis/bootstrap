@@ -482,6 +482,13 @@
     "Notes": ""
   },
   {
+    "Name": "ShareX",
+    "ChocolateyName": "sharex",
+    "WingetName": "ShareX.ShareX",
+    "Groups": ["PC","VM"],
+    "Notes": "Greenshot icons still too small on higher resolutions, giving ShareX a shot"
+  },
+  {
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
     "WingetName": "",

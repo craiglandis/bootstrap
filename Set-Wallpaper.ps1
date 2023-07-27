@@ -1,14 +1,14 @@
 ﻿<#
 Set-ExecutionPolicy Bypass -Force
-md c:\my
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\my\Set-Wallpaper.ps1
-c:\my\Set-Wallpaper.ps1
+md c:\meh
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\meh\Set-Wallpaper.ps1
+c:\meh\Set-Wallpaper.ps1
 
-copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\my\Set-Wallpaper.ps1;c:\my\Set-Wallpaper.ps1
+copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\meh\Set-Wallpaper.ps1;c:\meh\Set-Wallpaper.ps1
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-	[string]$path = 'c:\my',
+	[string]$path = 'c:\meh',
 	[int]$fontSize,
 	[ValidateSet('left', 'right')]
 	[string]
@@ -1682,7 +1682,7 @@ else
 {
 	$baseBoardProduct = $win32_BaseBoard.Product
 	$baseBoardManufacturer = $win32_BaseBoard.Manufacturer
-	$mobo = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
+	$board = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
 }
 
 # $hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
@@ -1830,8 +1830,9 @@ $weather | ForEach-Object {
 $objects.Add([PSCustomObject]@{Name = 'computerName'; DisplayName = 'NAME'; Value = "$computerName $ipV4AddressesString WAN:$wan$(if($vpn){" VPN:$vpn"})"; ValueColor = 'Cyan'})
 $objects.Add([PSCustomObject]@{Name = 'osVersion'; DisplayName = 'OS'; Value = $osVersion})
 $objects.Add([PSCustomObject]@{Name = 'lastBoot'; DisplayName = 'LAST BOOT'; Value = $lastBootUpTimeString})
-$objects.Add([PSCustomObject]@{Name = 'osInstallDateFromWMI'; DisplayName = 'OS INSTALLED (WMI)'; Value = $osInstallDateFromWMI})
-$objects.Add([PSCustomObject]@{Name = 'osInstallDateFromRegistry'; DisplayName = 'OS INSTALLED (REG)'; Value = $osInstallDateFromRegistry})
+# These OS install dates reflect the last cumulative update install, not the original OS install date
+# $objects.Add([PSCustomObject]@{Name = 'osInstallDateFromWMI'; DisplayName = 'OS INSTALLED (WMI)'; Value = $osInstallDateFromWMI})
+# $objects.Add([PSCustomObject]@{Name = 'osInstallDateFromRegistry'; DisplayName = 'OS INSTALLED (REG)'; Value = $osInstallDateFromRegistry})
 $objects.Add([PSCustomObject]@{Name = 'profileCreationTime'; DisplayName = 'PROFILE CREATED'; Value = $profileCreationTime})
 $objects.Add([PSCustomObject]@{Name = 'w32TimeRegKeyLastWriteTime'; DisplayName = 'W32TIME KEY LAST WRITE'; Value = $w32TimeRegKeyLastWriteTime})
 $objects.Add([PSCustomObject]@{Name = 'joinType'; DisplayName = 'JOIN TYPE'; Value = $joinType; EmptyLineAfter = $true})
@@ -1860,7 +1861,7 @@ if ($hasNvidiaGPU -and [string]::IsNullOrEmpty($gpuInfo) -eq $false)
 }
 $objects.Add([PSCustomObject]@{Name = 'mem'; DisplayName = 'MEM'; Value = $ram})
 $objects.Add([PSCustomObject]@{Name = 'model'; DisplayName = 'MODEL'; Value = $model})
-$objects.Add([PSCustomObject]@{Name = 'mobo'; DisplayName = 'MOBO'; Value = $mobo})
+$objects.Add([PSCustomObject]@{Name = 'board'; DisplayName = 'BOARD'; Value = $board})
 $objects.Add([PSCustomObject]@{Name = 'tpm'; DisplayName = 'TPM'; Value = $tpmString})
 # $objects.Add([PSCustomObject]@{Name = 'secureBootEnabled'; DisplayName = 'SECURE BOOT'; Value = $secureBootEnabled})
 
