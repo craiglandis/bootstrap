@@ -65,7 +65,7 @@
   {
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
-    "WingetName": "",
+    "WingetName": "Microsoft.Azure.AZCopy.10",
     "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
