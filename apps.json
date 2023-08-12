@@ -94,7 +94,7 @@
     "Name": "Bicep CLI",
     "ChocolateyName": "bicep",
     "WingetName": "Microsoft.Bicep",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   },
   {

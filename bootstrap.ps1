@@ -1280,14 +1280,22 @@ process
     $esIniFilePath = "$toolsPath\$esIniFileName"
     Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$esIniUrl`', `'$esIniFilePath`')"
 
-    # This takes ~10 minutes so skip it for $group -eq 'PC', files will be there anyway
     if ($group -eq 'VM')
     {
+        if ($os -in 'WIN10','WIN11','WS19','WS22')
+        {
+            Invoke-ExpressionWithLogging "Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0"
+            Invoke-ExpressionWithLogging "Start-Service sshd"
+            Invoke-ExpressionWithLogging "Set-Service -Name sshd -StartupType Automatic"
+        }
+        # This takes ~10 minutes so skip it for $group -eq 'PC', files will be there anyway
+        <# Just skipping entirely for now, don't use them much
         $getNirSoftToolsScriptUrl = 'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Get-NirsoftTools.ps1'
         $getNirSoftToolsScriptFileName = $getNirSoftToolsScriptUrl.Split('/')[-1]
         $getNirSoftToolsScriptFilePath = "$scriptsPath\$getNirSoftToolsScriptFileName"
         Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$getNirSoftToolsScriptUrl`', `'$getNirSoftToolsScriptFilePath`')"
         Invoke-ExpressionWithLogging $getNirSoftToolsScriptFilePath
+        #>
     }
 
     # autohotkey.portable - couldn't find a way to specify a patch for this package
