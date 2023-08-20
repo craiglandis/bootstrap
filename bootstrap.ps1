@@ -1602,6 +1602,9 @@ else
 
     }
 
+    Out-Log "Disabling Beyond Compare BCClipboard from running on Windows startup"
+    Remove-ItemProperty -Path 'HKCU\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -ErrorAction SilentlyContinue    
+
     # https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#searchinsidebarenabled
     Out-Log "Disabling search in sidebar which is supposed to disable 'Search Bing in sidebar' in the context menu"
     Invoke-ExpressionWithLogging "Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Edge' -Name 'SearchInSidebarEnabled' -Type DWord -Value 2 -ErrorAction SilentlyContinue"
