@@ -126,6 +126,13 @@
     "Notes": ""
   },
   {
+    "Name": "curl",
+    "ChocolateyName": "curl",
+    "WingetName": "cURL.cURL",
+    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html"
+  },
+  {
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
