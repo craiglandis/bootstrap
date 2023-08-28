@@ -271,6 +271,13 @@
     "Notes": ""
   },
   {
+    "Name": "HWInfo",
+    "ChocolateyName": "hwinfo.portable",
+    "WingetName": "REALiX.HWiNFO",
+    "Groups": ["PC"],
+    "Notes": "Can be configured to alert on high temps"
+  },
+  {
     "Name": "ImDisk Toolkit",
     "ChocolateyName": "ImDisk-Toolkit",
     "WingetName": "",
