@@ -316,14 +316,14 @@
     "Name": "Lenovo Commercial Vantage",
     "ChocolateyName": "",
     "WingetName": "9NR5B8GVVM13",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "System Update is the older Win32 app, Vantage is the newer modern store app https://thinkdeploy.blogspot.com/2018/11/lenovo-vantage-vs-system-update.html"
   },
   {
     "Name": "Lenovo Legion Toolkit",
     "ChocolateyName": "",
     "WingetName": "BartoszCichecki.LenovoLegionToolkit",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "Community built tool to use to control settings instead of using the first-party Lenovo Vantage app. https://github.com/BartoszCichecki/LenovoLegionToolkit"
   },
   {
@@ -380,7 +380,7 @@
     "ChocolateyName": "",
     "WingetName": "Insecure.Nmap",
     "Groups": ["VM"],
-    "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent."
+    "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent. But both are out of date - https://nmap.org/download.html#windows"
   },
   {
     "Name": "Nerd Fonts - CascadiaCode",
@@ -421,7 +421,7 @@
     "Name": "obs-studio",
     "ChocolateyName": "obs-studio",
     "WingetName": "XPFFH613W8V6LV",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -442,7 +442,7 @@
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -513,7 +513,7 @@
     "Name": "Splashtop Personal Remote Desktop Client",
     "ChocolateyName": "splashtop-client-personal",
     "WingetName": "9WZDNCRFJ4MF",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "9WZDNCRFJ4MF is the Store version, the non-modern app version is Splashtop.SplashtopPersonal. Splashtop.SplashtopStreamer is what you install on the target machine. https://www.splashtop.com/solutions/personal"
   },
   {
@@ -641,7 +641,7 @@
     "Name": "Zoom",
     "ChocolateyName": "zoom",
     "WingetName": "Zoom.Zoom",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   }
 ]
