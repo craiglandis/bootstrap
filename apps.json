@@ -510,13 +510,6 @@
     "Notes": ""
   },
   {
-    "Name": "Splashtop Personal Remote Desktop Client",
-    "ChocolateyName": "splashtop-client-personal",
-    "WingetName": "9WZDNCRFJ4MF",
-    "Groups": [],
-    "Notes": "9WZDNCRFJ4MF is the Store version, the non-modern app version is Splashtop.SplashtopPersonal. Splashtop.SplashtopStreamer is what you install on the target machine. https://www.splashtop.com/solutions/personal"
-  },
-  {
     "Name": "Steam",
     "ChocolateyName": "steam-client",
     "WingetName": "Valve.Steam",
