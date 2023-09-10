@@ -2285,8 +2285,11 @@ $scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
 $scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
 Out-Log "$scriptName duration: $scriptDuration"
 
-$textOutputString = $textOutput.ToString() | Out-String
-Out-Log $textOutputString -raw
+if (!$addScheduledTask)
+{
+	$textOutputString = $textOutput.ToString() | Out-String
+	Out-Log $textOutputString -raw
+}
 
 if ($currentPSDefaultParameterValues)
 {
