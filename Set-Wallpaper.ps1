@@ -2219,6 +2219,7 @@ $taskXml = @"
 
 if ($addScheduledTask)
 {
+	Out-Log "Adding scheduled task"
 	$taskName = (Get-Culture).TextInfo.ToTitleCase($scriptBaseName)
 	Invoke-ExpressionWithLogging "Unregister-ScheduledTask -TaskName $taskName -Confirm:`$false -ErrorAction SilentlyContinue"
 	if ((Test-Path -Path $setWallpaperVbsPath -PathType Leaf) -eq $false)
@@ -2248,6 +2249,7 @@ if ($addScheduledTask)
 			$trigger2 = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Hours 1)
 			$task = New-ScheduledTask -Action $action -Principal $principal -Settings $settings -Trigger $trigger1, $trigger2
 			Register-ScheduledTask -TaskName $taskName -InputObject $task | Out-Null
+   			Get-ScheduledTask -TaskName $taskName
 		}
 	}
 }
