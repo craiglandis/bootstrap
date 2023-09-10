@@ -2150,7 +2150,7 @@ shell.Run command,0
 
 if ($env:userdomain -eq 'WORKGROUP')
 {
-	$userId = "$env:computername\$env:username"
+	$userId = "$env:computername\craig"
 }
 else
 {
