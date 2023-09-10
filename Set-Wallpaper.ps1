@@ -2148,7 +2148,14 @@ Set shell = CreateObject("WScript.Shell")
 shell.Run command,0
 "@
 
-$userId = "$env:userdomain\$env:username"
+if ($env:userdomain -eq 'WORKGROUP')
+{
+	$userId = "$env:computername\$env:username"
+}
+else
+{
+	$userId = "$env:userdomain\$env:username"
+}
 $ntAccount = New-Object System.Security.Principal.NTAccount($userId)
 $sid = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
 $sidString = $sid.Value
