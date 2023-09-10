@@ -2148,6 +2148,7 @@ Set shell = CreateObject("WScript.Shell")
 shell.Run command,0
 "@
 
+Out-Log "`$env:userdomain: $env:userdomain"
 if ($env:userdomain -eq 'WORKGROUP')
 {
 	$userId = "$env:computername\craig"
