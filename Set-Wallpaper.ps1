@@ -2158,6 +2158,8 @@ else
 	$userId = "$env:userdomain\$env:username"
 }
 Out-Log "`$userId: $userId"
+Out-Log "`$env:userdomain: $env:userdomain"
+exit
 $ntAccount = New-Object System.Security.Principal.NTAccount($userId)
 $sid = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
 $sidString = $sid.Value
