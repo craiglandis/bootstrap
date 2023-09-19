@@ -499,8 +499,8 @@
     "Name": "ShareX",
     "ChocolateyName": "sharex",
     "WingetName": "ShareX.ShareX",
-    "Groups": ["PC","VM"],
-    "Notes": "Greenshot icons still too small on higher resolutions, giving ShareX a shot"
+    "Groups": [],
+    "Notes": "Greenshot icons still too small on higher resolutions, gave ShareX a shot, kinda meh"
   },
   {
     "Name": "Speedtest",
