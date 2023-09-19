@@ -220,14 +220,14 @@
     "Name": "GeForce Experience",
     "ChocolateyName": "geforce-experience",
     "WingetName": "Nvidia.GeForceExperience",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "GeForce Game Ready Driver",
     "ChocolateyName": "geforce-game-ready-driver",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
