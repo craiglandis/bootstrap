@@ -617,6 +617,8 @@ process
     Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowCompColor /t REG_DWORD /d 1 /f | Out-Null"
     # Taskbar on left instead of center
     Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v TaskbarAl /t REG_DWORD /d 0 /f | Out-Null"
+    # Prevent "Your remote desktop session has ended" dialog when closing an RDP session
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Terminal Server Client' /v DisableEndSessionDialog /t REG_DWORD /d 1 /f | Out-Null"
 
     if ($isSAW)
     {
