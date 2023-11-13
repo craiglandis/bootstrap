@@ -1229,7 +1229,7 @@ process
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
         # https://github.com/microsoft/WSL/issues/9032
-        Invoke-ExpressionWithLogging 'wsl --install'
+        # Invoke-ExpressionWithLogging 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
