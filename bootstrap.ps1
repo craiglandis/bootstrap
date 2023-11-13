@@ -564,6 +564,7 @@ process
         '20348' {$os = 'WS22'; $isWS22 = $true} # 21H2
         '22000' {$os = 'WIN11'; $isWin11 = $true} # 21H2
         '22621' {$os = 'WIN11'; $isWin11 = $true} # 22H2
+	'22631' {$os = 'WIN11'; $isWin11 = $true} # 23H2
         default {$os = 'Unknown'}
     }
     Out-Log "OS: $os ($osVersion)"
@@ -1229,7 +1230,7 @@ process
     {
         # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
         # https://github.com/microsoft/WSL/issues/9032
-        # Invoke-ExpressionWithLogging 'wsl --install'
+        Invoke-ExpressionWithLogging 'wsl --install'
         # /All enables all parent features of the specified feature
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
         Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
