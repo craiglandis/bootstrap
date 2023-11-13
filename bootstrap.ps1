@@ -568,6 +568,11 @@ process
         default {$os = 'Unknown'}
     }
     Out-Log "OS: $os ($osVersion)"
+    if ($os -eq 'Unknown')
+    {
+    	Out-Log "Could not determine OS version for build number $build, exiting"
+     	exit
+    }
 
     if ($isWindowsServer)
     {
