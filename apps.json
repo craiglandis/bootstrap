@@ -84,6 +84,13 @@
     "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module, not using this for PC since PC will have them in C:\\ODM\\Modules"
   },
   {
+    "Name": "balenaEtcher",
+    "ChocolateyName": "etcher",
+    "WingetName": "Balena.Etcher",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
