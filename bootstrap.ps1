@@ -593,6 +593,8 @@ process
         Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarDa' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
         # Hide Chat on Taskbar
         Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarMn' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
+	# Hide Desktop Icons
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideIcons' -PropertyType 'DWord' -Value 1 -Force | Out-Null" 
     }
 
     if ($isWin10)
