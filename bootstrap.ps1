@@ -30,7 +30,8 @@ param(
     [string]$group,
     [switch]$show,
     [string]$toolsPath = 'C:\OneDrive\Tools',
-    [string]$myPath = 'C:\OneDrive\My'
+    [string]$myPath = 'C:\OneDrive\My',
+    [switch]$installModules
 )
 DynamicParam
 {
@@ -1367,7 +1368,7 @@ process
         Invoke-ExpressionWithLogging "& `'$pwshFilePath`' -NoProfile -NoLogo -Command Update-Help -Force -ErrorAction SilentlyContinue"
     }
 
-    if (($isPC -or $isVM) -and $group -ne 'QUICKVM')
+    if ($installModules -eq $true -and ($isPC -or $isVM) -and $group -ne 'QUICKVM')
     {
         # These can't be run at this point, they need to be run after OneDrive is set to sync to C:\OneDrive, which is a step I have yet to find out how to automate
         #Invoke-ExpressionWithLogging "New-Item -ItemType SymbolicLink -Path $env:SystemDrive\od -Target $env:SystemDrive\OneDrive -ErrorAction SilentlyContinue | Out-Null"
