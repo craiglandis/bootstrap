@@ -1238,32 +1238,33 @@ process
     if ($isWin11 -and $group -in 'HV','PC')
     {
         $wsl = Get-AppPackage -Name MicrosoftCorporationII.WindowsSubsystemForLinux -ErrorAction SilentlyContinue
-	if ($wsl)
-	{
-	    $wslVersion = [version]($wsl.Version)
-	    $wslVersionString = $wslVersion.ToString()
-	    if ($wslVersion.Major -ge 2)
-	    {
-		Out-Log "WSL $wslVersionString already installed
-	    }
+        if ($wsl)
+        {
+    	    $wslVersion = [version]($wsl.Version)
+	        $wslVersionString = $wslVersion.ToString()
+	        if ($wslVersion.Major -ge 2)
+	        {
+		        Out-Log "WSL $wslVersionString already installed"
+	        }
             else
-	    {
+	        {
                 $installWsl2 = $true
             }
-	else
-	{
+        }
+        else
+        {
             $installWsl2 = $true
-	}
+        }
 
- 	if ($installWsl2)
-  	{
-            # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
-            # https://github.com/microsoft/WSL/issues/9032
-            Invoke-ExpressionWithLogging 'wsl --install'
-            # /All enables all parent features of the specified feature
-            Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
-            Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
- 	}
+        if ($installWsl2)
+        {
+                # Still this open bug that results in wsl --install throwing a UAC prompt even though it's called from elevated PS
+                # https://github.com/microsoft/WSL/issues/9032
+                Invoke-ExpressionWithLogging 'wsl --install'
+                # /All enables all parent features of the specified feature
+                Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart'
+                Invoke-ExpressionWithLogging 'dism /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart'
+        }
     }
 
     $nppSettingsZipUrl = 'https://github.com/craiglandis/bootstrap/raw/main/npp-settings.zip'
