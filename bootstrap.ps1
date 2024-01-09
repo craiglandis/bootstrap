@@ -1526,6 +1526,7 @@ process
 
         if ($group -eq 'VM')
         {
+	<#  This URL is no longer valid and I can't find a new equivalent
             $zimmermanToolsZipUrl = 'https://f001.backblazeb2.com/file/EricZimmermanTools/net6/All_6.zip'
             $zimmermanToolsZipFileName = $zimmermanToolsZipUrl.Split('/')[-1]
             $zimmermanToolsZipFilePath = "$packagesPath\$zimmermanToolsZipFileName"
@@ -1533,7 +1534,7 @@ process
             Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$zimmermanToolsZipUrl`', `'$zimmermanToolsZipFilePath`')"
             Invoke-ExpressionWithLogging "Expand-Zip -Path $zimmermanToolsZipFilePath -DestinationPath $zimmermanToolsZipFolderPath"
             Get-ChildItem -Path $zimmermanToolsZipFolderPath | ForEach-Object {Expand-Zip -Path $_.FullName -DestinationPath $toolsPath}
-
+	#>
             $tssUrl = 'https://aka.ms/getTSSv2'
             $tssFolderPath = "$toolsPath\TSSv2"
             $tssFilePath = "$packagesPath\TSSv2.zip"
