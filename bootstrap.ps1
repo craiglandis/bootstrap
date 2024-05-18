@@ -1186,6 +1186,7 @@ process
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Console.ps1',
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Add-ScheduledTasks.ps1'
         'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Disable-StickyKeys.ps1'
+	'https://raw.githubusercontent.com/craiglandis/bootstrap/main/Show-TaskbarIcons.ps1'
     )
 
     $scriptFileUrls | ForEach-Object {
