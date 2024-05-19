@@ -1194,7 +1194,14 @@ process
         $scriptFileName = $scriptFileUrl.Split('/')[-1]
         $scriptFilePath = "$scriptsPath\$scriptFileName"
         Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$scriptFileUrl`', `'$scriptFilePath`')"
-        Invoke-ExpressionWithLogging $scriptFilePath
+        if ($scriptFileName -eq 'Show-TaskbarIcons.ps1')
+	{
+	    Invoke-ExpressionWithLogging "& $scriptFilePath -addScheduledTask"
+        }
+	else
+        { 
+	    Invoke-ExpressionWithLogging $scriptFilePath
+        }
     }
 
     $regFileUrls = @(
