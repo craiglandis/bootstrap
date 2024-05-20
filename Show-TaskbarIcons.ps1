@@ -72,8 +72,8 @@ if ($addScheduledTask)
     $principal = New-ScheduledTaskPrincipal -UserId $userId -RunLevel $runLevel -LogonType Interactive
     $settings = New-ScheduledTaskSettingsSet -Compatibility Win8
     $trigger1 = New-ScheduledTaskTrigger -AtLogOn
-    $trigger2 = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Hours 1)
-    $task = New-ScheduledTask -Action $action -Principal $principal -Settings $settings -Trigger $trigger1, $trigger2
+    # $trigger2 = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Hours 1)
+    $task = New-ScheduledTask -Action $action -Principal $principal -Settings $settings -Trigger $trigger1 #, $trigger2
     Register-ScheduledTask -TaskName $taskName -InputObject $task | Out-Null
     # Get-ScheduledTask -TaskName $taskName | Format-List *
     Export-ScheduledTask -TaskName $taskName
