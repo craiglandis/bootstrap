@@ -1,15 +1,191 @@
-<# CmdletBinding allows -verbose/-debug to work so -verbose will make Write-Verbose Run, and -debug will make Write-Debug run
+function Out-Log
+{
+    param(
+        [string]$text,
+        [switch]$verboseOnly,
+        [switch]$startLine,
+        [switch]$endLine,
+        [switch]$raw,
+        [switch]$logonly,
+        [ValidateSet('Black','Blue','Cyan','DarkBlue','DarkCyan','DarkGray','DarkGreen','DarkMagenta','DarkRed','DarkYellow','Gray','Green','Magenta','Red','White','Yellow')]
+        [string]$color = 'White'
+    )
 
-   But you want to do more than Write-Verbose when -Verbose is used, check if $PSBoundParameters['verbose'] is $true
-   Unlike custom params, common params like -Verbose -Debug, etc. don't set a variable in their name, so no $Verbose to check for.
+    $utc = (Get-Date).ToUniversalTime()
 
-   SupportsShouldProcess = $true adds support for -Confirm and -WhatIf switches, which is used with $PSCmdlet.ShouldProcess
-   if($PSCmdlet.ShouldProcess($env:COMPUTERNAME,'Remove X'))
-#>
-[CmdletBinding(SupportsShouldProcess = $true)]
+    $logTimestampFormat = 'yyyy-MM-dd hh:mm:ssZ'
+    $logTimestampString = Get-Date -Date $utc -Format $logTimestampFormat
 
-$verbose = [bool]$PSBoundParameters['verbose']
-$debug = [bool]$PSBoundParameters['debug']
+    if ([string]::IsNullOrEmpty($script:scriptStartTimeUtc))
+    {
+        $script:scriptStartTimeUtc = $utc
+        $script:scriptStartTimeUtcString = Get-Date -Date $utc -Format $logTimestampFormat
+    }
+
+    if ([string]::IsNullOrEmpty($script:lastCallTime))
+    {
+        $script:lastCallTime = $utc
+    }
+
+    $lastCallTimeSpan = New-TimeSpan -Start $script:lastCallTime -End $utc
+    $lastCallTotalSeconds = $lastCallTimeSpan | Select-Object -ExpandProperty TotalSeconds
+    $lastCallTimeSpanFormat = '{0:ss}.{0:ff}'
+    $lastCallTimeSpanString = $lastCallTimeSpanFormat -f $lastCallTimeSpan
+    $lastCallTimeSpanString = "$($lastCallTimeSpanString)s"
+    $script:lastCallTime = $utc
+
+    if ($verboseOnly)
+    {
+        $callstack = Get-PSCallStack
+        $caller = $callstack | Select-Object -First 1 -Skip 1
+        $caller = $caller.InvocationInfo.MyCommand.Name
+        if ($caller -eq 'Invoke-ExpressionWithLogging')
+        {
+            $caller = $callstack | Select-Object -First 1 -Skip 2
+            $caller = $caller.InvocationInfo.MyCommand.Name
+        }
+
+        if ($verbose)
+        {
+            $outputNeeded = $true
+        }
+        else
+        {
+            $outputNeeded = $false
+        }
+    }
+    else
+    {
+        $outputNeeded = $true
+    }
+
+    if ($outputNeeded)
+    {
+        if ($raw)
+        {
+            if ($logonly)
+            {
+                if ($logFilePath)
+                {
+                    $text | Out-File $logFilePath -Append
+                }
+            }
+            else
+            {
+                Write-Host $text -ForegroundColor $color
+                if ($logFilePath)
+                {
+                    $text | Out-File $logFilePath -Append
+                }
+            }
+        }
+        else
+        {
+            $timespan = New-TimeSpan -Start $script:scriptStartTimeUtc -End $utc
+
+            $timespanFormat = '{0:mm}:{0:ss}'
+            $timespanString = $timespanFormat -f $timespan
+
+            $consolePrefixString = "$timespanString "
+            $logPrefixString = "$logTimestampString $timespanString $lastCallTimeSpanString"
+
+            if ($logonly -or $global:quiet)
+            {
+                if ($logFilePath)
+                {
+                    "$logPrefixString $text" | Out-File $logFilePath -Append
+                }
+            }
+            else
+            {
+                if ($verboseOnly)
+                {
+                    $consolePrefixString = "$consolePrefixString[$caller] "
+                    $logPrefixString = "$logPrefixString[$caller] "
+                }
+
+                if ($startLine)
+                {
+                    $script:startLineText = $text
+                    Write-Host $consolePrefixString -NoNewline -ForegroundColor DarkGray
+                    Write-Host "$text " -NoNewline -ForegroundColor $color
+                }
+                elseif ($endLine)
+                {
+                    Write-Host $text -ForegroundColor $color
+                    if ($logFilePath)
+                    {
+                        "$logPrefixString $script:startLineText $text" | Out-File $logFilePath -Append
+                    }
+                }
+                else
+                {
+                    Write-Host $consolePrefixString  -NoNewline -ForegroundColor DarkGray
+                    Write-Host $text -ForegroundColor $color
+                    if ($logFilePath)
+                    {
+                        "$logPrefixString $text" | Out-File $logFilePath -Append
+                    }
+                }
+            }
+        }
+    }
+}
+
+function Invoke-ExpressionWithLogging
+{
+    param(
+        [string]$command,
+        [switch]$raw,
+        [switch]$verboseOnly
+    )
+
+    if ($verboseOnly)
+    {
+        if ($verbose)
+        {
+            if ($raw)
+            {
+                Out-Log $command -verboseOnly -raw
+            }
+            else
+            {
+                Out-Log $command -verboseOnly
+            }
+        }
+    }
+    else
+    {
+        if ($raw)
+        {
+            Out-Log $command -raw
+        }
+        else
+        {
+            Out-Log $command
+        }
+    }
+
+    # This results in error:
+    # Cannot convert argument "newChar", with value: "", for "Replace" to type "System.Char": "Cannot convert value "" to
+    # type "System.Char". Error: "String must be exactly one character long.""
+    # $command = $command.Replace($green, '').Replace($reset, '')
+
+    try
+    {
+        Invoke-Expression -Command $command
+    }
+    catch
+    {
+        $global:errorRecordObject = $PSItem
+        Out-Log "`n$command`n" -raw -color Red
+        Out-Log "$global:errorRecordObject" -raw -color Red
+        if ($LASTEXITCODE)
+        {
+            Out-Log "`$LASTEXITCODE: $LASTEXITCODE`n" -raw -color Red
+        }
+    }
+}
 
 function Get-Ago
 {
@@ -59,6 +235,9 @@ function Get-Ago
     $ago = "$ago ago"
     return $ago
 }
+
+$verbose = [bool]$PSBoundParameters['verbose']
+$debug = [bool]$PSBoundParameters['debug']
 
 # Get-WinEvent -FilterHashtable @{LogName = 'Application'; ProviderName = 'Application Error'; Level = 2; Id = 1000} -ErrorAction SilentlyContinue
 $filterHashTable = @{LogName = 'Application'; ProviderName = 'Application Error'; Level = 2; Id = 1000}
