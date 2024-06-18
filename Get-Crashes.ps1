@@ -60,7 +60,9 @@ function Get-Ago
     return $ago
 }
 
-$crashes = Get-WinEvent -FilterHashtable @{LogName = 'Application'; ProviderName = 'Application Error'; Level = 2; Id = 1000}
+# Get-WinEvent -FilterHashtable @{LogName = 'Application'; ProviderName = 'Application Error'; Level = 2; Id = 1000} -ErrorAction SilentlyContinue
+$filterHashTable = @{LogName = 'Application'; ProviderName = 'Application Error'; Level = 2; Id = 1000}
+$crashes = Get-WinEvent -FilterHashtable $filterHashTable -ErrorAction SilentlyContinue
 $signature = @{N = 'Signature'; E = {"$($_.properties[6].Value) $($_.properties[0].value) $($_.properties[1].value) $($_.properties[3].value) $($_.properties[4].value)"}}
 #$signatureWithTime = @{N='SignatureWithTime';E={"$(Get-Date $_.TimeCreated -F yyyy-MM-ddTHH:mm:ss) $(Get-Ago -Start $_.TimeCreated -End (Get-Date)) $($_.properties[6].Value) $($_.properties[0].value) $($_.properties[1].value) $($_.properties[3].value) $($_.properties[4].value)"}}
 $signatureWithTime = @{N = 'SignatureWithTime'; E = {"$(Get-Ago -Start $_.TimeCreated -End (Get-Date)): $($_.properties[6].Value) $($_.properties[0].value) $($_.properties[1].value) $($_.properties[3].value) $($_.properties[4].value)"}}
