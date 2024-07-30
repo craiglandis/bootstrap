@@ -606,6 +606,10 @@ process
     }
 
     # Config for all Windows versions
+    # Disable "Enhance pointer precision"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseSpeed /t REG_SZ /d 0 /f"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseThreshold1 /t REG_SZ /d 0 /f"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseThreshold2 /t REG_SZ /d 0 /f"
     # Disable web search and recent search entries
     # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsExplorer::DisableSearchBoxSuggestions
     Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Policies\Microsoft\Windows\Explorer' /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f"
