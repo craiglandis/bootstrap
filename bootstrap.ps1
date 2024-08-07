@@ -625,6 +625,8 @@ process
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null"
     # Show hidden files
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Hidden /t REG_DWORD /d 1 /f | Out-Null"
+    # Display the full path in the title bar
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' /v FullPath /t REG_DWORD /d 1 /f | Out-Null"
     # Show encrypted or compressed NTFS files in color
     Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v ShowEncryptCompressedColor /t REG_DWORD /d 1 /f | Out-Null"
     # Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowEncryptCompressedColor' -Type DWord -Value 1
