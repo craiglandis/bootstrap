@@ -606,6 +606,8 @@ process
     }
 
     # Config for all Windows versions
+    # Disable "Show account related notifications occasionally in Start"
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Start_AccountNotifications /t REG_DWORD /d 0 /f"    
     # Disable "Enhance pointer precision"
     Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseSpeed /t REG_SZ /d 0 /f"
     Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseThreshold1 /t REG_SZ /d 0 /f"
