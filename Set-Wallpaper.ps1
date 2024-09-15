@@ -5,7 +5,6 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/m
 c:\meh\Set-Wallpaper.ps1
 
 copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\meh\Set-Wallpaper.ps1;c:\meh\Set-Wallpaper.ps1
-test
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
@@ -14,10 +13,11 @@ param(
 	[ValidateSet('left', 'right')]
 	[string]
 	$justify,
-	[switch]$noweather,
+	[switch]$noweather = $true,
 	[switch]$addScheduledTask,
 	[switch]$showDisconnects = $true,
-	[switch]$temps
+	[switch]$temps,
+    [switch]$noWallpaper
 )
 
 trap
@@ -885,7 +885,8 @@ if (!$addScheduledTask)
 	{
 		$deviceType = 'Laptop'
 		$isLaptop = $true
-		$temps = $true
+		# Defender complains about librehardwaremonitor, so skipping this
+        #$temps = $true
 	}
 	else
 	{
@@ -1681,12 +1682,12 @@ public class NetAPI32{
 		$systemSkuNumber = $win32_ComputerSystem.SystemSkuNumber
 		$model = "$systemManufacturer $systemFamily" # $systemSkuNumber
 	}
-	else
-	{
+	#else
+	#{
 		$baseBoardProduct = $win32_BaseBoard.Product
 		$baseBoardManufacturer = $win32_BaseBoard.Manufacturer
 		$board = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
-	}
+	#}
 
 	# $hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
@@ -1965,6 +1966,13 @@ public static extern uint SystemParametersInfo(
 	[int32]$currentVerticalResolution = $gpu.CurrentVerticalResolution
 	if ($currentHorizontalResolution -and $currentVerticalResolution)
 	{
+        # workaround for incorrect resolution being returned if scaling is not 100
+        if ($scale -ne 100)
+        {
+            $screen = [System.Windows.Forms.Screen]::PrimaryScreen
+            $currentHorizontalResolution = $screen.Bounds.Width * ($scale/100)
+            $currentVerticalResolution = $screen.Bounds.Height * ($scale/100)
+        }
 		$width = $currentHorizontalResolution
 		$height = $currentVerticalResolution
 		$workingAreaWidth = $currentHorizontalResolution
@@ -2113,29 +2121,36 @@ public static extern uint SystemParametersInfo(
 		}
 	}
 
-	$wallpaperFolderPath = "$env:windir\web\wallpaper"
-	$wallpaperFileName = "CustomWallpaper$($width)x$($height).png"
-	$wallpaperFilePath = "$wallpaperFolderPath\$wallpaperFileName"
+    if ($noWallpaper)
+    {
+        Out-Log "-noWallpaper specified, skipping wallpaper creation" -verboseonly
+    }
+    else
+    {
+        $wallpaperFolderPath = "$env:windir\web\wallpaper"
+        $wallpaperFileName = "CustomWallpaper$($width)x$($height).png"
+        $wallpaperFilePath = "$wallpaperFolderPath\$wallpaperFileName"
 
-	# First set wallpaper to solid black 1x1 PNG because sometimes it doesn't refresh correctly otherwise
-	$win32Utils = Add-Type -MemberDefinition $user32MemberDefinition -Name Win32Utils -Namespace SystemParametersInfo -PassThru -ErrorAction SilentlyContinue
+        # First set wallpaper to solid black 1x1 PNG because sometimes it doesn't refresh correctly otherwise
+        $win32Utils = Add-Type -MemberDefinition $user32MemberDefinition -Name Win32Utils -Namespace SystemParametersInfo -PassThru -ErrorAction SilentlyContinue
 
-	$solidColorBlack1x1ImageFilePath = "$env:TEMP\SolidColorBlack1x1.png"
-	[void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-	$solidColorBitmap = New-Object System.Drawing.Bitmap(1, 1)
+        $solidColorBlack1x1ImageFilePath = "$env:TEMP\SolidColorBlack1x1.png"
+        [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+        $solidColorBitmap = New-Object System.Drawing.Bitmap(1, 1)
 
-	$solidColorBitmap.Save($solidColorBlack1x1ImageFilePath, [System.Drawing.Imaging.ImageFormat]::Png)
-	$solidColorBitmap.Dispose()
-	[void]($win32Utils::SystemParametersInfo(20, 0, $solidColorBlack1x1ImageFilePath, 3))
+        $solidColorBitmap.Save($solidColorBlack1x1ImageFilePath, [System.Drawing.Imaging.ImageFormat]::Png)
+        $solidColorBitmap.Dispose()
+        [void]($win32Utils::SystemParametersInfo(20, 0, $solidColorBlack1x1ImageFilePath, 3))
 
-	# PNG is about 1/3rd the size of JPG for this type of text-only image
-	$bitmap.Save($wallpaperFilePath, [System.Drawing.Imaging.ImageFormat]::Png)
-	$bitmap.Dispose()
-	[void]($win32Utils::SystemParametersInfo(20, 0, $wallpaperFilePath, 3))
+        # PNG is about 1/3rd the size of JPG for this type of text-only image
+        $bitmap.Save($wallpaperFilePath, [System.Drawing.Imaging.ImageFormat]::Png)
+        $bitmap.Dispose()
+        [void]($win32Utils::SystemParametersInfo(20, 0, $wallpaperFilePath, 3))
 
-	$wallpaperFile = Get-Item -Path $wallpaperFilePath
-	$wallpaperFileSizeKB = "$([Math]::Round($wallpaperFile.Length/1KB))KB"
-	Out-Log "Created $wallpaperFilePath ($wallpaperFileSizeKB)" -verboseonly
+        $wallpaperFile = Get-Item -Path $wallpaperFilePath
+        $wallpaperFileSizeKB = "$([Math]::Round($wallpaperFile.Length/1KB))KB"
+        Out-Log "Created $wallpaperFilePath ($wallpaperFileSizeKB)" -verboseonly
+    }
 }
 
 # Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
@@ -2281,18 +2296,22 @@ $global:dbgObjects = $objects
 $global:dbgWeather = $weather
 $global:cpuSpecs = $cpuSpecs
 
-Out-Log "Log file: $logFilePath"
-$scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-$scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
-Out-Log "$scriptName duration: $scriptDuration"
-
 if (!$addScheduledTask)
 {
 	$textOutputString = $textOutput.ToString() | Out-String
 	Out-Log $textOutputString -raw
+    $filePath = "$scriptBaseName.$scriptStartTimeString.txt"
+    $textOutputString | Out-File -FilePath $filePath
+    Invoke-Item -Path $filePath
 }
 
 if ($currentPSDefaultParameterValues)
 {
 	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
 }
+
+Out-Log "Log file: $logFilePath"
+$scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
+$scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
+Out-Log "$scriptName duration: $scriptDuration"
+Out-Log "`n$cyan$('Set-BlankWallpaper.ps1 to set black wallpaper')$reset"
