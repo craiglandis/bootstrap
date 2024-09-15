@@ -5,6 +5,7 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/m
 c:\meh\Set-Wallpaper.ps1
 
 copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\meh\Set-Wallpaper.ps1;c:\meh\Set-Wallpaper.ps1
+test
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
