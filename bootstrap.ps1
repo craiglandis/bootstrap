@@ -1032,7 +1032,7 @@ process
         $apps = Get-AppList
         if (!$apps)
         {
-            Out-Log -Level Error -Message 'Failed to get app list'
+            Out-Log 'Failed to get app list'
             exit
         }
     }
@@ -1150,6 +1150,25 @@ process
                 Invoke-ExpressionWithLogging $command
             }
         }
+    }
+
+    $wingetListResult = Invoke-ExpressionWithLogging "winget list --id AutoHotkey.AutoHotkey --exact --source winget" -raw    
+    if ($LASTEXITCODE -eq 0)
+    {
+    	Out-Log "Winget installed AutoHotkey v1, pinning it to exclude it from 'winget upgrade --all --source winget' else it would be upgraded to V2, and I'm not ready to use V2 exclusively yet"
+    	$wingetPinResult = Invoke-ExpressionWithLogging "winget pin add --exact --id AutoHotkey.AutoHotkey"     	
+      	if ($LASTEXITCODE -eq 0)
+       	{
+           Out-Log "Pinned AutoHotkey.AutoHotkey, 'winget upgrade --all --source winget' will exclude it"
+       	}
+	else
+ 	{
+  	   Out-Log "Failed to pin AutoHotkey.AutoHotkey, 'winget upgrade --all --source winget' will include it unless pinned"
+ 	} 
+    }
+    else
+    {
+    	Out-Log "winget did not install AutoHotkey.AutoHotkey (which is V1), no need to pin it to exclude from 'winget upgrade --all --source winget' since it wasn't installed by winget"
     }
 
     <#
