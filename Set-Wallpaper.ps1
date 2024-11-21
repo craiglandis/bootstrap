@@ -843,7 +843,7 @@ namespace Registry
     }
 }
 
-$scriptStartTime = Get-Date
+$global:scriptStartTime = Get-Date
 $scriptStartTimeString = Get-Date -Date $scriptStartTime -Format yyyyMMddHHmmss
 $scriptFullName = $MyInvocation.MyCommand.Path
 $scriptFolderPath = Split-Path -Path $scriptFullName
@@ -2321,8 +2321,8 @@ $red = "$esc[91m" # $brightRed = "$esc[91m"
 $white = "$esc[97m" # $brightWhite = "$esc[97m"
 $yellow = "$esc[93m" # $brightYellow = "$esc[93m"
 
-Out-Log "Log file: $logFilePath "
-$scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
-$scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
-Out-Log "$scriptName duration: $scriptDuration`n" -raw
-Out-Log "`n$cyan$('Set-BlankWallpaper.ps1 to set black wallpaper')$reset" -raw
+Out-Log "Log file: $logFilePath"
+$scriptTimeSpan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
+$scriptTotalSeconds = [int]$scriptTimeSpan.TotalSeconds
+Out-Log "$gray$scriptName$reset duration: $gray$scriptTotalSeconds$reset`n" -raw
+Out-Log "Run $cyan$('Set-BlankWallpaper.ps1')$reset to set black wallpaper" -raw
