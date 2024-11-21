@@ -2321,7 +2321,7 @@ $red = "$esc[91m" # $brightRed = "$esc[91m"
 $white = "$esc[97m" # $brightWhite = "$esc[97m"
 $yellow = "$esc[93m" # $brightYellow = "$esc[93m"
 
-Out-Log "Log file: $logFilePath"
+Out-Log "Log file: $logFilePath "
 $scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
 $scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
 Out-Log "$scriptName duration: $scriptDuration`n" -raw
