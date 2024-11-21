@@ -2321,8 +2321,8 @@ $red = "$esc[91m" # $brightRed = "$esc[91m"
 $white = "$esc[97m" # $brightWhite = "$esc[97m"
 $yellow = "$esc[93m" # $brightYellow = "$esc[93m"
 
-Out-Log "Log file: $logFilePath"
+Out-Log "Log file: $logFilePath" -verboseOnly -raw
 $scriptTimeSpan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
 $scriptTotalSeconds = [int]$scriptTimeSpan.TotalSeconds
-Out-Log "$gray$scriptName$reset duration: $gray$scriptTotalSeconds$reset`n" -raw
-Out-Log "Run $cyan$('Set-BlankWallpaper.ps1')$reset to set black wallpaper" -raw
+Out-Log "$($scriptTotalSeconds)s`n" -raw
+Out-Log "Run $cyan$('Set-BlankWallpaper.ps1')$reset to set black wallpaper`n" -raw
