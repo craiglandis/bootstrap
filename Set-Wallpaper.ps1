@@ -2310,8 +2310,19 @@ if ($currentPSDefaultParameterValues)
 	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
 }
 
+$esc = [char]0x1b
+$reset = "$esc[0m"
+$blue = "$esc[94m"
+$cyan = "$esc[96m" # $brightCyan = "$esc[96m"
+$green = "$esc[92m" # $brightGreen = "$esc[92m"
+$gray = "$esc[90m" # $brightBlack = "$esc[90m"
+$magenta = "$esc[95m" # $brightMagenta = "$esc[95m"
+$red = "$esc[91m" # $brightRed = "$esc[91m"
+$white = "$esc[97m" # $brightWhite = "$esc[97m"
+$yellow = "$esc[93m" # $brightYellow = "$esc[93m"
+
 Out-Log "Log file: $logFilePath"
 $scriptDuration = New-TimeSpan -Start $scriptStartTime -End (Get-Date)
 $scriptDuration = "$([Math]::Round($scriptDuration.TotalSeconds,2))s"
-Out-Log "$scriptName duration: $scriptDuration"
-Out-Log "`n$cyan$('Set-BlankWallpaper.ps1 to set black wallpaper')$reset"
+Out-Log "$scriptName duration: $scriptDuration`n" -raw
+Out-Log "`n$cyan$('Set-BlankWallpaper.ps1 to set black wallpaper')$reset" -raw
