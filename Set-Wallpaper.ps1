@@ -1267,9 +1267,11 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 	}
 
 	$lastUpdateAccordingToWin32QuickFixEngineering = Get-CimInstance -Query 'Select InstalledOn,HotFixID,InstalledBy From Win32_QuickFixEngineering' | Sort-Object InstalledOn -Descending | Select-Object -First 1
-	$lastUpdateTimeAccordingToWin32QuickFixEngineering = Get-Date -Date $lastUpdateAccordingToWin32QuickFixEngineering.InstalledOn -Format yyyy-MM-ddTHH:mm:ss
-	$lastUpdateInstalledByAccordingToWin32QuickFixEngineering = $lastUpdateAccordingToWin32QuickFixEngineering.InstalledBy
-	$lastUpdateHotfixIdAccordingToWin32QuickFixEngineering = $lastUpdateAccordingToWin32QuickFixEngineering.HotFixID
+    	$lastUpdateHotfixIdAccordingToWin32QuickFixEngineering = $lastUpdateAccordingToWin32QuickFixEngineering.HotFixID
+    	$lastUpdateInstalledByAccordingToWin32QuickFixEngineering = $lastUpdateAccordingToWin32QuickFixEngineering.InstalledBy
+    	# Win32_QuickFixEngineering InstalledOn is in UTC, so to be consistent with other update-related timestamps, converting to local time
+    	$lastUpdateTimeAccordingToWin32QuickFixEngineeringUtc = $lastUpdateAccordingToWin32QuickFixEngineering.InstalledOn
+    	$lastUpdateTimeAccordingToWin32QuickFixEngineering = $lastUpdateTimeAccordingToWin32QuickFixEngineeringUtc.ToLocalTime()
 
 	$session = New-Object -ComObject Microsoft.Update.Session
 	$searcher = $session.CreateUpdateSearcher()
