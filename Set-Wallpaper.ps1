@@ -2302,7 +2302,15 @@ if (!$addScheduledTask)
 {
 	$textOutputString = $textOutput.ToString() | Out-String
 	Out-Log $textOutputString -raw
-    $filePath = "$scriptBaseName.$scriptStartTimeString.txt"
+    $outputFolderPath = 'C:\MISC\Set-Wallpaper'
+    if (Test-Path -Path $outputFolderPath -PathType Container)
+    {
+        $filePath = "$outputFolderPath\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
+    }
+    else
+    {
+        $filePath = "$env:TEMP\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
+    }
     $textOutputString | Out-File -FilePath $filePath
     Invoke-Item -Path $filePath
 }
