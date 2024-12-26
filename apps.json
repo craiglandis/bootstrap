@@ -446,6 +446,13 @@
     "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release"
   },
   {
+    "Name": "ParkControl",
+    "ChocolateyName": "",
+    "WingetName": "BitSum.ParkControl",
+    "Groups": ["HV","PC","VM"],
+    "Notes": "Display and change CPU core parking settings in real-time"
+  },
+  {
     "Name": "Power BI Desktop",
     "ChocolateyName": "powerbi",
     "WingetName": "Microsoft.PowerBI",
