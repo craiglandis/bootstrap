@@ -38,7 +38,7 @@
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -66,14 +66,14 @@
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "Microsoft.Azure.AZCopy.10",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": ["HV","PC","VM"],
+    "Groups": ["HV","PC","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -94,7 +94,7 @@
     "Name": "Beyond Compare",
     "ChocolateyName": "beyondcompare",
     "WingetName": "ScooterSoftware.BeyondCompare4",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -129,7 +129,7 @@
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": ["HV","PC","VM"],
+    "Groups": ["HV","PC","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -137,7 +137,7 @@
     "ChocolateyName": "curl",
     "WingetName": "cURL.cURL",
     "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html"
+    "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html, (WS25 RTM has curl.exe 8.8.0)"
   },
   {
     "Name": "Discord",
@@ -358,7 +358,7 @@
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": "The Winget 'Microsoft.Office' package installs x64 Microsoft 365 Apps for Enterprise, which is what I want, Chocolatey 'microsoft-office-deployment' package installs x86"
   },
   {
@@ -393,7 +393,7 @@
     "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
-    "Groups": ["HV","PC"],
+    "Groups": ["HV","PC","TEST1"],
     "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {
@@ -407,7 +407,7 @@
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -492,7 +492,7 @@
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": ["HV","PC"],
+    "Groups": ["HV","PC","TEST1"],
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
@@ -520,7 +520,7 @@
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
     "WingetName": "",
-    "Groups": ["HV","PC","VM"],
+    "Groups": ["HV","PC","VM","TEST1"],
     "Notes": ""
   },
   {
@@ -534,7 +534,7 @@
     "Name": "Storage Explorer",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Azure.StorageExplorer",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },
   {
@@ -542,7 +542,7 @@
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "",
     "WingetName": "9P7KNL5RWT25",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1"
   },
   {
@@ -550,7 +550,7 @@
     "ChocolateyName": "terminal-icons.powershell",
     "ChocolateyParams": "",
     "WingetName": "",
-    "Groups": ["HV","VM"],
+    "Groups": ["HV","VM","TEST1"],
     "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number. Not using this for PC since PC will have them in C:\\ODM\\Modules"
   },
   {
@@ -564,7 +564,7 @@
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": "This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
   },
   {
@@ -606,7 +606,7 @@
     "Name": "Windows Notepad",
     "ChocolateyName": "",
     "WingetName": "9MSMLRH6LZF3",
-    "Groups": ["HV","PC","VM"],
+    "Groups": ["HV","PC","VM","TEST1"],
     "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
   },
   {
