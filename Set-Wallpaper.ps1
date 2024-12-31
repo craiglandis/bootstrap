@@ -2320,16 +2320,18 @@ if ($currentPSDefaultParameterValues)
 	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
 }
 
-$esc = [char]0x1b
-$reset = "$esc[0m"
-$blue = "$esc[94m"
-$cyan = "$esc[96m" # $brightCyan = "$esc[96m"
-$green = "$esc[92m" # $brightGreen = "$esc[92m"
-$gray = "$esc[90m" # $brightBlack = "$esc[90m"
-$magenta = "$esc[95m" # $brightMagenta = "$esc[95m"
-$red = "$esc[91m" # $brightRed = "$esc[91m"
-$white = "$esc[97m" # $brightWhite = "$esc[97m"
-$yellow = "$esc[93m" # $brightYellow = "$esc[93m"
+$folderPath = 'C:\MISC\Set-Wallpaper'
+if (Test-Path -Path $folderPath -PathType Container)
+{
+    $pnpDevices = Get-PnpDevice | Select-Object Name,Description,Service,Class,PNPDeviceID,Present,Status,Problem | Sort-Object Name
+    $pnpDevices | Export-Clixml -Path "$folderPath\Get-PnPDevice_$env:COMPUTERNAME.xml" -Depth 9 -Force
+    # msinfo32 /nfo "$folderPath\MSINFO32_$env:COMPUTERNAME.nfo"
+    # msinfo32 /report "$folderPath\MSINFO32_$env:COMPUTERNAME.txt"}).TotalSeconds
+    if (Get-Module -name importexcel -ListAvailable)
+    {
+        $pnpDevices | Export-Excel -Path "$folderPath\PnPDevices_$env:COMPUTERNAME.xlsx" -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -ErrorAction Stop
+    }
+}
 
 Out-Log "Log file: $logFilePath" -verboseOnly -raw
 $scriptTimeSpan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
