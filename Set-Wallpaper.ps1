@@ -1201,27 +1201,40 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 		}
 	}
 
-	# For non-NVIDIA GPUs, best we can get is total VRAM from the registry
+	# Not aware of a nvidia-smi equivalent way to get VRAM usage for non-NVIDIA GPUs, best we can get is total VRAM from the registry
 	$displayClassKey = Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}'
 	$displayClassSubkeyNames = $displayClassKey.GetSubKeyNames()
 	foreach ($displayClassSubkeyName in $displayClassSubkeyNames)
 	{
-		$displayClassSubkey = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\$displayClassSubkeyName" -ErrorAction SilentlyContinue
-		$matchingDeviceId = $displayClassSubkey | Select-Object -ExpandProperty MatchingDeviceId -ErrorAction SilentlyContinue
-		if ($matchingDeviceId)
+		# This issue still repros with 7.5.0-rc.1 and 7.4.6 but not 5.1
+		# https://github.com/PowerShell/PowerShell/issues/9552
+		# Only repros on machines where the subkey has invalid DWORD values, AMD 780M GPU driver seems to have them
+		# PS C:\> Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000"
+		# Get-ItemProperty: Unable to cast object of type 'System.Byte[]' to type 'System.Int32'.
+		# $errorActionPreference = 'SilentlyContinue' suppresses the error but nonetheless the command doesn't return anything even though the key is there and has subkeys and values
+		# Workaround: Use Get-Item instead of Get-ItemProoperty and GetValue() to get the values you want to see
+		# $displayClassSubkey = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\$displayClassSubkeyName" -ErrorAction SilentlyContinue
+		$displayClassSubkey = Get-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\$displayClassSubkeyName" -ErrorAction SilentlyContinue
+		if ($displayClassSubkey)
 		{
-			$matchingDeviceId = $matchingDeviceId.ToUpper()
-			$qwMemorySize = $displayClassSubkey.'HardwareInformation.qwMemorySize'
-			if ($qwMemorySize)
+			# $matchingDeviceId = $displayClassSubkey | Select-Object -ExpandProperty MatchingDeviceId -ErrorAction SilentlyContinue
+			$matchingDeviceId = $displayClassSubkey.GetValue('MatchingDeviceId')
+			if ($matchingDeviceId)
 			{
-				$vram = "$([math]::round($displayClassSubkey.'HardwareInformation.qwMemorySize'/1GB))GB"
-			}
-			else
-			{
-				$vram = ''
-			}
-			$gpus | Where-Object {$_.PNPDeviceID.Contains($matchingDeviceId)} | ForEach-Object {
-				$_ | Add-Member -MemberType NoteProperty -Name VRAM -Value $vram -ErrorAction SilentlyContinue
+				$matchingDeviceId = $matchingDeviceId.ToUpper()
+				# $qwMemorySize = $displayClassSubkey.'HardwareInformation.qwMemorySize'
+				$qwMemorySize = $displayClassSubkey.GetValue('HardwareInformation.qwMemorySize')
+				if ($qwMemorySize)
+				{
+					$vram = "$([math]::round($qwMemorySize/1GB))GB"
+				}
+				else
+				{
+					$vram = ''
+				}
+				$gpus | Where-Object {$_.PNPDeviceID.Contains($matchingDeviceId)} | ForEach-Object {
+					$_ | Add-Member -MemberType NoteProperty -Name VRAM -Value $vram -ErrorAction SilentlyContinue
+				}
 			}
 		}
 	}
