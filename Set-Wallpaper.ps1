@@ -141,6 +141,17 @@ function Invoke-ExpressionWithLogging
     }
 }
 
+function Remove-Color
+{
+    param(
+        [string]$string
+    )
+
+    $cleanedString = $string -replace "`e\[\d+m", ""
+
+    return $cleanedString
+}
+
 function Get-PowerMode
 {
     $actual = [Guid]::NewGuid()
