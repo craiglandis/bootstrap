@@ -1404,8 +1404,9 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 
 	$lastBootUpTime = $win32_OperatingSystem.LastBootUpTime
 
-	$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceAlias,InterfaceDescription,InterfaceIndex,DriverDescription,DriverFileName,DriverDate,DriverVersionString,MacAddress,MediaConnectionState,NdisVersion,DriverInformation
-	$connectedPhysicalNics = $physicalNics | Where-Object MediaConnectionState -EQ 'Connected'
+	$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceAlias,InterfaceDescription,InterfaceIndex,DriverDescription,DriverFileName,DriverDate,DriverVersionString,MacAddress,MediaConnectionState,NdisVersion,DriverInformation,PnpDeviceId
+    $physicalNics = $physicalNics | Sort-Object PnPDeviceId -Unique
+    $connectedPhysicalNics = $physicalNics | Where-Object MediaConnectionState -EQ 'Connected'
 	$ipConfigs = Get-NetIPConfiguration -Detailed
 	$ipV4Addresses = @()
 	foreach ($connectedPhysicalNic in $connectedPhysicalNics)
