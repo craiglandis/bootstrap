@@ -1728,6 +1728,9 @@ public class NetAPI32{
 	$logicalDisksTable = $logicalDisks | Format-Table -AutoSize | Out-String
 	# TODO: Get-BitLockerVolume
 
+    $physicalDisks = Get-PhysicalDisk | Sort-Object SerialNumber -Unique | Select-Object Model,@{Name = 'SizeGB'; Expression={[System.Math]::Round($_.Size/1GB, 0)}},BusType,MediaType,@{Name = 'VirtualDiskUsageGB'; Expression={[System.Math]::Round($_.VirtualDiskFootprint/1GB, 0)}} | sort Model
+    $physicalDisksTable = $physicalDisks | Format-Table -Autosize | Out-String -Width 4096
+
 	$letter = $systemDrive.DeviceID
 	$systemDrive = "$letter $($size)GB ($($free)GB Free)"
 	$version = $win32_OperatingSystem.Version
@@ -1917,6 +1920,23 @@ public class NetAPI32{
 	foreach ($logicalDisk in $logicalDisks)
 	{
 		$objects.Add([PSCustomObject]@{Name = $logicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
+	}
+
+	foreach ($physicalDisk in $physicalDisks)
+	{
+        $fw = @{Name = 'FW'; Expression={$_.FirmwareVersion}}
+        $gb = @{Name = 'GB'; Expression={[int]($_.AllocatedSize/1GB)}}
+        $log = @{Name = 'Log'; Expression={$_.LogicalSectorSize}}
+        $phys = @{Name = 'Phys'; Expression={$_.PhysicalSectorSize}}
+        $bus = @{Name = 'Bus'; Expression={$_.BusType}}
+        $media = @{Name = 'Media'; Expression={$_.MediaType}}
+        #$physicalDisk | select Model,$fw,$gb,$phys,$log,$bus,$media | ft
+		#$objects.Add([PSCustomObject]@{Name = $physicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
+        <#
+                DRIVE C: Free:   819GB Used:    75GB Total:   894GB
+                DRIVE D: Free:   127GB Used:   106GB Total:   233GB
+                DRIVE E: Free:     0GB Used:     0GB Total:     0GB
+        #>
 	}
 
 	if ($temps)
