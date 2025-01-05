@@ -37,18 +37,51 @@ function Out-Log
     param(
         [string]$text,
         [switch]$verboseOnly,
-        [string]$prefix,
+        [switch]$startLine,
+        [switch]$endLine,
         [switch]$raw,
         [switch]$logonly,
-        [ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
+        [ValidateSet('Black','Blue','Cyan','DarkBlue','DarkCyan','DarkGray','DarkGreen','DarkMagenta','DarkRed','DarkYellow','Gray','Green','Magenta','Red','White','Yellow')]
         [string]$color = 'White'
     )
+
+    $utc = (Get-Date).ToUniversalTime()
+
+    $logTimestampFormat = 'yyyy-MM-dd hh:mm:ssZ'
+    $logTimestampString = Get-Date -Date $utc -Format $logTimestampFormat
+
+    if ([string]::IsNullOrEmpty($script:scriptStartTimeUtc))
+    {
+        $script:scriptStartTimeUtc = $utc
+        $script:scriptStartTimeUtcString = Get-Date -Date $utc -Format $logTimestampFormat
+    }
+
+    if ([string]::IsNullOrEmpty($script:lastCallTime))
+    {
+        $script:lastCallTime = $utc
+    }
+
+    $lastCallTimeSpan = New-TimeSpan -Start $script:lastCallTime -End $utc
+    $lastCallTotalSeconds = $lastCallTimeSpan | Select-Object -ExpandProperty TotalSeconds
+    $lastCallTimeSpanFormat = '{0:ss}.{0:ff}'
+    $lastCallTimeSpanString = $lastCallTimeSpanFormat -f $lastCallTimeSpan
+    $lastCallTimeSpanString = "$($lastCallTimeSpanString)s"
+    $script:lastCallTime = $utc
+
     if ($verboseOnly)
     {
+        $callstack = Get-PSCallStack
+        $caller = $callstack | Select-Object -First 1 -Skip 1
+        $caller = $caller.InvocationInfo.MyCommand.Name
+        if ($caller -eq 'Invoke-ExpressionWithLogging')
+        {
+            $caller = $callstack | Select-Object -First 1 -Skip 2
+            $caller = $caller.InvocationInfo.MyCommand.Name
+        }
+
         if ($verbose)
         {
             $outputNeeded = $true
-            $foreGroundColor = 'Yellow'
         }
         else
         {
@@ -58,12 +91,11 @@ function Out-Log
     else
     {
         $outputNeeded = $true
-        $foreGroundColor = 'White'
     }
 
     if ($outputNeeded)
     {
-        if ($raw)
+        if ($raw -or $global:helperOutputRaw)
         {
             if ($logonly)
             {
@@ -83,36 +115,51 @@ function Out-Log
         }
         else
         {
-            if ($prefix -eq 'timespan' -and $global:scriptStartTime)
-            {
-                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
-                $prefixString = '{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan
-            }
-            elseif ($prefix -eq 'both' -and $global:scriptStartTime)
-            {
-                $timestamp = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-                $timespan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
-                $prefixString = "$($timestamp) $('{0:hh}:{0:mm}:{0:ss}.{0:ff}' -f $timespan)"
-            }
-            else
-            {
-                $prefixString = Get-Date -Format 'yyyy-MM-dd hh:mm:ss'
-            }
+            $timespan = New-TimeSpan -Start $script:scriptStartTimeUtc -End $utc
 
-            if ($logonly)
+            $timespanFormat = '{0:mm}:{0:ss}'
+            $timespanString = $timespanFormat -f $timespan
+
+            $consolePrefixString = "$timespanString "
+            $logPrefixString = "$logTimestampString $timespanString $lastCallTimeSpanString"
+
+            if ($logonly -or $global:quiet)
             {
                 if ($logFilePath)
                 {
-                    "$prefixString $text" | Out-File $logFilePath -Append
+                    "$logPrefixString $text" | Out-File $logFilePath -Append
                 }
             }
             else
             {
-                Write-Host $prefixString -NoNewline -ForegroundColor Cyan
-                Write-Host " $text" -ForegroundColor $color
-                if ($logFilePath)
+                if ($verboseOnly)
                 {
-                    "$prefixString $text" | Out-File $logFilePath -Append
+                    $consolePrefixString = "$consolePrefixString[$caller] "
+                    $logPrefixString = "$logPrefixString[$caller] "
+                }
+
+                if ($startLine)
+                {
+                    $script:startLineText = $text
+                    Write-Host $consolePrefixString -NoNewline -ForegroundColor DarkGray
+                    Write-Host "$text " -NoNewline -ForegroundColor $color
+                }
+                elseif ($endLine)
+                {
+                    Write-Host $text -ForegroundColor $color
+                    if ($logFilePath)
+                    {
+                        "$logPrefixString $script:startLineText $text" | Out-File $logFilePath -Append
+                    }
+                }
+                else
+                {
+                    Write-Host $consolePrefixString  -NoNewline -ForegroundColor DarkGray
+                    Write-Host $text -ForegroundColor $color
+                    if ($logFilePath)
+                    {
+                        "$logPrefixString $text" | Out-File $logFilePath -Append
+                    }
                 }
             }
         }
@@ -122,21 +169,66 @@ function Out-Log
 function Invoke-ExpressionWithLogging
 {
     param(
-        [string]$command
+        [string]$command,
+        [switch]$raw,
+        [switch]$verboseOnly,
+        [switch]$commandWhatIf
     )
-    Out-Log $command -logonly
-    try
+
+    # This results in error:
+    # Cannot convert argument "newChar", with value: "", for "Replace" to type "System.Char": "Cannot convert value "" to
+    # type "System.Char". Error: "String must be exactly one character long.""
+    # $command = $command.Replace($green, '').Replace($reset, '')
+
+    # Write-Host "[HELPER] `$global:whatif: $global:whatif" -ForegroundColor Yellow
+    # Write-Host "[HELPER] `$script:whatif: $script:whatif" -ForegroundColor Yellow
+    # Write-Host "[HELPER] `$commandWhatIf: $commandWhatIf" -ForegroundColor Cyan
+    # if ($global:whatif -and $commandWhatIf)
+    if ($commandWhatIf)
     {
-        Invoke-Expression -Command $command
+        Out-Log "[WHATIF] $command" -color Cyan
     }
-    catch
+    else
     {
-        $global:errorRecordObject = $PSItem
-        Out-Log "`n$command`n" -raw -color Red
-        Out-Log "$global:errorRecordObject" -raw -color Red
-        if ($LASTEXITCODE)
+        if ($verboseOnly)
         {
-            Out-Log "`$LASTEXITCODE: $LASTEXITCODE`n" -raw -color Red
+            if ($verbose)
+            {
+                if ($raw -or $global:helperOutputRaw)
+                {
+                    Out-Log $command -verboseOnly -raw
+                }
+                else
+                {
+                    Out-Log $command -verboseOnly
+                }
+            }
+        }
+        else
+        {
+            if ($raw -or $global:helperOutputRaw)
+            {
+                Out-Log $command -raw
+            }
+            else
+            {
+                Out-Log $command
+            }
+        }
+
+        try
+        {
+            Invoke-Expression -Command $command
+        }
+        catch
+        {
+            $global:errorRecordObject = $PSItem
+            Out-Log "`n$command`n" -raw -color Red
+            Out-Log "$global:errorRecordObject" -raw -color Red
+            if ($LASTEXITCODE)
+            {
+                Out-Log "`$LASTEXITCODE: $LASTEXITCODE`n" -raw -color Red
+            }
         }
     }
 }
