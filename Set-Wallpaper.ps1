@@ -1844,8 +1844,8 @@ public class NetAPI32{
     $bus = @{Name = 'Bus'; Expression={$_.BusType}}
     $media = @{Name = 'Media'; Expression={$_.MediaType}}
     $physicalDisks = $physicalDisks | Select-Object Model,$gb,$fw,$log,$phys,$bus,$media
-    $details = @{Name = 'Details'; Expression = {"$($_.gb) GB allocated $($_.fw) firmware $($_.log)/$($_.phys) sec size (log/phys) $($_.bus) $($_.media)"}}
-    $colorfulDetails = @{Name = 'ColorfulDetails'; Expression = {"$cyan$($_.gb) GB$reset allocated $cyan$($_.fw)$reset firmware $cyan$($_.log)$reset/$cyan$($_.phys)$reset sec size (log/phys) $cyan$($_.bus) $($_.media)$reset"}}
+    $details = @{Name = 'Details'; Expression = {"$($_.gb) GB $($_.bus) $($_.media) $($_.log)/$($_.phys) sec size (log/phys)"}}
+    $colorfulDetails = @{Name = 'ColorfulDetails'; Expression = {"$cyan$($_.gb) GB$reset $cyan$($_.bus) $($_.media)$reset $cyan$($_.log)$reset/$cyan$($_.phys)$reset sec size (log/phys)"}}
     $physicalDisks = $physicalDisks | Select-Object *, $details, $colorfulDetails
     $global:dbgPhysicalDisks = $physicalDisks
 
