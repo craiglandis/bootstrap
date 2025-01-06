@@ -1836,6 +1836,35 @@ public class NetAPI32{
 	$logicalDisksTable = $logicalDisks | Format-Table -AutoSize | Out-String
 	# TODO: Get-BitLockerVolume
 
+    # time {$ProgressPreference = 'SilentlyContinue'; $p = Get-Pnpdevice -PresentOnly | Get-PnpdeviceProperty}
+    $ProgressPreference = 'SilentlyContinue'
+    $p = Get-Pnpdevice -PresentOnly | Get-PnpdeviceProperty
+    $instanceIds = $p.InstanceId | Sort-Object -Unique
+    $instances = New-Object System.Collections.Generic.List[Object]
+    foreach ($instanceId in $instanceIds)
+    {
+        $instance = [PSCustomObject]@{InstanceId = $instanceId}
+        $instanceProperties = $p | where InstanceId -eq $instanceId
+        foreach ($instanceProperty in $instanceProperties)
+        {
+            $keyNameShort = $null
+            $keyNameShort = $instanceProperty.KeyName.Split('_')[-1]
+            $value = $instanceProperty.Data
+            if ($keyNameShort)
+            {
+                if ($keyNameShort.EndsWith('Date'))
+                {
+                    $value = Get-Date $value -Format yyyy-MM-dd
+                }
+                $instance | Add-Member -MemberType NoteProperty -Name $keyNameShort -Value $value -Force
+            }
+        }
+        $instances.Add($instance)
+    }
+    $instances | sort DriverDate | ft InstanceId,Driverdate
+    $global:dbgInstances = $instances
+    # $dbgInstances | select Name,FriendlyName,PowerData,ProblemCode,Service,InstanceId,DeviceDesc,Class,DriverDate,DriverDesc,DriverProvider,DriverRank,DriverVersion,InstallDate,FirstInstallDate,LastArrivalDate,HasProblem -first 1 | nn
+
     $physicalDisks = Get-PhysicalDisk | Sort-Object SerialNumber -Unique
     $gb = @{Name = 'GB'; Expression={([int]($_.AllocatedSize/1GB)).ToString(("N0")).PadLeft(6)}}
     $fw = @{Name = 'FW'; Expression={$_.FirmwareVersion}}
