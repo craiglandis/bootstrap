@@ -17,7 +17,8 @@ param(
 	[switch]$addScheduledTask,
 	[switch]$showDisconnects = $true,
 	[switch]$temps,
-    [switch]$noWallpaper
+    [switch]$noWallpaper,
+    [switch]$showPreviousRun
 )
 
 trap
@@ -976,6 +977,21 @@ if ($logFile -and $logFile.Length -ge 10MB)
 	$logFile | Remove-Item
 }
 
+if ($showPreviousRun)
+{
+    $previousRunPath = "C:\MISC\Set-Wallpaper\Set-Wallpaper_$env:COMPUTERNAME*"
+    $previousRunOutputFilePath = Get-Item -Path $previousRunPath | Sort-Object LastWriteTime | Select-Object -ExpandProperty FullName -last 1
+    if ($previousRunOutputFilePath)
+    {
+        Invoke-Item -Path $previousRunOutputFilePath
+    }
+    else
+    {
+        Out-Log "No $previousRunPath files found, exiting"
+    }
+    exit
+}
+
 if (!$addScheduledTask)
 {
 	Out-Log "Getting system information"
@@ -1820,8 +1836,30 @@ public class NetAPI32{
 	$logicalDisksTable = $logicalDisks | Format-Table -AutoSize | Out-String
 	# TODO: Get-BitLockerVolume
 
-    $physicalDisks = Get-PhysicalDisk | Sort-Object SerialNumber -Unique | Select-Object Model,@{Name = 'SizeGB'; Expression={[System.Math]::Round($_.Size/1GB, 0)}},BusType,MediaType,@{Name = 'VirtualDiskUsageGB'; Expression={[System.Math]::Round($_.VirtualDiskFootprint/1GB, 0)}} | sort Model
-    $physicalDisksTable = $physicalDisks | Format-Table -Autosize | Out-String -Width 4096
+    $physicalDisks = Get-PhysicalDisk | Sort-Object SerialNumber -Unique
+    $gb = @{Name = 'GB'; Expression={([int]($_.AllocatedSize/1GB)).ToString(("N0")).PadLeft(6)}}
+    $fw = @{Name = 'FW'; Expression={$_.FirmwareVersion}}
+    $log = @{Name = 'Log'; Expression={$_.LogicalSectorSize}}
+    $phys = @{Name = 'Phys'; Expression={$_.PhysicalSectorSize}}
+    $bus = @{Name = 'Bus'; Expression={$_.BusType}}
+    $media = @{Name = 'Media'; Expression={$_.MediaType}}
+    $physicalDisks = $physicalDisks | Select-Object Model,$gb,$fw,$log,$phys,$bus,$media
+    $details = @{Name = 'Details'; Expression = {"$($_.gb) GB allocated $($_.fw) firmware $($_.log)/$($_.phys) sec size (log/phys) $($_.bus) $($_.media)"}}
+    $colorfulDetails = @{Name = 'ColorfulDetails'; Expression = {"$cyan$($_.gb) GB$reset allocated $cyan$($_.fw)$reset firmware $cyan$($_.log)$reset/$cyan$($_.phys)$reset sec size (log/phys) $cyan$($_.bus) $($_.media)$reset"}}
+    $physicalDisks = $physicalDisks | Select-Object *, $details, $colorfulDetails
+    $global:dbgPhysicalDisks = $physicalDisks
+
+    # get-storagepool -IsPrimordial:$false | select FriendlyName,Size,AllocatedSize,PhysicalSectorSize,LogicalSectorSize,ResiliencySettingNameDefault,HealthStatus
+
+    $virtualDisks = get-virtualdisk | select FriendlyName,ResiliencySettingName,NumberOfColumns,Interleave,LogicalSectorSize,PhysicalSectorSize,Size,WriteCacheSize,AllocatedSize,AllocationUnitSize
+    if ($virtualDisks)
+    {
+        $allocatedGB = @{Name = 'AllocatedGB'; Expression={([int]($_.AllocatedSize/1GB)).ToString(("N0"))}}
+        $virtualDisks = $virtualDisks | select *, $allocatedGB
+        $details = @{Name = 'Details'; Expression = {"$($_.HealthStatus) $($_.allocatedGB)GB $($_.ResiliencySettingName) $($_.NumberOfColumns) cols $([int]($_.Interleave/1KB))KB int $([int]($_.AllocationUnitSize/1MB))MB clus $($_.LogicalSectorSize)/$($_.PhysicalSectorSize) sec size (log/phys) $([int]($_.WriteCacheSize/1MB))MB write cache"}}
+        $virtualDisks = $virtualDisks | select *, $details
+    }
+    $global:dbgVirtualDisks = $virtualDisks
 
 	$letter = $systemDrive.DeviceID
 	$systemDrive = "$letter $($size)GB ($($free)GB Free)"
@@ -2014,21 +2052,32 @@ public class NetAPI32{
 		$objects.Add([PSCustomObject]@{Name = $logicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
 	}
 
-	foreach ($physicalDisk in $physicalDisks)
+	$i = $null
+    foreach ($physicalDisk in $physicalDisks)
 	{
-        $fw = @{Name = 'FW'; Expression={$_.FirmwareVersion}}
-        $gb = @{Name = 'GB'; Expression={[int]($_.AllocatedSize/1GB)}}
-        $log = @{Name = 'Log'; Expression={$_.LogicalSectorSize}}
-        $phys = @{Name = 'Phys'; Expression={$_.PhysicalSectorSize}}
-        $bus = @{Name = 'Bus'; Expression={$_.BusType}}
-        $media = @{Name = 'Media'; Expression={$_.MediaType}}
-        #$physicalDisk | select Model,$fw,$gb,$phys,$log,$bus,$media | ft
-		#$objects.Add([PSCustomObject]@{Name = $physicalDisk.Drive.Replace(' ', ''); DisplayName = $logicalDisk.Drive; Value = $logicalDisk.Details})
-        <#
-                DRIVE C: Free:   819GB Used:    75GB Total:   894GB
-                DRIVE D: Free:   127GB Used:   106GB Total:   233GB
-                DRIVE E: Free:     0GB Used:     0GB Total:     0GB
-        #>
+        $i++
+        if ($i -eq 1)
+        {
+            $objects.Add([PSCustomObject]@{Name = $physicalDisk.Model.Replace(' ', ''); DisplayName = $physicalDisk.Model; Value = $physicalDisk.Details; EmptyLineBefore = $true})
+        }
+        else
+        {
+            $objects.Add([PSCustomObject]@{Name = $physicalDisk.Model.Replace(' ', ''); DisplayName = $physicalDisk.Model; Value = $physicalDisk.Details})
+        }
+	}
+
+	$i = $null
+    foreach ($virtualDisk in $virtualDisks)
+	{
+        $i++
+        if ($i -eq 1)
+        {
+            $objects.Add([PSCustomObject]@{Name = $virtualDisk.FriendlyName.Replace(' ', ''); DisplayName = $virtualDisk.FriendlyName; Value = $virtualDisk.Details; EmptyLineBefore = $true})
+        }
+        else
+        {
+            $objects.Add([PSCustomObject]@{Name = $virtualDisk.FriendlyName.Replace(' ', ''); DisplayName = $virtualDisk.FriendlyName; Value = $virtualDisk.Details})
+        }
 	}
 
 	if ($temps)
@@ -2158,6 +2207,7 @@ public static extern uint SystemParametersInfo(
 	$length = 25
 	$longestString = ''
 	$objects = $objects | Where-Object {[string]::IsNullOrEmpty($_.Value) -eq $false}
+
 	foreach ($object in $objects)
 	{
 		$string = "$((Add-Padding -Text "$($object.DisplayName): " -Length $length -Align Left) + $object.Value)"
