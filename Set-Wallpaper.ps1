@@ -1,4 +1,4 @@
-﻿<#
+<#
 Set-ExecutionPolicy Bypass -Force
 md c:\meh
 Invoke-WebRequest -Uri https://raw.githubusercontent.com/craiglandis/bootstrap/main/Set-Wallpaper.ps1 -OutFile c:\meh\Set-Wallpaper.ps1
@@ -1836,7 +1836,8 @@ public class NetAPI32{
 	$logicalDisksTable = $logicalDisks | Format-Table -AutoSize | Out-String
 	# TODO: Get-BitLockerVolume
 
-    # time {$ProgressPreference = 'SilentlyContinue'; $p = Get-Pnpdevice -PresentOnly | Get-PnpdeviceProperty}
+    <# TODO: See what useful stuff can be gleaned from having all reg values for all devices, since Get-PnpDevice by itself doesn't get them all
+	# time {$ProgressPreference = 'SilentlyContinue'; $p = Get-Pnpdevice -PresentOnly | Get-PnpdeviceProperty}
     $ProgressPreference = 'SilentlyContinue'
     $p = Get-Pnpdevice -PresentOnly | Get-PnpdeviceProperty
     $instanceIds = $p.InstanceId | Sort-Object -Unique
@@ -1864,6 +1865,7 @@ public class NetAPI32{
     $instances | sort DriverDate | ft InstanceId,Driverdate
     $global:dbgInstances = $instances
     # $dbgInstances | select Name,FriendlyName,PowerData,ProblemCode,Service,InstanceId,DeviceDesc,Class,DriverDate,DriverDesc,DriverProvider,DriverRank,DriverVersion,InstallDate,FirstInstallDate,LastArrivalDate,HasProblem -first 1 | nn
+	#>
 
     $physicalDisks = Get-PhysicalDisk | Sort-Object SerialNumber -Unique
     $gb = @{Name = 'GB'; Expression={([int]($_.AllocatedSize/1GB)).ToString(("N0")).PadLeft(6)}}
@@ -1878,7 +1880,8 @@ public class NetAPI32{
     $physicalDisks = $physicalDisks | Select-Object *, $details, $colorfulDetails
     $global:dbgPhysicalDisks = $physicalDisks
 
-    # get-storagepool -IsPrimordial:$false | select FriendlyName,Size,AllocatedSize,PhysicalSectorSize,LogicalSectorSize,ResiliencySettingNameDefault,HealthStatus
+	# Wasn't anything from Get-StoragePool that seemed interesting enough to include
+    # Get-StoragePool -IsPrimordial:$false | select FriendlyName,Size,AllocatedSize,PhysicalSectorSize,LogicalSectorSize,ResiliencySettingNameDefault,HealthStatus
 
     $virtualDisks = get-virtualdisk | select FriendlyName,ResiliencySettingName,NumberOfColumns,Interleave,LogicalSectorSize,PhysicalSectorSize,Size,WriteCacheSize,AllocatedSize,AllocationUnitSize
     if ($virtualDisks)
@@ -2058,10 +2061,15 @@ public class NetAPI32{
 	$objects.Add([PSCustomObject]@{Name = 'tpm'; DisplayName = 'TPM'; Value = $tpmString})
 	# $objects.Add([PSCustomObject]@{Name = 'secureBootEnabled'; DisplayName = 'SECURE BOOT'; Value = $secureBootEnabled})
 
+	$global:physicalNics = $physicalNics #;exit
+
 	foreach ($physicalNic in $physicalNics)
 	{
-		#$interfaceDescription = $physicalNic.InterfaceDescription.Replace('Intel(R) Ethernet Controller','Intel').Replace('Intel(R) Ethernet Connection','Intel').Replace('(R)','')
-		$nicDescription = $physicalNic.DriverDescription.Replace('Intel(R) Ethernet Controller', 'Intel').Replace('Intel(R) Ethernet Connection', 'Intel').Replace('(R)', '')
+		$nicDescription = $physicalNic.InterfaceDescription		
+		$nicDescription = $nicDescription -replace 'Ethernet Controller',''
+		$nicDescription = $nicDescription -replace 'Ethernet Connection',''
+		$nicDescription = $nicDescription -replace '\(\w+\)','' # replaces (R), (TM), (C), and also (3) where 3 is the instance number
+		$nicDescription = $nicDescription -replace '\s+',' ' # replaces multiple spaces with one space
 		$driverInformation = "$($physicalNic.DriverFileName) $(Get-Date -Format $physicalNic.DriverVersionString) NDIS $(Get-Date -Format $physicalNic.NdisVersion) $(Get-Date -Format $physicalNic.DriverDate) $(Get-Age -Start $physicalNic.DriverDate) old"
 		$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 	}
@@ -2260,7 +2268,7 @@ public static extern uint SystemParametersInfo(
 
 	$verticalPosition = 40
 	$white = New-Object Drawing.SolidBrush White
-	$cyan = New-Object Drawing.SolidBrush Cyan
+	$cyanColor = New-Object Drawing.SolidBrush Cyan
 
 	$objects = $objects | Where-Object {[string]::IsNullOrEmpty($_.Value) -eq $false}
 	foreach ($object in $objects)
@@ -2320,7 +2328,7 @@ public static extern uint SystemParametersInfo(
 				#$measureStringResult = $graphics.MeasureString($string1, $font) | Select-Object -ExpandProperty Width
 				#Out-Log "`$measureStringResult:$measureStringResult" -verboseonly
 				$horizontalPosition += $measureTextResult
-				$graphics.DrawString($string2, $font, $cyan, $horizontalPositionp, $verticalPosition)
+				$graphics.DrawString($string2, $font, $cyanColor, $horizontalPositionp, $verticalPosition)
 			}
 			else
 			{
