@@ -2065,6 +2065,12 @@ public class NetAPI32{
 
 	foreach ($physicalNic in $physicalNics)
 	{
+		$pnpDeviceId = $physicalNic.PnpDeviceId
+		$ids = $pnpDeviceId.Split('_').Split('\').Split('&')
+		$vendorId = $ids[2]
+		$deviceId = $ids[4]
+		$id = "VEN $vendorId DEV $deviceId"
+
 		<# For ones like this that are the same so diffirentiated with "#2", 
 		   instead use MacAddress to differentiate them here
 
@@ -2078,7 +2084,7 @@ public class NetAPI32{
 		$nicDescription = $nicDescription -replace 'Ethernet Connection',''
 		$nicDescription = $nicDescription -replace '\(\w+\)','' # replaces (R), (TM), (C), and also (3) where 3 is the instance number
 		$nicDescription = $nicDescription -replace '\s+',' ' # replaces multiple spaces with one space
-		$nicDescription = "$nicDescription $($physicalNic.PermanentAddress)"
+		$nicDescription = "$nicDescription MAC $($physicalNic.PermanentAddress) $id"
 		$driverInformation = "$($physicalNic.DriverFileName) $(Get-Date -Format $physicalNic.DriverVersionString) NDIS $(Get-Date -Format $physicalNic.NdisVersion) $(Get-Date -Format $physicalNic.DriverDate) $(Get-Age -Start $physicalNic.DriverDate) old"
 		$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 	}
