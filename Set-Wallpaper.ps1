@@ -1512,7 +1512,7 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 
 	$lastBootUpTime = $win32_OperatingSystem.LastBootUpTime
 
-	$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceAlias,InterfaceDescription,InterfaceIndex,DriverDescription,DriverFileName,DriverDate,DriverVersionString,MacAddress,MediaConnectionState,NdisVersion,DriverInformation,PnpDeviceId
+	$physicalNics = Get-NetAdapter -Physical | Select-Object InterfaceAlias,InterfaceDescription,InterfaceIndex,DriverDescription,DriverFileName,DriverDate,DriverVersionString,MacAddress,PermanentAddress,MediaConnectionState,NdisVersion,DriverInformation,PnpDeviceId
     $physicalNics = $physicalNics | Sort-Object PnPDeviceId -Unique
     $connectedPhysicalNics = $physicalNics | Where-Object MediaConnectionState -EQ 'Connected'
 	$ipConfigs = Get-NetIPConfiguration -Detailed
@@ -2065,11 +2065,20 @@ public class NetAPI32{
 
 	foreach ($physicalNic in $physicalNics)
 	{
-		$nicDescription = $physicalNic.InterfaceDescription		
+		<# For ones like this that are the same so diffirentiated with "#2", 
+		   instead use MacAddress to differentiate them here
+
+			NIC: Intel I225-V #2 e2fn.sys 2.1.4.3 NDIS 6.89 2024-02-20 10.7 months old
+            NIC: Intel I225-V e2fn.sys 2.1.4.3 NDIS 6.89 2024-02-20 10.7 months old
+
+			$global:physicalNics | group DriverDescription | where Count -ge 2 | select -expand Name
+		#>
+		$nicDescription = $physicalNic.DriverDescription #InterfaceDescription		
 		$nicDescription = $nicDescription -replace 'Ethernet Controller',''
 		$nicDescription = $nicDescription -replace 'Ethernet Connection',''
 		$nicDescription = $nicDescription -replace '\(\w+\)','' # replaces (R), (TM), (C), and also (3) where 3 is the instance number
 		$nicDescription = $nicDescription -replace '\s+',' ' # replaces multiple spaces with one space
+		$nicDescription = "$nicDescription $($physicalNic.PermanentAddress)"
 		$driverInformation = "$($physicalNic.DriverFileName) $(Get-Date -Format $physicalNic.DriverVersionString) NDIS $(Get-Date -Format $physicalNic.NdisVersion) $(Get-Date -Format $physicalNic.DriverDate) $(Get-Age -Start $physicalNic.DriverDate) old"
 		$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 	}
