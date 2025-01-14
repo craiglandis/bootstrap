@@ -127,10 +127,10 @@
   },
   {
     "Name": "CrystalDiskMark",
-    "ChocolateyName": "crystaldiskmark",
+    "ChocolateyName": "",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
     "Groups": ["HV","PC","VM","TEST1"],
-    "Notes": ""
+    "Notes": "As of Jan 2025, winget had the latest version 8.0.6 but the chocolatey package is still 8.0.5, removing the ChocolateyName ('crystaldiskmark') so it will use winget instead"
   },
   {
     "Name": "curl",
