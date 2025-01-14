@@ -52,7 +52,7 @@
     "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": ""
   },
   {
