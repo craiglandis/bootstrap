@@ -7,11 +7,11 @@
     "Notes": ""
   },
   {
-    "Name": ".NET Desktop Runtime 7.0",
-    "ChocolateyName": "dotnet-7.0-desktopruntime",
-    "WingetName": "Microsoft.DotNet.DesktopRuntime.7",
-    "Groups": ["HV","PC","VM"],
-    "Notes": ""
+    "Name": ".NET Core 3.1 Desktop Runtime",
+    "ChocolateyName": "dotnetcore-3.1-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.3_1",
+    "Groups": [],
+    "Notes": "Installing dotnetcore-desktopruntime with chocolatey gets the latest, currently 3.1, so same as installing 3.1 explicitly via dotnetcore-3.1-desktopruntime, same for dotnet-desktopruntime vs dotnet-9.0-desktopruntime"
   },
   {
     "Name": ".NET Desktop Runtime 6.0",
@@ -21,10 +21,24 @@
     "Notes": ""
   },
   {
-    "Name": ".NET Core 3.1 Desktop Runtime",
-    "ChocolateyName": "dotnetcore-3.1-desktopruntime",
-    "WingetName": "",
-    "Groups": [],
+    "Name": ".NET Desktop Runtime 7.0",
+    "ChocolateyName": "dotnet-7.0-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.7",
+    "Groups": ["HV","PC","VM"],
+    "Notes": ""
+  },
+  {
+    "Name": ".NET Desktop Runtime 8.0",
+    "ChocolateyName": "dotnet-8.0-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.8",
+    "Groups": ["HV","PC","VM"],
+    "Notes": ""
+  },
+  {
+    "Name": ".NET Desktop Runtime 9.0",
+    "ChocolateyName": "dotnet-9.0-desktopruntime",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.9",
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -81,7 +95,7 @@
     "ChocolateyName": "az.powershell",
     "WingetName": "",
     "Groups": ["HV","QUICKVM","VM"],
-    "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module, not using this for PC since PC will have them in C:\\ODM\\Modules"
+    "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module, not using this for PC since PC will have them in C:\\OD\\Modules. As of Jan 2025 still can't find a winget package for Az PowerShell. ('winget search Microsoft.Azure --source winget')"
   },
   {
     "Name": "balenaEtcher",
@@ -92,10 +106,10 @@
   },
   {
     "Name": "Beyond Compare",
-    "ChocolateyName": "beyondcompare",
-    "WingetName": "ScooterSoftware.BeyondCompare4",
+    "ChocolateyName": "",
+    "WingetName": "ScooterSoftware.BeyondCompare.5",
     "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
-    "Notes": ""
+    "Notes": "As of Jan 2025, beyondcompare from chocolatey versus winget is the same version 5.0.4.30422, so removing the chocolatey package name ('beyondcompare') so it uses winget"
   },
   {
     "Name": "Bicep CLI",
@@ -123,7 +137,7 @@
     "ChocolateyName": "crystaldiskinfo.portable",
     "WingetName": "CrystalDewWorld.CrystalDiskInfo",
     "Groups": ["HV","PC","VM"],
-    "Notes": ""
+    "Notes": "As of Jan 2025 there's still no portable version available via winget, only chocolatey has a portable one available"
   },
   {
     "Name": "CrystalDiskMark",
@@ -185,15 +199,15 @@
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything.Alpha",
-    "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not. Using 'voidtools.Everything.Alpha' until I find a reason not to ('voidtools.Everything' is for the release/non-alpha version)"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
-    "ChocolateyName": "es",
+    "ChocolateyName": "",
     "WingetName": "voidtools.Everything.Cli",
-    "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "ES.EXE is now in its own choco package named es, because reasons"
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Notes": "Chocolatey package is 'es' but making that null so it use winget instead since I'm trying to use winget as much as possible since its package selection has improved"
   },
   {
     "Name": "Fiddler",
@@ -241,7 +255,7 @@
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": ["HV","PC","QUICKVM","VM"]
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"]
   },
   {
     "Name": "GitHub CLI",
@@ -463,14 +477,14 @@
     "Name": "PowerShell 7",
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
-    "Groups": ["QUICKVM"],
+    "Groups": ["QUICKVM","TEST1"],
     "Notes": "Scripting this install instead of using choco/winget since those packages can be stale, but still using chocolatey to install it for QUICKVM"
   },
   {
     "Name": "PowerShell 7 Preview",
     "ChocolateyName": "powershell-preview",
     "WingetName": "Microsoft.PowerShell.Preview",
-    "Groups": [],
+    "Groups": ["QUICKVM","TEST1"],
     "Notes": "This package was stale (had 7.2.0-preview.4 when 7.3.0-preview.1 was latest, and since it's easy to get the MSI, just installing it manually instead"
   },
   {
@@ -541,9 +555,9 @@
     "Name": "Sysinternals Suite",
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "",
-    "WingetName": "9P7KNL5RWT25",
+    "WingetName": "Microsoft.Sysinternals",
     "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
-    "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1"
+    "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1, 9P7KNL5RWT25 with winget is for the source msstore, Microsoft.Sysinternals for source winget"
   },
   {
     "Name": "Terminal-Icons (PowerShell Module)",
@@ -612,16 +626,16 @@
   {
     "Name": "Windows Terminal",
     "ChocolateyName": "",
-    "WingetName": "9N0DX20HK701",
-    "Groups": [],
-    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview"
+    "WingetName": "Microsoft.WindowsTerminal",
+    "Groups": ["TEST1"],
+    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview. For winget, 9N0DX20HK701 installs from source msstore and Microsoft.WindowsTerminal installs from source winget."
   },
   {
     "Name": "Windows Terminal Preview",
     "ChocolateyName": "",
-    "WingetName": "9N8G5RFZ9XK3",
-    "Groups": [],
-    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Currently no choco package for terminal preview (choco find *windows*terminal* only returns microsoft-windows-terminal"
+    "WingetName": "Microsoft.WindowsTerminal.Preview",
+    "Groups": ["TEST1"],
+    "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Currently no choco package for terminal preview (choco find *windows*terminal* only returns microsoft-windows-terminal). For winget, 9N8G5RFZ9XK3 installs from source msstore and Microsoft.WindowsTerminal.Preview installs from source winget."
   },
   {
     "Name": "WinSCP",
