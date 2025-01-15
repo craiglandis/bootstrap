@@ -56,6 +56,13 @@
     "Notes": ""
   },
   {
+    "Name": "AI Shell",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.AIShell",
+    "Groups": ["TEST1"],
+    "Notes": "https://learn.microsoft.com/en-us/powershell/utility-modules/aishell/get-started/aishell-powershell"
+  },
+  {
     "Name": "Audacity",
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
@@ -369,6 +376,13 @@
     "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
   },
   {
+    "Name": "LogParser",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.LogParser",
+    "Groups": ["TEST1"],
+    "Notes": "As of Jan 2025, Microsoft.LogParser gets you version 2.2.10, which the download site shows as being from 2021, which is probably the latest as I suspect LogParser is very infrequently updated"
+  },
+  {
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
@@ -446,6 +460,13 @@
     "Notes": ""
   },
   {
+    "Name": "OneDrive",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.OneDrive",
+    "Groups": [],
+    "Notes": "As of Jan 2025, the chocolatey package 'onedrive' is stale (24.226.1110.4) compared to Microsoft.OneDrive that is version 24.232.1118.0003."
+  },
+  {
     "Name": "OneNote for Windows 10",
     "ChocolateyName": "",
     "WingetName": "9WZDNCRFHVJL",
@@ -455,16 +476,30 @@
   {
     "Name": "OpenSSH Beta",
     "ChocolateyName": "",
-    "WingetName": "Microsoft.OpenSSH.Beta",
+    "WingetName": "Microsoft.OpenSSH.Preview",
     "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release"
+    "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release, Microsoft.OpenSSH.Preview is the bleeding edge, newer than Microsoft.OpenSSH.Beta"
   },
   {
     "Name": "ParkControl",
     "ChocolateyName": "",
     "WingetName": "BitSum.ParkControl",
     "Groups": ["HV","PC","VM"],
-    "Notes": "Display and change CPU core parking settings in real-time"
+    "Notes": "Display and change CPU core parking settings in real-time, as of Jan 2025 could not find an equivalent chocolatey package for it"
+  },
+  {
+    "Name": "PC Manager}",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.PCManager.Beta",
+    "Groups": [],
+    "Notes": "https://pcmanager.microsoft.com/ Microsoft.PCManager is the release version, Microsoft.PCManager.Beta the beta"
+  },
+  {
+    "Name": "Perfview",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.PerfView",
+    "Groups": [],
+    "Notes": "https://github.com/microsoft/perfview, the chocolatey package is 'perfview' but 'Microsoft.PerfView' is the same version as of Jan 2025 so preferring the winget install"
   },
   {
     "Name": "Power BI Desktop",
@@ -494,6 +529,13 @@
     "WingetName": "Microsoft.PowerToys",
     "Groups": [],
     "Notes": "The chocolatey package - powertoys - waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
+  },
+  {
+    "Name": "Promptflow",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.Promptflow",
+    "Groups": [],
+    "Notes": "https://github.com/microsoft/promptflow and https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/overview-what-is-prompt-flow"
   },
   {
     "Name": "Python",
@@ -582,6 +624,13 @@
     "Notes": "This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
   },
   {
+    "Name": "Visual Studio Code CLI",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.VisualStudioCode.CLI",
+    "Groups": ["TEST1"],
+    "Notes": ""
+  },
+  {
     "Name": "Visual Studio 2022 Enterprise",
     "ChocolateyName": "visualstudio2022enterprise",
     "WingetName": "Microsoft.VisualStudio.2022.Enterprise",
@@ -589,19 +638,41 @@
     "Notes": ""
   },
   {
+    "Name": "WDK",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.WindowsWDK.10.0.26100",
+    "Groups": ["TEST1"],
+    "Notes": ""
+  },
+  {
     "Name": "WinDbg",
     "ChocolateyName": "",
-    "WingetName": " ",
-    "Groups": ["QUICKVM","VM"],
+    "WingetName": "Microsoft.WinDbg",
+    "Groups": ["QUICKVM","VM","TEST1"],
     "Notes": "The windbg chocolatey package doesn't work, returns 404, description says This package is likely not broken for licensed users - see https://docs.chocolatey.org/en-us/features/private-cdn"
+  },
+  {
+    "Name": "Windows ADK",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.WindowsADK",
+    "Groups": ["TEST1"],
+    "Notes": "https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install"
   },
   {
     "Name": "Windows Admin Center",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsAdminCenter",
-    "Groups": [],
+    "Groups": ["TEST1"],
     "Notes": ""
   },
+  {
+    "Name": "Windows App",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.WindowsApp",
+    "Groups": ["TEST1"],
+    "Notes": "https://learn.microsoft.com/en-us/windows-app/overview"
+  },
+
   {
     "Name": "Windows Driver Kit 11",
     "ChocolateyName": "windowsdriverkit11",
@@ -656,6 +727,13 @@
     "ChocolateyName": "wiztree",
     "WingetName": "AntibodySoftware.WizTree",
     "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": ""
+  },
+  {
+    "Name": "WSL",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.WSL",
+    "Groups": ["TEST1"],
     "Notes": ""
   },
   {
