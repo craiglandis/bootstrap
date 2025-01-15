@@ -184,14 +184,14 @@
   {
     "Name": "Everything",
     "ChocolateyName": "everything",
-    "WingetName": "voidtools.Everything",
+    "WingetName": "voidtools.Everything.Alpha",
     "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
     "ChocolateyName": "es",
-    "WingetName": "",
+    "WingetName": "voidtools.Everything.Cli",
     "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, because reasons"
   },
