@@ -596,7 +596,7 @@ process
         # Hide Chat on Taskbar
         Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarMn' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
 	# Hide Desktop Icons
-        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideIcons' -PropertyType 'DWord' -Value 1 -Force | Out-Null" 
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideIcons' -PropertyType 'DWord' -Value 1 -Force | Out-Null"
     }
 
     if ($isWin10)
@@ -607,7 +607,7 @@ process
 
     # Config for all Windows versions
     # Disable "Show account related notifications occasionally in Start"
-    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Start_AccountNotifications /t REG_DWORD /d 0 /f"    
+    Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v Start_AccountNotifications /t REG_DWORD /d 0 /f"
     # Disable "Enhance pointer precision"
     Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseSpeed /t REG_SZ /d 0 /f"
     Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Mouse' /v MouseThreshold1 /t REG_SZ /d 0 /f"
@@ -617,7 +617,7 @@ process
     Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Policies\Microsoft\Windows\Explorer' /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f"
     # Configure New Tab page URL
     # https://admx.help/?Category=Chrome&Policy=Google.Policies.Chrome::NewTabPageLocation
-    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Policies\Microsoft\Edge' /v NewTabPageLocation /t REG_SZ /d 'https://www.google.com' /f"    
+    Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Policies\Microsoft\Edge' /v NewTabPageLocation /t REG_SZ /d 'https://www.google.com' /f"
     # Enable dark mode
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v SystemUsesLightTheme /t REG_DWORD /d 0 /f"
     Invoke-ExpressionWithLogging "reg add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize' /v AppsUseLightTheme /t REG_DWORD /d 0 /f"
@@ -1152,11 +1152,11 @@ process
         }
     }
 
-    $wingetListResult = Invoke-ExpressionWithLogging "winget list --id AutoHotkey.AutoHotkey --exact --source winget" -raw    
+    $wingetListResult = Invoke-ExpressionWithLogging "winget list --id AutoHotkey.AutoHotkey --exact --source winget" -raw
     if ($LASTEXITCODE -eq 0)
     {
     	Out-Log "Winget installed AutoHotkey v1, pinning it to exclude it from 'winget upgrade --all --source winget' else it would be upgraded to V2, and I'm not ready to use V2 exclusively yet"
-    	$wingetPinResult = Invoke-ExpressionWithLogging "winget pin add --exact --id AutoHotkey.AutoHotkey"     	
+    	$wingetPinResult = Invoke-ExpressionWithLogging "winget pin add --exact --id AutoHotkey.AutoHotkey"
       	if ($LASTEXITCODE -eq 0)
        	{
            Out-Log "Pinned AutoHotkey.AutoHotkey, 'winget upgrade --all --source winget' will exclude it"
@@ -1164,7 +1164,7 @@ process
 	else
  	{
   	   Out-Log "Failed to pin AutoHotkey.AutoHotkey, 'winget upgrade --all --source winget' will include it unless pinned"
- 	} 
+ 	}
     }
     else
     {
@@ -1410,6 +1410,12 @@ process
         Invoke-ExpressionWithLogging "New-Item -Path $vsCodeSettingsJsonPath -Force | Out-Null"
         Out-Log "Downloading $vsCodeSettingsJsonUrl"
         Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$vsCodeSettingsJsonUrl`', `'$vsCodeSettingsJsonPath`')"
+
+        $vsCodeKeybindingsJsonUrl = "https://raw.githubusercontent.com/craiglandis/bootstrap/main/vscode_keybindings.json"
+        $vsCodeKeybindingsJsonPath = "$env:APPDATA\Code\User\keybindings.json"
+        Invoke-ExpressionWithLogging "New-Item -Path `"$env:APPDATA\Code\User`" -Force -ErrorAction SilentlyContinue | Out-Null"
+        Out-Log "Downloading $vsCodeKeybindingsJsonUrl"
+        Invoke-ExpressionWithLogging "(New-Object Net.WebClient).DownloadFile(`'$vsCodeKeybindingsJsonUrl`', `'$vsCodeKeybindingsJsonPath`')"
     }
     else
     {
@@ -1676,7 +1682,7 @@ else
     }
 
     Out-Log "Disabling Beyond Compare BCClipboard from running on Windows startup"
-    Remove-ItemProperty -Path 'HKCU\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -ErrorAction SilentlyContinue    
+    Remove-ItemProperty -Path 'HKCU\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'BCClipboard' -ErrorAction SilentlyContinue
 
     # https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#searchinsidebarenabled
     Out-Log "Disabling search in sidebar which is supposed to disable 'Search Bing in sidebar' in the context menu"
