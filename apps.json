@@ -126,6 +126,20 @@
     "Notes": ""
   },
   {
+    "Name": "Cinebench 2024",
+    "ChocolateyName": "cinebench",
+    "WingetName": "",
+    "Groups": [],
+    "Notes": "Cinebench is a commonly used CPU benchmarking tool. 2024 is newer than R23 but R23 is still used more because people are familiar with the scores and the numbers are higer. Did not find a 2024 winget package as of Feb 2025."
+  },
+  {
+    "Name": "Cinebench R23",
+    "ChocolateyName": "",
+    "WingetName": "Maxon.CinebenchR23",
+    "Groups": [],
+    "Notes": "Cinebench is a commonly used CPU benchmarking tool. R23 is older than 2024 but R23 is still used more because people are familiar with the scores and the numbers are higer. Did not find an R23 chocolatey package as of Feb 2025."
+  },
+  {
     "Name": "CoreTemp",
     "ChocolateyName": "coretemp",
     "WingetName": "ALCPU.CoreTemp",
