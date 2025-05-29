@@ -542,7 +542,7 @@
     "ChocolateyParams": "--silent",
     "WingetName": "Microsoft.PowerToys",
     "Groups": [],
-    "Notes": "The chocolatey package - powertoys - waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
+    "Notes": "The chocolatey powertoys package waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
   },
   {
     "Name": "Promptflow",
