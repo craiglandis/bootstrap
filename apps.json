@@ -11,7 +11,7 @@
     "ChocolateyName": "dotnetcore-3.1-desktopruntime",
     "WingetName": "Microsoft.DotNet.DesktopRuntime.3_1",
     "Groups": [],
-    "Notes": "Installing dotnetcore-desktopruntime with chocolatey gets the latest, currently 3.1, so same as installing 3.1 explicitly via dotnetcore-3.1-desktopruntime, same for dotnet-desktopruntime vs dotnet-9.0-desktopruntime"
+    "Notes": "Installing dotnetcore-desktopruntime with chocolatey gets latest, currently 3.1, so same as installing 3.1 explicitly via dotnetcore-3.1-desktopruntime, same for dotnet-desktopruntime vs dotnet-9.0-desktopruntime"
   },
   {
     "Name": ".NET Desktop Runtime 6.0",
