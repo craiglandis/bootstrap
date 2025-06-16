@@ -183,10 +183,10 @@
   },
   {
     "Name": "diskspd",
-    "ChocolateyName": "diskspd",
-    "WingetName": "",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.DiskSpd",
     "Groups": ["HV","PC"],
-    "Notes": ""
+    "Notes": "As of June 2025, the choco package 'diskspd' was still 2.1, but the winget package Microsoft.DiskSpd was 2.2 which is the version used by Crystaldiskmark 9"
   },
   {
     "Name": "Docker Desktop",
