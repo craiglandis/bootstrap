@@ -1589,6 +1589,7 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 		}
 	}
 
+    <#
 	if ($isPhysicalMachine)
 	{
 		$PSNativeCommandUseErrorActionPreference = $false
@@ -1600,6 +1601,7 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 			$lastBackupTime = "$(Get-Age -start $lastBackupTime) ago $(Get-Date $lastBackupTime -Format yyyy-MM-ddTHH:mm:ss)"
 		}
 	}
+    #>
 
 	$lastSystemCrash = Get-WinEvent -FilterHashtable @{LogName = 'System'; ProviderName = 'Microsoft-Windows-WER-SystemErrorReporting'; Level = 2; Id = 1001} -MaxEvents 1 -ErrorAction SilentlyContinue
 	if ($lastSystemCrash)
@@ -2071,7 +2073,7 @@ public class NetAPI32{
 		$deviceId = $ids[4]
 		$id = "VEN $vendorId DEV $deviceId"
 
-		<# For ones like this that are the same so diffirentiated with "#2", 
+		<# For ones like this that are the same so diffirentiated with "#2",
 		   instead use MacAddress to differentiate them here
 
 			NIC: Intel I225-V #2 e2fn.sys 2.1.4.3 NDIS 6.89 2024-02-20 10.7 months old
@@ -2079,7 +2081,7 @@ public class NetAPI32{
 
 			$global:physicalNics | group DriverDescription | where Count -ge 2 | select -expand Name
 		#>
-		$nicDescription = $physicalNic.DriverDescription #InterfaceDescription		
+		$nicDescription = $physicalNic.DriverDescription #InterfaceDescription
 		$nicDescription = $nicDescription -replace 'Ethernet Controller',''
 		$nicDescription = $nicDescription -replace 'Ethernet Connection',''
 		$nicDescription = $nicDescription -replace '\(\w+\)','' # replaces (R), (TM), (C), and also (3) where 3 is the instance number
