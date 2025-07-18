@@ -1826,7 +1826,7 @@ public class NetAPI32{
 		$board = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
 	#}
 
-	# $hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
+	$hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
 	$logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3'
 	$drive = @{Name = 'Drive'; Expression = {"DRIVE $($_.DeviceID.Replace(':',''))"}}
@@ -2091,7 +2091,7 @@ public class NetAPI32{
 		$objects.Add([PSCustomObject]@{Name = 'nic'; DisplayName = 'NIC'; Value = "$nicDescription $driverInformation"})
 	}
 	$objects.Add([PSCustomObject]@{Name = 'disconnectsInfo'; DisplayName = ''; Value = $disconnectsInfo})
-	# $objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
+	$objects.Add([PSCustomObject]@{Name = 'hyperVEnabled'; DisplayName = 'HYPER-V'; Value = $hyperVEnabled})
 	if ($isDesktop -or $isVm)
 	{
 		$objects.Add([PSCustomObject]@{Name = 'powerPlan'; DisplayName = 'POWER PLAN'; Value = $powerPlan; EmptyLineAfter = $true})
