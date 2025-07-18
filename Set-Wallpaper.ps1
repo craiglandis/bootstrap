@@ -8,7 +8,8 @@ copy \\tsclient\c\src\bootstrap\set-wallpaper.ps1 c:\meh\Set-Wallpaper.ps1;c:\me
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-	[string]$path = 'c:\meh',
+	#[string]$path = 'C:\my',
+    [string]$outputPath = 'C:\my\Set-Wallpaper',
 	[int]$fontSize,
 	[ValidateSet('left', 'right')]
 	[string]
@@ -979,7 +980,9 @@ if ($logFile -and $logFile.Length -ge 10MB)
 
 if ($showPreviousRun)
 {
-    $previousRunPath = "C:\MISC\Set-Wallpaper\Set-Wallpaper_$env:COMPUTERNAME*"
+    #$previousRunPath = "C:\MISC\Set-Wallpaper\Set-Wallpaper_$env:COMPUTERNAME*"
+    $previousRunPath = "$outputPath\Set-Wallpaper_$env:COMPUTERNAME*"
+
     $previousRunOutputFilePath = Get-Item -Path $previousRunPath | Sort-Object LastWriteTime | Select-Object -ExpandProperty FullName -last 1
     if ($previousRunOutputFilePath)
     {
@@ -2543,10 +2546,19 @@ if (!$addScheduledTask)
 {
 	$textOutputString = $textOutput.ToString() | Out-String
 	Out-Log $textOutputString -raw
-    $outputFolderPath = 'C:\MISC\Set-Wallpaper'
-    if (Test-Path -Path $outputFolderPath -PathType Container)
+    $outputParentPath = Split-Path -Path $outputPath
+    if ((Test-Path -Path $outputParentPath -PathType Container) -eq $false)
     {
-        $filePath = "$outputFolderPath\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
+        New-Item -Path $outputParentPath -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+    }
+    if ((Test-Path -Path $outputPath -PathType Container) -eq $false)
+    {
+        New-Item -Path $outputPath -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+    }
+
+    if (Test-Path -Path $outputPath -PathType Container)
+    {
+        $filePath = "$outputPath\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
     }
     else
     {
@@ -2554,6 +2566,24 @@ if (!$addScheduledTask)
     }
     $textOutputString | Out-File -FilePath $filePath
     Invoke-Item -Path $filePath
+    $global:dbgFilePath = $filePath
+
+    #$outputPath = 'c:\my\Set-Wallpaper'
+    #$scriptBaseName = 'Set-Wallpaper'
+    $filePathRegex = "$outputPath\$($scriptBaseName)_$($env:COMPUTERNAME)_*.txt"
+    $numFllesToKeep = 5
+    $fullNames = Get-ChildItem -Path $filePathRegex | Sort-Object LastWriteTime | Select-Object -Last $numFllesToKeep -ExpandProperty FullName
+    $oldFiles = Get-ChildItem -Path $filePathRegex -ErrorAction SilentlyContinue | Where-Object {$_.FullName -notin $fullNames}
+    $oldFilesCount = $oldFiles | Measure-Object | Select-Object -ExpandProperty Count
+    $ErrorActionPreference = 'Stop'
+    if ($oldFilesCount -ge 1)
+    {
+        $oldFiles | Remove-Item -ErrorAction Stop -WhatIf
+    }
+
+    #$filePath = "$outputPath\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
+    #$filePath = "C:\my\Set-Wallpaper\Set-Wallpaper_G16_20250718145202.txt"
+
 }
 
 if ($currentPSDefaultParameterValues)
@@ -2561,16 +2591,16 @@ if ($currentPSDefaultParameterValues)
 	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
 }
 
-$folderPath = 'C:\MISC\Set-Wallpaper'
-if (Test-Path -Path $folderPath -PathType Container)
+# $folderPath = 'C:\MISC\Set-Wallpaper'
+if (Test-Path -Path $outputPath -PathType Container)
 {
     $pnpDevices = Get-PnpDevice | Select-Object Name,Description,Service,Class,PNPDeviceID,Present,Status,Problem | Sort-Object Name
-    $pnpDevices | Export-Clixml -Path "$folderPath\Get-PnPDevice_$env:COMPUTERNAME.xml" -Depth 9 -Force
-    # msinfo32 /nfo "$folderPath\MSINFO32_$env:COMPUTERNAME.nfo"
-    # msinfo32 /report "$folderPath\MSINFO32_$env:COMPUTERNAME.txt"}).TotalSeconds
+    $pnpDevices | Export-Clixml -Path "$outputPath\Get-PnPDevice_$env:COMPUTERNAME.xml" -Depth 9 -Force
+    # msinfo32 /nfo "$outputPath\MSINFO32_$env:COMPUTERNAME.nfo"
+    # msinfo32 /report "$outputPath\MSINFO32_$env:COMPUTERNAME.txt"}).TotalSeconds
     if (Get-Module -name importexcel -ListAvailable)
     {
-        $pnpDevices | Export-Excel -Path "$folderPath\PnPDevices_$env:COMPUTERNAME.xlsx" -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -ErrorAction Stop
+        $pnpDevices | Export-Excel -Path "$outputPath\PnPDevices_$env:COMPUTERNAME.xlsx" -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -ErrorAction Stop
     }
 }
 
