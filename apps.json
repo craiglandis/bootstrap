@@ -509,7 +509,7 @@
     "Notes": "Display and change CPU core parking settings in real-time, as of Jan 2025 could not find an equivalent chocolatey package for it"
   },
   {
-    "Name": "PC Manager}",
+    "Name": "PC Manager",
     "ChocolateyName": "",
     "WingetName": "Microsoft.PCManager.Beta",
     "Groups": [],
