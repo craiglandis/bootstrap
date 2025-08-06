@@ -240,7 +240,7 @@
   {
     "Name": "ffmpeg",
     "ChocolateyName": "ffmpeg",
-    "WingetName": "",
+    "WingetName": "Gyan.FFmpeg",
     "Groups": [],
     "Notes": ""
   },
