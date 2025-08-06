@@ -313,6 +313,20 @@
     "Notes": ""
   },
   {
+    "Name": "HandBrake",
+    "ChocolateyName": "handbrake",
+    "WingetName": "HandBrake.HandBrake",
+    "Groups": ["PC"],
+    "Notes": "Handbrake app for playing media files"
+  },
+  {
+    "Name": "HandBrake CLI",
+    "ChocolateyName": "handbrake-cli",
+    "WingetName": "HandBrake.HandBrake.CLI",
+    "Groups": ["PC"],
+    "Notes": "HandleBrake command line interface for playing media files"
+  },
+  {
     "Name": "HWInfo",
     "ChocolateyName": "hwinfo.portable",
     "WingetName": "REALiX.HWiNFO",
@@ -339,6 +353,13 @@
     "WingetName": "Apple.iTunes",
     "Groups": [],
     "Notes": ""
+  },
+  {
+    "Name": "JDownloader 2",
+    "ChocolateyName": "AppWork.JDownloader",
+    "WingetName": "AppWork.JDownloader",
+    "Groups": ["PC"],
+    "Notes": "GUI download tool https://jdownloader.org/"
   },
   {
     "Name": "kubectl",
@@ -416,6 +437,13 @@
     "WingetName": "Microsoft.Teams",
     "Groups": ["PC"],
     "Notes": ""
+  },
+  {
+    "Name": "MKVToolNix",
+    "ChocolateyName": "mkvtoolnix",
+    "WingetName": "MoritzBunkus.MKVToolNix",
+    "Groups": ["PC"],
+    "Notes": "Tools for working with MKV files. Includes MKVExtract for extracting audio from .MKV video file."
   },
   {
     "Name": "mpvio",
@@ -613,6 +641,20 @@
     "WingetName": "Microsoft.Azure.StorageExplorer",
     "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
+  },
+  {
+    "Name": "Stremio",
+    "ChocolateyName": "",
+    "WingetName": "Stremio.Stremio",
+    "Groups": ["PC"],
+    "Notes": "https://www.stremio.com/downloads"
+  },
+  {
+    "Name": "Stremio Beta",
+    "ChocolateyName": "",
+    "WingetName": "Stremio.Stremio.Beta",
+    "Groups": ["PC"],
+    "Notes": "https://www.stremio.com/downloads"
   },
   {
     "Name": "Sysinternals Suite",
