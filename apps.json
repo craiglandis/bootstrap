@@ -460,6 +460,13 @@
     "Notes": "Chocolatey package had a more current version (6.6.1) than winget (6.5.0), so chocolatey may be the more up-to-date place to get it from"
   },
   {
+    "Name": "NVEncC",
+    "ChocolateyName": "nvenc",
+    "WingetName": "",
+    "Groups": ["PC"],
+    "Notes": "CLI tool for nvenc encoding https://github.com/rigaya/NVEnc/releases"
+  },
+  {
     "Name": "oh-my-posh",
     "ChocolateyName": "oh-my-posh",
     "WingetName": "JanDeDobbeleer.OhMyPosh",
