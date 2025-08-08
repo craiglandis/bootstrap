@@ -126,6 +126,13 @@
     "Notes": ""
   },
   {
+    "Name": "Boom Audio Player",
+    "ChocolateyName": "",
+    "WingetName": "9NQNS46R8T75",
+    "Groups": ["PC"],
+    "Notes": "Simple audio player from maker of foobar2000 https://perkele.cc/software/boom"
+  },
+  {
     "Name": "Cinebench 2024",
     "ChocolateyName": "cinebench",
     "WingetName": "",
@@ -362,6 +369,13 @@
     "Notes": "GUI download tool https://jdownloader.org/"
   },
   {
+    "Name": "Jackett",
+    "ChocolateyName": "",
+    "WingetName": "Jackett.Jackett",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "kubectl",
     "ChocolateyName": "kubernetes-cli",
     "WingetName": "",
@@ -416,6 +430,20 @@
     "WingetName": "Microsoft.LogParser",
     "Groups": ["TEST1"],
     "Notes": "As of Jan 2025, Microsoft.LogParser gets you version 2.2.10, which the download site shows as being from 2021, which is probably the latest as I suspect LogParser is very infrequently updated"
+  },
+  {
+    "Name": "MakeMKV",
+    "ChocolateyName": "",
+    "WingetName": "GuinpinSoft.MakeMKV",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "MKVToolNix",
+    "ChocolateyName": "",
+    "WingetName": "MoritzBunkus.MKVToolNix",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Microsoft 365 Apps for enterprise",
@@ -549,6 +577,13 @@
     "WingetName": "Microsoft.PerfView",
     "Groups": [],
     "Notes": "https://github.com/microsoft/perfview, the chocolatey package is 'perfview' but 'Microsoft.PerfView' is the same version as of Jan 2025 so preferring the winget install"
+  },
+  {
+    "Name": "Plex",
+    "ChocolateyName": "",
+    "WingetName": "Plex.Plex",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Power BI Desktop",
@@ -797,6 +832,13 @@
     "ChocolateyName": "",
     "WingetName": "Microsoft.WSL",
     "Groups": ["TEST1"],
+    "Notes": ""
+  },
+  {
+    "Name": "yt-dlp",
+    "ChocolateyName": "",
+    "WingetName": "yt-dlp.yt-dlp",
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
