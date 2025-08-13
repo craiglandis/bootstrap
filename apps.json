@@ -439,6 +439,20 @@
     "Notes": ""
   },
   {
+    "Name": "MediaInfo GUI",
+    "ChocolateyName": "mediainfo",
+    "WingetName": "MediaArea.MediaInfo.GUI",
+    "Groups": ["PC"],
+    "Notes": "https://mediaarea.net/en/MediaInfo"
+  },
+  {
+    "Name": "MediaInfo CLI",
+    "ChocolateyName": "mediainfo-cli",
+    "WingetName": "MediaArea.MediaInfo",
+    "Groups": ["PC"],
+    "Notes": "https://mediaarea.net/en/MediaInfo"
+  },
+  {
     "Name": "MKVToolNix",
     "ChocolateyName": "",
     "WingetName": "MoritzBunkus.MKVToolNix",
