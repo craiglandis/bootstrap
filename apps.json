@@ -66,7 +66,7 @@
     "Name": "Audacity",
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
-    "Groups": [],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -129,7 +129,7 @@
     "Name": "Boom Audio Player",
     "ChocolateyName": "",
     "WingetName": "9NQNS46R8T75",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "Simple audio player from maker of foobar2000 https://perkele.cc/software/boom"
   },
   {
@@ -248,7 +248,7 @@
     "Name": "ffmpeg",
     "ChocolateyName": "ffmpeg",
     "WingetName": "Gyan.FFmpeg",
-    "Groups": [],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -262,7 +262,7 @@
     "Name": "foobar2000",
     "ChocolateyName": "foobar2000",
     "WingetName": "PeterPawlowski.foobar2000",
-    "Groups": [],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -323,14 +323,14 @@
     "Name": "HandBrake",
     "ChocolateyName": "handbrake",
     "WingetName": "HandBrake.HandBrake",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "Handbrake app for playing media files"
   },
   {
     "Name": "HandBrake CLI",
     "ChocolateyName": "handbrake-cli",
     "WingetName": "HandBrake.HandBrake.CLI",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "HandleBrake command line interface for playing media files"
   },
   {
@@ -365,14 +365,14 @@
     "Name": "JDownloader 2",
     "ChocolateyName": "AppWork.JDownloader",
     "WingetName": "AppWork.JDownloader",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "GUI download tool https://jdownloader.org/"
   },
   {
     "Name": "Jackett",
     "ChocolateyName": "",
     "WingetName": "Jackett.Jackett",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
@@ -435,29 +435,22 @@
     "Name": "MakeMKV",
     "ChocolateyName": "",
     "WingetName": "GuinpinSoft.MakeMKV",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
     "Name": "MediaInfo GUI",
     "ChocolateyName": "mediainfo",
     "WingetName": "MediaArea.MediaInfo.GUI",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "https://mediaarea.net/en/MediaInfo"
   },
   {
     "Name": "MediaInfo CLI",
     "ChocolateyName": "mediainfo-cli",
     "WingetName": "MediaArea.MediaInfo",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "https://mediaarea.net/en/MediaInfo"
-  },
-  {
-    "Name": "MKVToolNix",
-    "ChocolateyName": "",
-    "WingetName": "MoritzBunkus.MKVToolNix",
-    "Groups": ["PC"],
-    "Notes": ""
   },
   {
     "Name": "Microsoft 365 Apps for enterprise",
@@ -484,14 +477,14 @@
     "Name": "MKVToolNix",
     "ChocolateyName": "mkvtoolnix",
     "WingetName": "MoritzBunkus.MKVToolNix",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "Tools for working with MKV files. Includes MKVExtract for extracting audio from .MKV video file."
   },
   {
     "Name": "mpvio",
     "ChocolateyName": "mpvio",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
@@ -533,7 +526,7 @@
     "Name": "NVEncC",
     "ChocolateyName": "nvenc",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "CLI tool for nvenc encoding https://github.com/rigaya/NVEnc/releases"
   },
   {
@@ -547,7 +540,7 @@
     "Name": "obs-studio",
     "ChocolateyName": "obs-studio",
     "WingetName": "XPFFH613W8V6LV",
-    "Groups": [],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -596,7 +589,7 @@
     "Name": "Plex",
     "ChocolateyName": "",
     "WingetName": "Plex.Plex",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
@@ -695,14 +688,14 @@
     "Name": "Stremio",
     "ChocolateyName": "",
     "WingetName": "Stremio.Stremio",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "https://www.stremio.com/downloads"
   },
   {
     "Name": "Stremio Beta",
     "ChocolateyName": "",
     "WingetName": "Stremio.Stremio.Beta",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": "https://www.stremio.com/downloads"
   },
   {
@@ -852,7 +845,7 @@
     "Name": "yt-dlp",
     "ChocolateyName": "",
     "WingetName": "yt-dlp.yt-dlp",
-    "Groups": ["PC"],
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
