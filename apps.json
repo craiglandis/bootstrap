@@ -633,7 +633,7 @@
     "ChocolateyName": "python",
     "WingetName": "Python.Python.3.12",
     "Groups": ["HV","PC","VM"],
-    "Notes": ""
+    "Notes": "https://www.python.org/downloads/windows/"
   },
   {
     "Name": "Rufus",
