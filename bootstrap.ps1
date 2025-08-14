@@ -1731,6 +1731,12 @@ else
         }
     }
 
+    if (Test-Path -Path 'C:\Program Files\PyManager\py.exe' -PathType Leaf)
+    {
+        # Pymanager\py.exe is installed by "winget install Python.PythonInstallManager"
+        & 'C:\Program Files\PyManager\py.exe' install 3
+    }
+
     <#
     # Urban legend is that if Windows is installed on an SSD, disabling prefetch and superfetch can actually improve performance
     # Prefetch/Superfetch definitely help if the OS is on an HDD, but it's unclear if leaving them enabled if the OS is on an SSD actually makes any difference

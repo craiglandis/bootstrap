@@ -631,9 +631,9 @@
   {
     "Name": "Python",
     "ChocolateyName": "python",
-    "WingetName": "Python.Python.3.12",
-    "Groups": ["HV","PC","VM"],
-    "Notes": "https://www.python.org/downloads/windows/"
+    "WingetName": "Python.PythonInstallManager",
+    "Groups": ["HV","PC","VM","Media"],
+    "Notes": "After Python.PythonInstallManager is installed, run: & 'C:\\Program Files\\PyManager\\py.exe' install 3"
   },
   {
     "Name": "Rufus",
