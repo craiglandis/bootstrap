@@ -59,8 +59,15 @@
     "Name": "AI Shell",
     "ChocolateyName": "",
     "WingetName": "Microsoft.AIShell",
-    "Groups": ["TEST1"],
+    "Groups": ["PC","TEST1"],
     "Notes": "https://learn.microsoft.com/en-us/powershell/utility-modules/aishell/get-started/aishell-powershell"
+  },
+  {
+    "Name": "AIMP",
+    "ChocolateyName": "aimp",
+    "WingetName": "",
+    "Groups": ["PC","Media","TEST1"],
+    "Notes": "As of Aug 2025, AIMP.AIMP Winget package from source winget is way out of date, from source msstore even more so, choco package is current, website is www.aimp.ru"
   },
   {
     "Name": "Audacity",
