@@ -140,6 +140,13 @@
     "Notes": "Simple audio player from maker of foobar2000 https://perkele.cc/software/boom"
   },
   {
+    "Name": "Chocolatey",
+    "ChocolateyName": "",
+    "WingetName": "Chocolatey.Chocolatey",
+    "Groups": ["PC"],
+    "Notes": "Windows versions with winget can you it to install Chocolatey. As of Aug 2025 some things still aren't available on winget but are on chocolatey, or the chocolatey package is more current than the winget package."
+  },
+  {
     "Name": "Cinebench 2024",
     "ChocolateyName": "cinebench",
     "WingetName": "",
