@@ -297,7 +297,8 @@
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"]
+    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Notes": "winget install --id GitHub.cli --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
   },
   {
     "Name": "GitHub CLI",
