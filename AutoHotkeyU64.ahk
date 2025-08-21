@@ -9,7 +9,7 @@ powershell := "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 SetTitleMatchMode RegEx
 if WinExist("ahk_exe WindowsTerminal.exe")
 {
-    WinActivate
+    WinActivate ; foo
 }
 else if FileExist(windowsTerminalPreview)
 {
