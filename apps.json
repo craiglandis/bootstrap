@@ -739,6 +739,7 @@
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
+    "WingetScope": "machine",
     "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
     "Notes": "This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
   },
@@ -746,6 +747,7 @@
     "Name": "Visual Studio Code CLI",
     "ChocolateyName": "",
     "WingetName": "Microsoft.VisualStudioCode.CLI",
+    "WingetScope": "machine",
     "Groups": ["TEST1"],
     "Notes": ""
   },
