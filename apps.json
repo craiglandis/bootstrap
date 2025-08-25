@@ -70,6 +70,20 @@
     "Notes": "As of Aug 2025, AIMP.AIMP Winget package from source winget is way out of date, from source msstore even more so, choco package is current, website is www.aimp.ru"
   },
   {
+    "Name": "Apple Music",
+    "ChocolateyName": "",
+    "WingetName": "9PFHDD62MXS1",
+    "Groups": ["PC","Media"],
+    "Notes": ""
+  },
+  {
+    "Name": "Apple TV",
+    "ChocolateyName": "",
+    "WingetName": "9NM4T8B9JQZ1",
+    "Groups": ["PC","Media"],
+    "Notes": ""
+  },
+  {
     "Name": "Audacity",
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
