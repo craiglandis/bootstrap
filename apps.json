@@ -154,6 +154,13 @@
     "Notes": "Simple audio player from maker of foobar2000 https://perkele.cc/software/boom"
   },
   {
+    "Name": "Brave",
+    "ChocolateyName": "",
+    "WingetName": "Brave.Brave",
+    "Groups": ["PC","Media"],
+    "Notes": "Brave browser is chromium-based and blocks YouTube ads"
+  },
+  {
     "Name": "Chocolatey",
     "ChocolateyName": "",
     "WingetName": "Chocolatey.Chocolatey",
