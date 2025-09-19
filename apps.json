@@ -679,6 +679,13 @@
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
+    "Name": "Samsung Magician",
+    "ChocolateyName": "",
+    "WingetName": "XPDDT99J9GKB5C",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "ScreenToGif",
     "ChocolateyName": "screentogif.portable",
     "WingetName": "NickeManarin.ScreenToGif",
