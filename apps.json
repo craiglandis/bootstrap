@@ -525,7 +525,7 @@
     "Notes": ""
   },
   {
-    "Name": "Libre Hardware Monitor (fork of Open Hardware Monitor)",
+    "Name": "Libre Hardware Monitor",
     "ChocolateyName": "librehardwaremonitor",
     "WingetName": "",
     "Groups": ["PC"],
@@ -560,7 +560,7 @@
     "Notes": "https://mediaarea.net/en/MediaInfo"
   },
   {
-    "Name": "Microsoft 365 Apps for enterprise",
+    "Name": "Microsoft 365",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
     "Groups": ["PC"],
@@ -927,7 +927,7 @@
     "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1, 9P7KNL5RWT25 with winget is for the source msstore, Microsoft.Sysinternals for source winget"
   },
   {
-    "Name": "Terminal-Icons (PowerShell Module)",
+    "Name": "Terminal-Icons",
     "ChocolateyName": "terminal-icons.powershell",
     "ChocolateyParams": "",
     "WingetName": "",
@@ -1024,7 +1024,7 @@
     "Notes": "Winget right now only has the Win10 WDK - Microsoft.WindowsWDK - not Win11"
   },
   {
-    "Name": "Windows Management Framework and PowerShell",
+    "Name": "WMF",
     "ChocolateyName": "powershell",
     "WingetName": "",
     "Groups": ["QUICKVM","VM"],
