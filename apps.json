@@ -80,7 +80,7 @@
     "Name": "Apple TV",
     "ChocolateyName": "",
     "WingetName": "9NM4T8B9JQZ1",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","Streaming"],
     "Notes": ""
   },
   {
@@ -161,6 +161,13 @@
     "Notes": "Brave browser is chromium-based and blocks YouTube ads"
   },
   {
+    "Name": "ChatGPT",
+    "ChocolateyName": "",
+    "WingetName": "9nt1r1c2hh7j",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Chocolatey",
     "ChocolateyName": "",
     "WingetName": "Chocolatey.Chocolatey",
@@ -221,7 +228,7 @@
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
     "Groups": [],
-    "Notes": ""
+    "Notes": "Also an msstore version with id XPDC2RH70K22MN"
   },
   {
     "Name": "diskspd",
@@ -229,6 +236,13 @@
     "WingetName": "Microsoft.DiskSpd",
     "Groups": ["HV","PC"],
     "Notes": "As of June 2025, the choco package 'diskspd' was still 2.1, but the winget package Microsoft.DiskSpd was 2.2 which is the version used by Crystaldiskmark 9"
+  },
+  {
+    "Name": "Disney",
+    "ChocolateyName": "",
+    "WingetName": "9nxqxxlfst89",
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "Docker Desktop",
@@ -259,6 +273,13 @@
     "Notes": ""
   },
   {
+    "Name": "ESPN",
+    "ChocolateyName": "",
+    "WingetName": "9nwd3s85mtfb",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
+  },
+  {
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything.Alpha",
@@ -273,10 +294,31 @@
     "Notes": "Chocolatey package is 'es' but making that null so it use winget instead since I'm trying to use winget as much as possible since its package selection has improved"
   },
   {
+    "Name": "Fandango at Home",
+    "ChocolateyName": "",
+    "WingetName": "9nblggh4v68b",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
+  },
+  {
+    "Name": "Fawesome",
+    "ChocolateyName": "",
+    "WingetName": "9p55dw09xk2d",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
+  },  
+  {
     "Name": "Fiddler",
     "ChocolateyName": "fiddler",
     "WingetName": "Telerik.Fiddler",
     "Groups": ["VM"],
+    "Notes": ""
+  },
+  {
+    "Name": "FilmRise",
+    "ChocolateyName": "",
+    "WingetName": "9nf6j13g5d52",
+    "Groups": ["Media","Streaming"],
     "Notes": ""
   },
   {
@@ -531,6 +573,13 @@
     "Notes": "Chocolatey nmap package waits for input as it run Npcap installer. Winget package is silent. But both are out of date - https://nmap.org/download.html#windows"
   },
   {
+    "Name": "Netflix",
+    "ChocolateyName": "",
+    "WingetName": "9wzdncrfj3tj",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
+  },
+  {
     "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
@@ -601,6 +650,13 @@
     "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release, Microsoft.OpenSSH.Preview is the bleeding edge, newer than Microsoft.OpenSSH.Beta"
   },
   {
+    "Name": "Paramount",
+    "ChocolateyName": "",
+    "WingetName": "9wzdncrfj0wk",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
+  },
+  {
     "Name": "ParkControl",
     "ChocolateyName": "",
     "WingetName": "BitSum.ParkControl",
@@ -625,7 +681,14 @@
     "Name": "Plex",
     "ChocolateyName": "",
     "WingetName": "Plex.Plex",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","Streaming"],
+    "Notes": ""
+  },
+  {
+    "Name": "Pluto",
+    "ChocolateyName": "",
+    "WingetName": "9p9lv240kq9r",
+    "Groups": ["Media","Streaming"],
     "Notes": ""
   },
   {
@@ -656,6 +719,13 @@
     "WingetName": "Microsoft.PowerToys",
     "Groups": [],
     "Notes": "The chocolatey powertoys package waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
+  },
+  {
+    "Name": "Prime Video",
+    "ChocolateyName": "",
+    "WingetName": "9p6rc76msmmj",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
   },
   {
     "Name": "Promptflow",
@@ -704,7 +774,7 @@
     "ChocolateyName": "sharex",
     "WingetName": "ShareX.ShareX",
     "Groups": [],
-    "Notes": "Greenshot icons still too small on higher resolutions, gave ShareX a shot, kinda meh"
+    "Notes": "Greenshot icons too small on higher resolutions, gave ShareX a shot, kinda meh"
   },
   {
     "Name": "Speedtest",
@@ -738,7 +808,7 @@
     "Name": "Stremio Beta",
     "ChocolateyName": "",
     "WingetName": "Stremio.Stremio.Beta",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","Streaming"],
     "Notes": "https://www.stremio.com/downloads"
   },
   {
@@ -756,6 +826,13 @@
     "WingetName": "",
     "Groups": ["HV","VM","TEST1"],
     "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number. Not using this for PC since PC will have them in C:\\ODM\\Modules"
+  },
+  {
+    "Name": "Tubi",
+    "ChocolateyName": "",
+    "WingetName": "9n1sv6841f0b",
+    "Groups": ["Media","Streaming"],
+    "Notes": ""
   },
   {
     "Name": "Ubisoft Connect",
