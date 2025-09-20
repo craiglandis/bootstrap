@@ -52,22 +52,29 @@
     "Name": "7-Zip",
     "ChocolateyName": "7zip.install",
     "WingetName": "7zip.7zip",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "AI Shell",
     "ChocolateyName": "",
     "WingetName": "Microsoft.AIShell",
-    "Groups": ["PC","TEST1"],
+    "Groups": ["PC"],
     "Notes": "https://learn.microsoft.com/en-us/powershell/utility-modules/aishell/get-started/aishell-powershell"
   },
   {
     "Name": "AIMP",
     "ChocolateyName": "aimp",
     "WingetName": "",
-    "Groups": ["PC","Media","TEST1"],
+    "Groups": ["PC","Media"],
     "Notes": "As of Aug 2025, AIMP.AIMP Winget package from source winget is way out of date, from source msstore even more so, choco package is current, website is www.aimp.ru"
+  },
+  {
+    "Name": "Apple Devices",
+    "ChocolateyName": "",
+    "WingetName": "9NP83LWLPZ9K",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Apple Music",
@@ -88,13 +95,13 @@
     "ChocolateyName": "audacity",
     "WingetName": "Audacity.Audacity",
     "Groups": ["Media"],
-    "Notes": ""
+    "Notes": "msstore version is XP8K0J757HHRDW"
   },
   {
     "Name": "AutoHotkey v1",
     "ChocolateyName": "autohotkey",
     "WingetName": "Lexikos.AutoHotkey",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -108,14 +115,14 @@
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "Microsoft.Azure.AZCopy.10",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": ["HV","PC","VM","TEST1"],
+    "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
   {
@@ -136,7 +143,7 @@
     "Name": "Beyond Compare",
     "ChocolateyName": "",
     "WingetName": "ScooterSoftware.BeyondCompare.5",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "As of Jan 2025, beyondcompare from chocolatey versus winget is the same version 5.0.4.30422, so removing the chocolatey package name ('beyondcompare') so it uses winget"
   },
   {
@@ -158,7 +165,14 @@
     "ChocolateyName": "",
     "WingetName": "Brave.Brave",
     "Groups": ["PC","Media"],
-    "Notes": "Brave browser is chromium-based and blocks YouTube ads"
+    "Notes": "msstore version is XP8C9QZMS2PC1T"
+  },
+  {
+    "Name": "Canva",
+    "ChocolateyName": "",
+    "WingetName": "XP8K17RNMM8MTN",
+    "Groups": ["PC","Media"],
+    "Notes": ""
   },
   {
     "Name": "ChatGPT",
@@ -213,7 +227,7 @@
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": ["HV","PC","VM","TEST1"],
+    "Groups": ["HV","PC","VM"],
     "Notes": "As of Aug 2025, both winget and chocolatey have the latest 9.0.1"
   },
   {
@@ -224,11 +238,18 @@
     "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html, (WS25 RTM has curl.exe 8.8.0)"
   },
   {
+    "Name": "DevToys",
+    "ChocolateyName": "",
+    "WingetName": "9PGCV4V3BK4W",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Discord",
     "ChocolateyName": "discord",
     "WingetName": "Discord.Discord",
     "Groups": [],
-    "Notes": "Also an msstore version with id XPDC2RH70K22MN"
+    "Notes": "msstore version is XPDC2RH70K22MN"
   },
   {
     "Name": "diskspd",
@@ -283,14 +304,14 @@
     "Name": "Everything",
     "ChocolateyName": "everything",
     "WingetName": "voidtools.Everything.Alpha",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not. Using 'voidtools.Everything.Alpha' until I find a reason not to ('voidtools.Everything' is for the release/non-alpha version)"
   },
   {
     "Name": "Everything CLI (ES.EXE)",
     "ChocolateyName": "",
     "WingetName": "voidtools.Everything.Cli",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "Chocolatey package is 'es' but making that null so it use winget instead since I'm trying to use winget as much as possible since its package selection has improved"
   },
   {
@@ -333,7 +354,7 @@
     "ChocolateyName": "Firefox",
     "WingetName": "Mozilla.Firefox",
     "Groups": ["HV","PC"],
-    "Notes": ""
+    "Notes": "msstore version is 9NZVDKPMR9RD"
   },
   {
     "Name": "foobar2000",
@@ -360,7 +381,7 @@
     "Name": "Git",
     "ChocolateyName": "git",
     "WingetName": "Git.Git",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "winget install --id GitHub.cli --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
   },
   {
@@ -432,12 +453,20 @@
     "Groups": [],
     "Notes": ""
   },
+
+  {
+    "Name": "iCloud",
+    "ChocolateyName": "",
+    "WingetName": "9PKTQ5699M62",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
   {
     "Name": "iTunes",
     "ChocolateyName": "iTunes",
     "WingetName": "Apple.iTunes",
     "Groups": [],
-    "Notes": ""
+    "Notes": "msstore version is 9PB2MZ1ZMB1S"
   },
   {
     "Name": "JDownloader 2",
@@ -534,8 +563,15 @@
     "Name": "Microsoft 365 Apps for enterprise",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Office",
-    "Groups": ["PC","TEST1"],
+    "Groups": ["PC"],
     "Notes": "The Winget 'Microsoft.Office' package installs x64 Microsoft 365 Apps for Enterprise, which is what I want, Chocolatey 'microsoft-office-deployment' package installs x86"
+  },
+  {
+    "Name": "Microsoft Designer",
+    "ChocolateyName": "",
+    "WingetName": "9PJGRCLDLX5V",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Microsoft Edge",
@@ -545,9 +581,44 @@
     "Notes": "Edge is still supported on Win7+ https://docs.microsoft.com/en-us/deployedge/microsoft-edge-supported-operating-systems"
   },
   {
+    "Name": "Microsoft Forms",
+    "ChocolateyName": "",
+    "WingetName": "9NHKF5NVCG00",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "Microsoft Journal",
+    "ChocolateyName": "",
+    "WingetName": "9N318R854RHH",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "Microsoft Loop",
+    "ChocolateyName": "",
+    "WingetName": "9P1HQ5TQZMGD",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Microsoft Teams",
     "ChocolateyName": "microsoft-teams",
     "WingetName": "Microsoft.Teams",
+    "Groups": ["PC"],
+    "Notes": "msstore is version XP8BT8DW290MPQ"
+  },
+  {
+    "Name": "Microsoft To Do",
+    "ChocolateyName": "",
+    "WingetName": "9NBLGGH5R558",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
+    "Name": "Microsoft Whiteboard",
+    "ChocolateyName": "",
+    "WingetName": "9MSPC6MP8FM4",
     "Groups": ["PC"],
     "Notes": ""
   },
@@ -583,7 +654,7 @@
     "Name": "Nerd Fonts - CascadiaCode",
     "ChocolateyName": "nerd-fonts-CascadiaCode",
     "WingetName": "",
-    "Groups": ["HV","PC","TEST1"],
+    "Groups": ["HV","PC"],
     "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {
@@ -597,7 +668,7 @@
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -622,7 +693,7 @@
     "Notes": ""
   },
   {
-    "Name": "obs-studio",
+    "Name": "OBS Studio",
     "ChocolateyName": "obs-studio",
     "WingetName": "XPFFH613W8V6LV",
     "Groups": ["Media"],
@@ -636,11 +707,25 @@
     "Notes": "As of Jan 2025, the chocolatey package 'onedrive' is stale (24.226.1110.4) compared to Microsoft.OneDrive that is version 24.232.1118.0003."
   },
   {
+    "Name": "OneNote",
+    "ChocolateyName": "",
+    "WingetName": "XPFFZHVGQWWLHB",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "OneNote for Windows 10",
     "ChocolateyName": "",
     "WingetName": "9WZDNCRFHVJL",
     "Groups": ["PC"],
     "Notes": "OneNote for Windows 10 is still installable via winget though doesn't show up when searching for it."
+  },
+  {
+    "Name": "Outlook for Windows",
+    "ChocolateyName": "",
+    "WingetName": "9NRX63209R7B",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "OpenSSH Beta",
@@ -668,7 +753,7 @@
     "ChocolateyName": "",
     "WingetName": "Microsoft.PCManager.Beta",
     "Groups": [],
-    "Notes": "https://pcmanager.microsoft.com/ Microsoft.PCManager is the release version, Microsoft.PCManager.Beta the beta"
+    "Notes": "msstore version is 9PM860492SZD https://pcmanager.microsoft.com/ Microsoft.PCManager is the release version, Microsoft.PCManager.Beta the beta"
   },
   {
     "Name": "Perfview",
@@ -702,23 +787,23 @@
     "Name": "PowerShell 7",
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
-    "Groups": ["QUICKVM","TEST1"],
+    "Groups": ["QUICKVM"],
     "Notes": "Scripting this install instead of using choco/winget since those packages can be stale, but still using chocolatey to install it for QUICKVM"
   },
   {
     "Name": "PowerShell 7 Preview",
     "ChocolateyName": "powershell-preview",
     "WingetName": "Microsoft.PowerShell.Preview",
-    "Groups": ["QUICKVM","TEST1"],
+    "Groups": ["QUICKVM"],
     "Notes": "This package was stale (had 7.2.0-preview.4 when 7.3.0-preview.1 was latest, and since it's easy to get the MSI, just installing it manually instead"
   },
   {
     "Name": "PowerToys",
     "ChocolateyName": "",
-    "ChocolateyParams": "--silent",
+    "ChocolateyParams": "",
     "WingetName": "Microsoft.PowerToys",
     "Groups": [],
-    "Notes": "The chocolatey powertoys package waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
+    "Notes": "msstore version is XP89DCGQ3K6VLD The chocolatey powertoys package waits for input even with --silent, winget package does not wait, though it does launch PowerToys"
   },
   {
     "Name": "Prime Video",
@@ -745,7 +830,7 @@
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": ["HV","PC","TEST1"],
+    "Groups": ["HV","PC"],
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
@@ -777,10 +862,24 @@
     "Notes": "Greenshot icons too small on higher resolutions, gave ShareX a shot, kinda meh"
   },
   {
+    "Name": "SoundCloud",
+    "ChocolateyName": "",
+    "WingetName": "9NVJBT29B36L",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
     "WingetName": "",
-    "Groups": ["HV","PC","VM","TEST1"],
+    "Groups": ["HV","PC","VM"],
+    "Notes": ""
+  },
+  {
+    "Name": "Spotify",
+    "ChocolateyName": "",
+    "WingetName": "9NCBCSZSJRSB",
+    "Groups": ["PC","Media"],
     "Notes": ""
   },
   {
@@ -794,14 +893,14 @@
     "Name": "Storage Explorer",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Azure.StorageExplorer",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },
   {
     "Name": "Stremio",
     "ChocolateyName": "",
     "WingetName": "Stremio.Stremio",
-    "Groups": ["PC","Media"],
+    "Groups": [],
     "Notes": "https://www.stremio.com/downloads"
   },
   {
@@ -816,7 +915,7 @@
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "",
     "WingetName": "Microsoft.Sysinternals",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
+    "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1, 9P7KNL5RWT25 with winget is for the source msstore, Microsoft.Sysinternals for source winget"
   },
   {
@@ -824,7 +923,7 @@
     "ChocolateyName": "terminal-icons.powershell",
     "ChocolateyParams": "",
     "WingetName": "",
-    "Groups": ["HV","VM","TEST1"],
+    "Groups": ["HV","VM"],
     "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number. Not using this for PC since PC will have them in C:\\ODM\\Modules"
   },
   {
@@ -846,8 +945,8 @@
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
     "WingetScope": "machine",
-    "Groups": ["HV","PC","QUICKVM","VM","TEST1"],
-    "Notes": "This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
+    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": "msstore version is XP9KHM4BK9FZ7Q This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
   },
   {
     "Name": "Visual Studio Code CLI",
@@ -865,6 +964,15 @@
     "Notes": ""
   },
   {
+    "Name": "VLC",
+    "ChocolateyName": "",
+    "WingetName": "XPDM1ZW6815MQM",
+    "Groups": ["PC","Media","Streaming"],
+    "Notes": ""
+  },
+
+  
+  {
     "Name": "WDK",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsWDK.10.0.26100",
@@ -875,7 +983,7 @@
     "Name": "WinDbg",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WinDbg",
-    "Groups": ["QUICKVM","VM","TEST1"],
+    "Groups": ["QUICKVM","VM"],
     "Notes": "The windbg chocolatey package doesn't work, returns 404, description says This package is likely not broken for licensed users - see https://docs.chocolatey.org/en-us/features/private-cdn"
   },
   {
@@ -918,8 +1026,15 @@
     "Name": "Windows Notepad",
     "ChocolateyName": "",
     "WingetName": "9MSMLRH6LZF3",
-    "Groups": ["HV","PC","VM","TEST1"],
+    "Groups": ["HV","PC","VM"],
     "Notes": "Windows Notepad Microsoft Store app supported on Win11 22000+"
+  },
+  {
+    "Name": "Windows Scan",
+    "ChocolateyName": "",
+    "WingetName": "9WZDNCRFJ3PV",
+    "Groups": ["PC"],
+    "Notes": ""
   },
   {
     "Name": "Windows Terminal",
@@ -960,7 +1075,7 @@
     "Name": "WSL",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WSL",
-    "Groups": ["TEST1"],
+    "Groups": ["HV"],
     "Notes": ""
   },
   {
