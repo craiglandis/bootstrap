@@ -672,6 +672,14 @@
     "Notes": ""
   },
   {
+    "Name": "Notion",
+    "ChocolateyName": "",
+    "WingetName": "XPDBVSS44R0L9H",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+
+  {
     "Name": "Nuget CLI",
     "ChocolateyName": "NuGet.CommandLine",
     "WingetName": "Microsoft.NuGet",
