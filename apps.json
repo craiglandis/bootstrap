@@ -535,7 +535,7 @@
     "Name": "LogParser",
     "ChocolateyName": "",
     "WingetName": "Microsoft.LogParser",
-    "Groups": ["TEST1"],
+    "Groups": [],
     "Notes": "As of Jan 2025, Microsoft.LogParser gets you version 2.2.10, which the download site shows as being from 2021, which is probably the latest as I suspect LogParser is very infrequently updated"
   },
   {
@@ -982,7 +982,7 @@
     "Name": "WDK",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsWDK.10.0.26100",
-    "Groups": ["TEST1"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -996,7 +996,7 @@
     "Name": "Windows ADK",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsADK",
-    "Groups": ["TEST1"],
+    "Groups": [],
     "Notes": "https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install"
   },
   {
@@ -1046,14 +1046,14 @@
     "Name": "Windows Terminal",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsTerminal",
-    "Groups": ["TEST1"],
+    "Groups": ["PC"],
     "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Chocolatey package is microsoft-windows-terminal but leaving it blank so winget installs both terminal and terminal preview. For winget, 9N0DX20HK701 installs from source msstore and Microsoft.WindowsTerminal installs from source winget."
   },
   {
     "Name": "Windows Terminal Preview",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsTerminal.Preview",
-    "Groups": ["TEST1"],
+    "Groups": ["PC"],
     "Notes": "Note supported on Windows Server SKUs, though may work on WS22 by install the msixbundle. Currently no choco package for terminal preview (choco find *windows*terminal* only returns microsoft-windows-terminal). For winget, 9N8G5RFZ9XK3 installs from source msstore and Microsoft.WindowsTerminal.Preview installs from source winget."
   },
   {
