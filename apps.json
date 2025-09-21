@@ -73,21 +73,21 @@
     "Name": "Apple Devices",
     "ChocolateyName": "",
     "WingetName": "9NP83LWLPZ9K",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Apple Music",
     "ChocolateyName": "",
     "WingetName": "9PFHDD62MXS1",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Apple TV",
     "ChocolateyName": "",
     "WingetName": "9NM4T8B9JQZ1",
-    "Groups": ["PC","Media","Streaming"],
+    "Groups": ["PC","Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -164,21 +164,21 @@
     "Name": "Brave",
     "ChocolateyName": "",
     "WingetName": "Brave.Brave",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","TEST1"],
     "Notes": "msstore version is XP8C9QZMS2PC1T"
   },
   {
     "Name": "Canva",
     "ChocolateyName": "",
     "WingetName": "XP8K17RNMM8MTN",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","TEST1"],
     "Notes": ""
   },
   {
     "Name": "ChatGPT",
     "ChocolateyName": "",
     "WingetName": "9nt1r1c2hh7j",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -241,7 +241,7 @@
     "Name": "DevToys",
     "ChocolateyName": "",
     "WingetName": "9PGCV4V3BK4W",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -262,7 +262,7 @@
     "Name": "Disney",
     "ChocolateyName": "",
     "WingetName": "9nxqxxlfst89",
-    "Groups": [],
+    "Groups": ["Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -297,7 +297,7 @@
     "Name": "ESPN",
     "ChocolateyName": "",
     "WingetName": "9nwd3s85mtfb",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -318,16 +318,16 @@
     "Name": "Fandango at Home",
     "ChocolateyName": "",
     "WingetName": "9nblggh4v68b",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Fawesome",
     "ChocolateyName": "",
     "WingetName": "9p55dw09xk2d",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
-  },  
+  },
   {
     "Name": "Fiddler",
     "ChocolateyName": "fiddler",
@@ -339,7 +339,7 @@
     "Name": "FilmRise",
     "ChocolateyName": "",
     "WingetName": "9nf6j13g5d52",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -458,7 +458,7 @@
     "Name": "iCloud",
     "ChocolateyName": "",
     "WingetName": "9PKTQ5699M62",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -570,7 +570,7 @@
     "Name": "Microsoft Designer",
     "ChocolateyName": "",
     "WingetName": "9PJGRCLDLX5V",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -584,14 +584,14 @@
     "Name": "Microsoft Forms",
     "ChocolateyName": "",
     "WingetName": "9NHKF5NVCG00",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Microsoft Journal",
     "ChocolateyName": "",
     "WingetName": "9N318R854RHH",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -612,14 +612,14 @@
     "Name": "Microsoft To Do",
     "ChocolateyName": "",
     "WingetName": "9NBLGGH5R558",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Microsoft Whiteboard",
     "ChocolateyName": "",
     "WingetName": "9MSPC6MP8FM4",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -647,7 +647,7 @@
     "Name": "Netflix",
     "ChocolateyName": "",
     "WingetName": "9wzdncrfj3tj",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -675,7 +675,7 @@
     "Name": "Notion",
     "ChocolateyName": "",
     "WingetName": "XPDBVSS44R0L9H",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
 
@@ -746,7 +746,7 @@
     "Name": "Paramount",
     "ChocolateyName": "",
     "WingetName": "9wzdncrfj0wk",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -774,14 +774,14 @@
     "Name": "Plex",
     "ChocolateyName": "",
     "WingetName": "Plex.Plex",
-    "Groups": ["PC","Media","Streaming"],
+    "Groups": ["PC","Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Pluto",
     "ChocolateyName": "",
     "WingetName": "9p9lv240kq9r",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -817,7 +817,7 @@
     "Name": "Prime Video",
     "ChocolateyName": "",
     "WingetName": "9p6rc76msmmj",
-    "Groups": ["Media","Streaming"],
+    "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
@@ -873,7 +873,7 @@
     "Name": "SoundCloud",
     "ChocolateyName": "",
     "WingetName": "9NVJBT29B36L",
-    "Groups": ["PC"],
+    "Groups": ["PC","TEST1"],
     "Notes": ""
   },
   {
@@ -887,7 +887,7 @@
     "Name": "Spotify",
     "ChocolateyName": "",
     "WingetName": "9NCBCSZSJRSB",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","TEST1"],
     "Notes": ""
   },
   {
@@ -915,7 +915,7 @@
     "Name": "Stremio Beta",
     "ChocolateyName": "",
     "WingetName": "Stremio.Stremio.Beta",
-    "Groups": ["PC","Media","Streaming"],
+    "Groups": ["PC","Media","Streaming","TEST1"],
     "Notes": "https://www.stremio.com/downloads"
   },
   {
@@ -961,11 +961,11 @@
     "ChocolateyName": "",
     "WingetName": "Microsoft.VisualStudioCode.CLI",
     "WingetScope": "machine",
-    "Groups": ["TEST1"],
+    "Groups": [],
     "Notes": ""
   },
   {
-    "Name": "Visual Studio 2022 Enterprise",
+    "Name": "VS 2022 ENT",
     "ChocolateyName": "visualstudio2022enterprise",
     "WingetName": "Microsoft.VisualStudio.2022.Enterprise",
     "Groups": [],
@@ -975,11 +975,9 @@
     "Name": "VLC",
     "ChocolateyName": "",
     "WingetName": "XPDM1ZW6815MQM",
-    "Groups": ["PC","Media","Streaming"],
+    "Groups": ["PC","Media","Streaming","TEST1"],
     "Notes": ""
   },
-
-  
   {
     "Name": "WDK",
     "ChocolateyName": "",
@@ -1005,7 +1003,7 @@
     "Name": "Windows Admin Center",
     "ChocolateyName": "",
     "WingetName": "Microsoft.WindowsAdminCenter",
-    "Groups": ["TEST1"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -1090,7 +1088,7 @@
     "Name": "yt-dlp",
     "ChocolateyName": "",
     "WingetName": "yt-dlp.yt-dlp",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Media","TEST1"],
     "Notes": ""
   },
   {
