@@ -637,6 +637,13 @@
     "Notes": ""
   },
   {
+    "Name": "Mullvad VPN",
+    "ChocolateyName": "",
+    "WingetName": "MullvadVPN.MullvadVPN",
+    "Groups": ["PC","Media"],
+    "Notes": ""
+  },
+  {
     "Name": "Nmap",
     "ChocolateyName": "",
     "WingetName": "Insecure.Nmap",
