@@ -635,6 +635,13 @@
     "WingetName": "",
     "Groups": ["PC","Media"],
     "Notes": ""
+  },  
+  {
+    "Name": "Mullvad Browser",
+    "ChocolateyName": "",
+    "WingetName": "MullvadVPN.MullvadBrowser",
+    "Groups": ["PC","Media"],
+    "Notes": ""
   },
   {
     "Name": "Mullvad VPN",
