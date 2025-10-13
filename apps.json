@@ -302,17 +302,17 @@
   },
   {
     "Name": "Everything",
-    "ChocolateyName": "everything",
+    "ChocolateyName": "everything-development",
     "WingetName": "voidtools.Everything.Alpha",
     "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "ES.EXE is now in its own choco package named es, not sure if winget has it in a different package or not. Using 'voidtools.Everything.Alpha' until I find a reason not to ('voidtools.Everything' is for the release/non-alpha version)"
+    "Notes": "ES.EXE CLI tool is in a separate package for both choco and winget."
   },
   {
     "Name": "Everything CLI (ES.EXE)",
-    "ChocolateyName": "",
+    "ChocolateyName": "es",
     "WingetName": "voidtools.Everything.Cli",
     "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "Chocolatey package is 'es' but making that null so it use winget instead since I'm trying to use winget as much as possible since its package selection has improved"
+    "Notes": ""
   },
   {
     "Name": "Fandango at Home",
@@ -635,7 +635,7 @@
     "WingetName": "",
     "Groups": ["PC","Media"],
     "Notes": ""
-  },  
+  },
   {
     "Name": "Mullvad Browser",
     "ChocolateyName": "",
