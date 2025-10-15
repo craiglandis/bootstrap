@@ -80,7 +80,7 @@
     "Name": "Apple Music",
     "ChocolateyName": "",
     "WingetName": "9PFHDD62MXS1",
-    "Groups": ["PC","Media","TEST1"],
+    "Groups": ["PC","Streaming","Media","TEST1"],
     "Notes": ""
   },
   {
@@ -640,14 +640,14 @@
     "Name": "Mullvad Browser",
     "ChocolateyName": "",
     "WingetName": "MullvadVPN.MullvadBrowser",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Streaming","Media"],
     "Notes": ""
   },
   {
     "Name": "Mullvad VPN",
     "ChocolateyName": "",
     "WingetName": "MullvadVPN.MullvadVPN",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC","Streaming","Media"],
     "Notes": ""
   },
   {
@@ -692,7 +692,6 @@
     "Groups": ["PC","TEST1"],
     "Notes": ""
   },
-
   {
     "Name": "Nuget CLI",
     "ChocolateyName": "NuGet.CommandLine",
@@ -887,7 +886,7 @@
     "Name": "SoundCloud",
     "ChocolateyName": "",
     "WingetName": "9NVJBT29B36L",
-    "Groups": ["PC","TEST1"],
+    "Groups": ["PC","Streaming","Media","TEST1"],
     "Notes": ""
   },
   {
@@ -901,7 +900,7 @@
     "Name": "Spotify",
     "ChocolateyName": "",
     "WingetName": "9NCBCSZSJRSB",
-    "Groups": ["PC","Media","TEST1"],
+    "Groups": ["PC","Streaming","Media","TEST1"],
     "Notes": ""
   },
   {
@@ -989,7 +988,7 @@
     "Name": "VLC",
     "ChocolateyName": "",
     "WingetName": "XPDM1ZW6815MQM",
-    "Groups": ["PC","Media","Streaming","TEST1"],
+    "Groups": ["PC","Streaming","Media","TEST1"],
     "Notes": ""
   },
   {
