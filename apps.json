@@ -935,7 +935,7 @@
     "Name": "Sysinternals Suite",
     "ChocolateyName": "sysinternals",
     "ChocolateyParams": "",
-    "WingetName": "Microsoft.Sysinternals",
+    "WingetName": "Microsoft.Sysinternals.Suite",
     "Groups": ["HV","PC","QUICKVM","VM"],
     "Notes": "With InstallDir:TOOLSPATH specified the Chocolatey package creates TOOLSPATH (fails if exists), adds TOOLSPATH to PATH, creates HKCU:\\SOFTWARE\\Sysinternals\\<toolname>\\EulaAccepted == 1 for all tools, also HKCU:\\Software\\Sysinternals\\SigCheck\\VirusTotal\\VirusTotalTermsAccepted == 1, 9P7KNL5RWT25 with winget is for the source msstore, Microsoft.Sysinternals for source winget"
   },
