@@ -261,7 +261,7 @@
   {
     "Name": "Disney",
     "ChocolateyName": "",
-    "WingetName": "9nxqxxlfst89",
+    "WingetName": "9NXQXXLFST89",
     "Groups": ["Streaming","TEST1"],
     "Notes": ""
   },
@@ -296,7 +296,7 @@
   {
     "Name": "ESPN",
     "ChocolateyName": "",
-    "WingetName": "9nwd3s85mtfb",
+    "WingetName": "9NWD3S85MTFB",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -317,14 +317,14 @@
   {
     "Name": "Fandango at Home",
     "ChocolateyName": "",
-    "WingetName": "9nblggh4v68b",
+    "WingetName": "9NBLGGH4V68B",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
   {
     "Name": "Fawesome",
     "ChocolateyName": "",
-    "WingetName": "9p55dw09xk2d",
+    "WingetName": "9P55DW09XK2D",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -338,7 +338,7 @@
   {
     "Name": "FilmRise",
     "ChocolateyName": "",
-    "WingetName": "9nf6j13g5d52",
+    "WingetName": "9NF6J13G5D52",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -409,7 +409,7 @@
     "ChocolateyName": "greenshot",
     "WingetName": "Greenshot.Greenshot",
     "Groups": [],
-    "Notes": "Not using choco or winget to install it since neither have the prerelease version"
+    "Notes": ""
   },
   {
     "Name": "GPU-Z",
@@ -660,7 +660,7 @@
   {
     "Name": "Netflix",
     "ChocolateyName": "",
-    "WingetName": "9wzdncrfj3tj",
+    "WingetName": "9WZDNCRFJ3TJ",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -758,7 +758,7 @@
   {
     "Name": "Paramount",
     "ChocolateyName": "",
-    "WingetName": "9wzdncrfj0wk",
+    "WingetName": "9WZDNCRFJ0WK",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -793,7 +793,7 @@
   {
     "Name": "Pluto",
     "ChocolateyName": "",
-    "WingetName": "9p9lv240kq9r",
+    "WingetName": "9P9LV240KQ9R",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -829,7 +829,7 @@
   {
     "Name": "Prime Video",
     "ChocolateyName": "",
-    "WingetName": "9p6rc76msmmj",
+    "WingetName": "9P6RC76MSMMJ",
     "Groups": ["Media","Streaming","TEST1"],
     "Notes": ""
   },
@@ -950,7 +950,7 @@
   {
     "Name": "Tubi",
     "ChocolateyName": "",
-    "WingetName": "9n1sv6841f0b",
+    "WingetName": "9N1SV6841F0B",
     "Groups": ["Media","Streaming"],
     "Notes": ""
   },
