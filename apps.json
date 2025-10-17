@@ -273,6 +273,20 @@
     "Notes": ""
   },
   {
+    "Name": "Dolby Access",
+    "ChocolateyName": "",
+    "WingetName": "9N0866FS04W8",
+    "Groups": [],
+    "Notes": ""
+  },  
+  {
+    "Name": "Dolby Vision Extensions",
+    "ChocolateyName": "",
+    "WingetName": "9PLTG1LWPHLF",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "Draw.io Desktop",
     "ChocolateyName": "",
     "WingetName": "JGraph.Draw",
