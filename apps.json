@@ -276,14 +276,14 @@
     "Name": "Dolby Access",
     "ChocolateyName": "",
     "WingetName": "9N0866FS04W8",
-    "Groups": [],
+    "Groups": ["PC","Streaming","Media"],
     "Notes": ""
   },  
   {
     "Name": "Dolby Vision Extensions",
     "ChocolateyName": "",
     "WingetName": "9PLTG1LWPHLF",
-    "Groups": [],
+    "Groups": ["PC","Streaming","Media"],
     "Notes": ""
   },
   {
