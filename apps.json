@@ -892,7 +892,7 @@
   {
     "Name": "Speedtest",
     "ChocolateyName": "speedtest",
-    "WingetName": "",
+    "WingetName": "Ookla.Speedtest.Desktop",
     "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
