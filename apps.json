@@ -278,7 +278,7 @@
     "WingetName": "9N0866FS04W8",
     "Groups": ["PC","Streaming","Media"],
     "Notes": ""
-  },  
+  },
   {
     "Name": "Dolby Vision Extensions",
     "ChocolateyName": "",
@@ -895,6 +895,13 @@
     "WingetName": "ShareX.ShareX",
     "Groups": [],
     "Notes": "Greenshot icons too small on higher resolutions, gave ShareX a shot, kinda meh"
+  },
+  {
+    "Name": "SimpleMind Pro",
+    "ChocolateyName": "",
+    "WingetName": "ModelMakerTools.SimpleMindPro",
+    "Groups": [],
+    "Notes": ""
   },
   {
     "Name": "SoundCloud",
