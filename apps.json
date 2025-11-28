@@ -287,11 +287,11 @@
     "Notes": ""
   },
   {
-    "Name": "Draw.io Desktop",
+    "Name": "diagrams.net (was draw.io)",
     "ChocolateyName": "",
     "WingetName": "JGraph.Draw",
     "Groups": [],
-    "Notes": ""
+    "Notes": "msstore 9MVVSZK43QQW, note that draw.io was rebranded to diagrams.net, so all three of these install the same app - JGraph.Draw, draw.io, diagrams.net"
   },
   {
     "Name": "EA Desktop",
