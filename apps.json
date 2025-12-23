@@ -729,9 +729,9 @@
   {
     "Name": "OBS Studio",
     "ChocolateyName": "obs-studio",
-    "WingetName": "XPFFH613W8V6LV",
+    "WingetName": "OBSProject.OBSStudio",
     "Groups": ["Media"],
-    "Notes": ""
+    "Notes": "msstore XPFFH613W8V6LV"
   },
   {
     "Name": "OneDrive",
