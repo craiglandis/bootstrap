@@ -18,7 +18,7 @@ param(
 	[switch]$addScheduledTask,
 	[switch]$showDisconnects = $true,
 	[switch]$temps,
-    [switch]$noWallpaper,
+    [switch]$wallpaper,
     [switch]$showPreviousRun
 )
 
@@ -2367,11 +2367,7 @@ public static extern uint SystemParametersInfo(
 		}
 	}
 
-    if ($noWallpaper)
-    {
-        Out-Log "-noWallpaper specified, skipping wallpaper creation" -verboseonly
-    }
-    else
+    if ($wallpaper)
     {
         $wallpaperFolderPath = "$env:windir\web\wallpaper"
         $wallpaperFileName = "CustomWallpaper$($width)x$($height).png"
@@ -2397,6 +2393,10 @@ public static extern uint SystemParametersInfo(
         $wallpaperFileSizeKB = "$([Math]::Round($wallpaperFile.Length/1KB))KB"
         Out-Log "Created $wallpaperFilePath ($wallpaperFileSizeKB)" -verboseonly
     }
+	else
+	{
+        Out-Log "-noWallpaper specified, skipping wallpaper creation" -verboseonly
+	}
 }
 
 # Using a VBS script to launch a PS script is a workaround for PowerShell's -Hidden not working to hide the window when calling a PS1 from Task Scheduler
