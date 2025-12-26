@@ -2595,8 +2595,13 @@ if (Test-Path -Path $outputPath -PathType Container)
 	$xmlPath = "$outputPath\Get-PnPDevice_$($env:COMPUTERNAME)_$($scriptStartTimeString).xml"
 	$pnpDevices | Export-Clixml -Path $xmlPath -Depth 9 -Force
 	Out-Log $xmlPath -raw -verboseOnly
-    # msinfo32 /nfo "$outputPath\MSINFO32_$env:COMPUTERNAME.nfo"
-    # msinfo32 /report "$outputPath\MSINFO32_$env:COMPUTERNAME.txt"}).TotalSeconds
+	<#
+		$basePath = "c:\my\msinfo32_$($env:COMPUTERNAME.ToUpper())_$(Get-Date -Format yyyyMMddHHmmss)"
+		$nfoPath = "$basePath.nfo"
+		$reportPath = "$basePath.txt"
+		msinfo32 /nfo $nfoPath
+		msinfo32 /report $reportPath
+	#>
     if (Get-Module -Name ImportExcel -ListAvailable)
     {
 		$xlsxPath = "$outputPath\PnPDevices_$($env:COMPUTERNAME)_$($scriptStartTimeString).xlsx"
