@@ -12,14 +12,13 @@ param(
     [string]$outputPath = 'C:\my\Set-Wallpaper',
 	[int]$fontSize,
 	[ValidateSet('left', 'right')]
-	[string]
-	$justify,
-	[switch]$noweather = $true,
+	[string]$justify,
+	[switch]$show,
+	[switch]$weather,
 	[switch]$addScheduledTask,
-	[switch]$showDisconnects = $true,
 	[switch]$temps,
     [switch]$wallpaper,
-    [switch]$showPreviousRun
+    [switch]$previous
 )
 
 trap
@@ -978,7 +977,7 @@ if ($logFile -and $logFile.Length -ge 10MB)
 	$logFile | Remove-Item
 }
 
-if ($showPreviousRun)
+if ($previous)
 {
     #$previousRunPath = "C:\MISC\Set-Wallpaper\Set-Wallpaper_$env:COMPUTERNAME*"
     $previousRunPath = "$outputPath\Set-Wallpaper_$env:COMPUTERNAME*"
@@ -1132,7 +1131,7 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 	$network = [System.Windows.Forms.SystemInformation]::Network
 	Out-Log "ComputerName: $env:computername, Monitors: $monitorCount, MonitorsSameDisplayFormat: $monitorsSameDisplayFormat, screenOrientation: $screenOrientation, userInteractive: $userInteractive" -verboseOnly
 
-	if ($isPhysicalMachine -and $noweather -eq $false -and $isRdpSession -eq $false)
+	if ($isPhysicalMachine -and $weather -eq $true -and $isRdpSession -eq $false)
 	{
 		<# $weather = Invoke-RestMethod -Uri 'https://wttr.in/?1FQT' -ErrorAction SilentlyContinue
 			https://github.com/chubin/wttr.in#one-line-output
@@ -1536,7 +1535,7 @@ public static extern int PowerGetEffectiveOverlayScheme(out Guid EffectiveOverla
 	}
 	$ipV4AddressesString = $ipV4Addresses -join ','
 
-	if ($showDisconnects -and ($connectedPhysicalNics.DriverDescription -match 'I226' -or $connectedPhysicalNics.DriverDescription -match 'I225'))
+	if ($connectedPhysicalNics.DriverDescription -match 'I226' -or $connectedPhysicalNics.DriverDescription -match 'I225')
 	{
 		# This check for disconnects/idleworkingstate value is for the Intel i225-V/i226-V NICs
 		# While I've added other NIC vendor's event providers to the query, they probably don't log a disconnect as Id 27 like Intel does
@@ -2564,12 +2563,14 @@ if (!$addScheduledTask)
     {
         $filePath = "$env:TEMP\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
     }
-    $textOutputString | Out-File -FilePath $filePath
-    Invoke-Item -Path $filePath
     $global:dbgFilePath = $filePath
+	$textOutputString | Out-File -FilePath $filePath
+	Out-Log $filePath -raw
+	if ($show)
+	{
+	    Invoke-Item -Path $filePath
+	}
 
-    #$outputPath = 'c:\my\Set-Wallpaper'
-    #$scriptBaseName = 'Set-Wallpaper'
     $filePathRegex = "$outputPath\$($scriptBaseName)_$($env:COMPUTERNAME)_*.txt"
     $numFllesToKeep = 5
     $fullNames = Get-ChildItem -Path $filePathRegex | Sort-Object LastWriteTime | Select-Object -Last $numFllesToKeep -ExpandProperty FullName
@@ -2578,12 +2579,8 @@ if (!$addScheduledTask)
     $ErrorActionPreference = 'Stop'
     if ($oldFilesCount -ge 1)
     {
-        $oldFiles | Remove-Item -ErrorAction Stop -WhatIf
+        $oldFiles | Remove-Item -ErrorAction Stop
     }
-
-    #$filePath = "$outputPath\$($scriptBaseName)_$($env:COMPUTERNAME)_$($scriptStartTimeString).txt"
-    #$filePath = "C:\my\Set-Wallpaper\Set-Wallpaper_G16_20250718145202.txt"
-
 }
 
 if ($currentPSDefaultParameterValues)
@@ -2591,21 +2588,26 @@ if ($currentPSDefaultParameterValues)
 	$global:PSDefaultParameterValues = $currentPSDefaultParameterValues
 }
 
-# $folderPath = 'C:\MISC\Set-Wallpaper'
 if (Test-Path -Path $outputPath -PathType Container)
 {
     $pnpDevices = Get-PnpDevice | Select-Object Name,Description,Service,Class,PNPDeviceID,Present,Status,Problem | Sort-Object Name
-    $pnpDevices | Export-Clixml -Path "$outputPath\Get-PnPDevice_$env:COMPUTERNAME.xml" -Depth 9 -Force
+    $global:dbgPnpDevices = $pnpDevices
+	$xmlPath = "$outputPath\Get-PnPDevice_$($env:COMPUTERNAME)_$($scriptStartTimeString).xml"
+	$pnpDevices | Export-Clixml -Path $xmlPath -Depth 9 -Force
+	Out-Log $xmlPath -raw -verboseOnly
     # msinfo32 /nfo "$outputPath\MSINFO32_$env:COMPUTERNAME.nfo"
     # msinfo32 /report "$outputPath\MSINFO32_$env:COMPUTERNAME.txt"}).TotalSeconds
-    if (Get-Module -name importexcel -ListAvailable)
+    if (Get-Module -Name ImportExcel -ListAvailable)
     {
-        $pnpDevices | Export-Excel -Path "$outputPath\PnPDevices_$env:COMPUTERNAME.xlsx" -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -ErrorAction Stop
+		$xlsxPath = "$outputPath\PnPDevices_$($env:COMPUTERNAME)_$($scriptStartTimeString).xlsx"
+        $pnpDevices | Export-Excel -Path $xlsxPath -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -ErrorAction Stop
+        # $pnpDevices | Export-Excel -Path $xlsxPath -MaxAutoSizeRows 3 -NoNumberConversion * -ErrorAction Stop
+		Out-Log $xlsxPath -raw
     }
 }
 
 Out-Log "Log file: $logFilePath" -verboseOnly -raw
 $scriptTimeSpan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
 $scriptTotalSeconds = [int]$scriptTimeSpan.TotalSeconds
-Out-Log "$($scriptTotalSeconds)s`n" -raw
-Out-Log "Run $cyan$('Set-BlankWallpaper.ps1')$reset to set black wallpaper`n" -raw
+Out-Log "Set-BlankWallpaper.ps1 sets a solid black background`n" -raw
+Out-Log "$($scriptTotalSeconds)s`n" -raw -verboseOnly
