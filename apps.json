@@ -653,14 +653,14 @@
     "Name": "Mullvad Browser",
     "ChocolateyName": "",
     "WingetName": "MullvadVPN.MullvadBrowser",
-    "Groups": ["PC","Streaming","Media"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Mullvad VPN",
     "ChocolateyName": "",
     "WingetName": "MullvadVPN.MullvadVPN",
-    "Groups": ["PC","Streaming","Media"],
+    "Groups": [],
     "Notes": ""
   },
   {
