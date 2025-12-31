@@ -793,7 +793,7 @@
     "Name": "Plex",
     "ChocolateyName": "",
     "WingetName": "Plex.Plex",
-    "Groups": ["PC","Streaming"],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
