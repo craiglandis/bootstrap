@@ -2611,8 +2611,27 @@ if (Test-Path -Path $outputPath -PathType Container)
     }
 }
 
+<#
+$xlsxPath = "$outputPath\specs.xlsx"
+if (Test-Path -Path $xlsxPath -PathType Leaf)
+{
+	$specs = Import-Excel -Path $xlsxPath
+	$specs = $devices | Sort-Object NAME -Unique | select -ExpandProperty NAME
+	Invoke-Item	-Path $xlsxPath
+}
+
+$device | Export-Excel -Path $xlsxPath -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -Append -ErrorAction Stop 
+if (Test-Path -Path $xlsxPath -PathType Leaf)
+{
+	Out-Log $xlsxPath -raw
+	Invoke-Item	-Path $xlsxPath
+}
+#>
+
 Out-Log "Log file: $logFilePath" -verboseOnly -raw
 $scriptTimeSpan = New-TimeSpan -Start $global:scriptStartTime -End (Get-Date)
 $scriptTotalSeconds = [int]$scriptTimeSpan.TotalSeconds
 Out-Log "Set-BlankWallpaper.ps1 sets a solid black background`n" -raw
 Out-Log "$($scriptTotalSeconds)s`n" -raw -verboseOnly
+
+$computerName = $env:computername
