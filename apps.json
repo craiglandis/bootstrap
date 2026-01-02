@@ -896,9 +896,9 @@
     "Notes": ""
   },
   {
-    "Name": "Speedtest",
+    "Name": "Speedtest CLI",
     "ChocolateyName": "speedtest",
-    "WingetName": "Ookla.Speedtest.Desktop",
+    "WingetName": "Ookla.Speedtest.CLI",
     "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
