@@ -73,14 +73,14 @@
     "Name": "Apple Devices",
     "ChocolateyName": "",
     "WingetName": "9NP83LWLPZ9K",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Apple Music",
     "ChocolateyName": "",
     "WingetName": "9PFHDD62MXS1",
-    "Groups": ["PC","Streaming","Media"],
+    "Groups": ["PC","Streaming"],
     "Notes": ""
   },
   {
@@ -115,28 +115,28 @@
     "Name": "AzCopy",
     "ChocolateyName": "azcopy10",
     "WingetName": "Microsoft.Azure.AZCopy.10",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Azure CLI",
     "ChocolateyName": "azure-cli",
     "WingetName": "Microsoft.AzureCLI",
-    "Groups": ["HV","PC","VM"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Azure PowerShell",
     "ChocolateyName": "az.powershell",
     "WingetName": "",
-    "Groups": ["HV","QUICKVM","VM"],
+    "Groups": [],
     "Notes": "Installing Azure PowerShell is ~20s faster using chocolatey than using Install-Module, not using this for PC since PC will have them in C:\\OD\\Modules. As of Jan 2025 still can't find a winget package for Az PowerShell. ('winget search Microsoft.Azure --source winget')"
   },
   {
     "Name": "balenaEtcher",
     "ChocolateyName": "etcher",
     "WingetName": "Balena.Etcher",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -150,35 +150,35 @@
     "Name": "Bicep CLI",
     "ChocolateyName": "bicep",
     "WingetName": "Microsoft.Bicep",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Boom Audio Player",
     "ChocolateyName": "",
     "WingetName": "9NQNS46R8T75",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "Simple audio player from maker of foobar2000 https://perkele.cc/software/boom"
   },
   {
     "Name": "Brave",
     "ChocolateyName": "",
     "WingetName": "Brave.Brave",
-    "Groups": ["PC","Media"],
+    "Groups": ["PC"],
     "Notes": "msstore version is XP8C9QZMS2PC1T"
   },
   {
     "Name": "Canva",
     "ChocolateyName": "",
     "WingetName": "XP8K17RNMM8MTN",
-    "Groups": ["PC","Media"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "ChatGPT",
     "ChocolateyName": "",
     "WingetName": "9NT1R1C2HH7J",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -220,28 +220,28 @@
     "Name": "CrystalDiskInfo",
     "ChocolateyName": "crystaldiskinfo.portable",
     "WingetName": "CrystalDewWorld.CrystalDiskInfo",
-    "Groups": ["HV","PC","VM"],
+    "Groups": [],
     "Notes": "As of Jan 2025 there's still no portable version available via winget, only chocolatey has a portable one available"
   },
   {
     "Name": "CrystalDiskMark",
     "ChocolateyName": "crystaldiskmark",
     "WingetName": "CrystalDewWorld.CrystalDiskMark",
-    "Groups": ["HV","PC","VM"],
+    "Groups": [],
     "Notes": "As of Aug 2025, both winget and chocolatey have the latest 9.0.1"
   },
   {
     "Name": "curl",
     "ChocolateyName": "curl",
     "WingetName": "cURL.cURL",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": [],
     "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html, (WS25 RTM has curl.exe 8.8.0)"
   },
   {
     "Name": "DevToys",
     "ChocolateyName": "",
     "WingetName": "9PGCV4V3BK4W",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -255,7 +255,7 @@
     "Name": "diskspd",
     "ChocolateyName": "",
     "WingetName": "Microsoft.DiskSpd",
-    "Groups": ["HV","PC"],
+    "Groups": [],
     "Notes": "As of June 2025, the choco package 'diskspd' was still 2.1, but the winget package Microsoft.DiskSpd was 2.2 which is the version used by Crystaldiskmark 9"
   },
   {
@@ -402,7 +402,7 @@
     "Name": "GitHub CLI",
     "ChocolateyName": "gh",
     "WingetName": "GitHub.cli",
-    "Groups": ["PC","VM"]
+    "Groups": []
   },
   {
     "Name": "Google Chrome",
@@ -422,7 +422,7 @@
     "Name": "Greenshot",
     "ChocolateyName": "greenshot",
     "WingetName": "Greenshot.Greenshot",
-    "Groups": [],
+    "Groups": ["PC"],
     "Notes": ""
   },
   {
@@ -436,14 +436,14 @@
     "Name": "HandBrake",
     "ChocolateyName": "handbrake",
     "WingetName": "HandBrake.HandBrake",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "Handbrake app for playing media files"
   },
   {
     "Name": "HandBrake CLI",
     "ChocolateyName": "handbrake-cli",
     "WingetName": "HandBrake.HandBrake.CLI",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "HandleBrake command line interface for playing media files"
   },
   {
@@ -471,7 +471,7 @@
     "Name": "iCloud",
     "ChocolateyName": "",
     "WingetName": "9PKTQ5699M62",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -485,14 +485,14 @@
     "Name": "JDownloader 2",
     "ChocolateyName": "AppWork.JDownloader",
     "WingetName": "AppWork.JDownloader",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "GUI download tool https://jdownloader.org/"
   },
   {
     "Name": "Jackett",
     "ChocolateyName": "",
     "WingetName": "Jackett.Jackett",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -541,7 +541,7 @@
     "Name": "Libre Hardware Monitor",
     "ChocolateyName": "librehardwaremonitor",
     "WingetName": "",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor"
   },
   {
@@ -555,7 +555,7 @@
     "Name": "MakeMKV",
     "ChocolateyName": "",
     "WingetName": "GuinpinSoft.MakeMKV",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
@@ -583,7 +583,7 @@
     "Name": "Microsoft Designer",
     "ChocolateyName": "",
     "WingetName": "9PJGRCLDLX5V",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -597,28 +597,28 @@
     "Name": "Microsoft Forms",
     "ChocolateyName": "",
     "WingetName": "9NHKF5NVCG00",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Microsoft Journal",
     "ChocolateyName": "",
     "WingetName": "9N318R854RHH",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Microsoft Loop",
     "ChocolateyName": "",
     "WingetName": "9P1HQ5TQZMGD",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "Microsoft Teams",
     "ChocolateyName": "microsoft-teams",
     "WingetName": "Microsoft.Teams",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "msstore is version XP8BT8DW290MPQ"
   },
   {
@@ -632,14 +632,14 @@
     "Name": "Microsoft Whiteboard",
     "ChocolateyName": "",
     "WingetName": "9MSPC6MP8FM4",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "MKVToolNix",
     "ChocolateyName": "mkvtoolnix",
     "WingetName": "MoritzBunkus.MKVToolNix",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "Tools for working with MKV files. Includes MKVExtract for extracting audio from .MKV video file."
   },
   {
@@ -702,21 +702,21 @@
     "Name": "Nuget CLI",
     "ChocolateyName": "NuGet.CommandLine",
     "WingetName": "Microsoft.NuGet",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "Chocolatey package had a more current version (6.6.1) than winget (6.5.0), so chocolatey may be the more up-to-date place to get it from"
   },
   {
     "Name": "NVEncC",
     "ChocolateyName": "nvenc",
     "WingetName": "",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": "CLI tool for nvenc encoding https://github.com/rigaya/NVEnc/releases"
   },
   {
     "Name": "oh-my-posh",
     "ChocolateyName": "oh-my-posh",
     "WingetName": "JanDeDobbeleer.OhMyPosh",
-    "Groups": ["HV","PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -737,21 +737,21 @@
     "Name": "OneNote",
     "ChocolateyName": "",
     "WingetName": "XPFFZHVGQWWLHB",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
     "Name": "OneNote for Windows 10",
     "ChocolateyName": "",
     "WingetName": "9WZDNCRFHVJL",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": "OneNote for Windows 10 is still installable via winget though doesn't show up when searching for it."
   },
   {
     "Name": "Outlook for Windows",
     "ChocolateyName": "",
     "WingetName": "9NRX63209R7B",
-    "Groups": ["PC"],
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -772,7 +772,7 @@
     "Name": "ParkControl",
     "ChocolateyName": "",
     "WingetName": "BitSum.ParkControl",
-    "Groups": ["HV","PC","VM"],
+    "Groups": [],
     "Notes": "Display and change CPU core parking settings in real-time, as of Jan 2025 could not find an equivalent chocolatey package for it"
   },
   {
@@ -814,15 +814,15 @@
     "Name": "PowerShell 7",
     "ChocolateyName": "powershell-core",
     "WingetName": "Microsoft.PowerShell",
-    "Groups": ["QUICKVM"],
-    "Notes": "Scripting this install instead of using choco/winget since those packages can be stale, but still using chocolatey to install it for QUICKVM"
+    "Groups": ["PC","QUICKVM"],
+    "Notes": ""
   },
   {
     "Name": "PowerShell 7 Preview",
     "ChocolateyName": "powershell-preview",
     "WingetName": "Microsoft.PowerShell.Preview",
-    "Groups": ["QUICKVM"],
-    "Notes": "This package was stale (had 7.2.0-preview.4 when 7.3.0-preview.1 was latest, and since it's easy to get the MSI, just installing it manually instead"
+    "Groups": ["PC","QUICKVM"],
+    "Notes": ""
   },
   {
     "Name": "PowerToys",
@@ -850,14 +850,14 @@
     "Name": "Python",
     "ChocolateyName": "python",
     "WingetName": "Python.PythonInstallManager",
-    "Groups": ["HV","PC","VM","Media"],
+    "Groups": ["HV","VM"],
     "Notes": "After Python.PythonInstallManager is installed, run: & 'C:\\Program Files\\PyManager\\py.exe' install 3"
   },
   {
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
-    "Groups": ["HV","PC"],
+    "Groups": ["PC"],
     "Notes": "Winget doesn't have a portable one, only Rufus.Rufus and 9PC3H3V7Q9CH for msstore"
   },
   {
@@ -878,7 +878,7 @@
     "Name": "SetUserFTA",
     "ChocolateyName": "setuserfta",
     "WingetName": "",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","QUICKVM","VM"],
     "Notes": ""
   },
   {
@@ -920,7 +920,7 @@
     "Name": "Storage Explorer",
     "ChocolateyName": "",
     "WingetName": "Microsoft.Azure.StorageExplorer",
-    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Groups": ["HV","QUICKVM","VM"],
     "Notes": "The choco package microsoftazurestorageexplorer was two versions behind the winget package Microsoft.AzureStorageExplorer, so installing the winget package"
   },
   {
@@ -994,7 +994,7 @@
     "Name": "VLC",
     "ChocolateyName": "",
     "WingetName": "XPDM1ZW6815MQM",
-    "Groups": ["PC","Media"],
+    "Groups": ["Media"],
     "Notes": ""
   },
   {
