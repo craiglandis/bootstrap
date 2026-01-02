@@ -4,7 +4,7 @@
     "ChocolateyName": "dotnet-7.0-sdk",
     "WingetName": "Microsoft.DotNet.SDK.7",
     "Groups": ["HV","PC","VM"],
-    "Notes": ""
+    "Notes": " "
   },
   {
     "Name": ".NET Core 3.1 Desktop Runtime",
