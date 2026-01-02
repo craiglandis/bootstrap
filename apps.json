@@ -1032,7 +1032,6 @@
     "Groups": [],
     "Notes": "https://learn.microsoft.com/en-us/windows-app/overview"
   },
-
   {
     "Name": "Windows Driver Kit 11",
     "ChocolateyName": "windowsdriverkit11",
