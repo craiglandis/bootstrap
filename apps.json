@@ -993,9 +993,9 @@
   {
     "Name": "VLC",
     "ChocolateyName": "",
-    "WingetName": "XPDM1ZW6815MQM",
+    "WingetName": "VideoLAN.VLC",
     "Groups": ["Media"],
-    "Notes": ""
+    "Notes": "msstore version is XPDM1ZW6815MQM"
   },
   {
     "Name": "WDK",
