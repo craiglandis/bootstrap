@@ -889,6 +889,14 @@
     "Notes": "Greenshot icons too small on higher resolutions, gave ShareX a shot, kinda meh"
   },
   {
+    "Name": "SKHynix Drive Manager",
+    "ChocolateyName": "",
+    "WingetName": "SKHynix.DriverManager",
+    "Groups": [],
+    "Notes": "ssd.skhynix.com//download"
+  },
+
+  {
     "Name": "SoundCloud",
     "ChocolateyName": "",
     "WingetName": "9NVJBT29B36L",
