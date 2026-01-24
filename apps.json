@@ -154,6 +154,13 @@
     "Notes": ""
   },
   {
+    "Name": "Bluetooth Tweaker",
+    "ChocolateyName": "",
+    "WingetName": "LuculentSystems.BluetoothTweaker",
+    "Groups": [""],
+    "Notes": "Tool to view Bluetooth codec usage"
+  },
+  {
     "Name": "Boom Audio Player",
     "ChocolateyName": "",
     "WingetName": "9NQNS46R8T75",
