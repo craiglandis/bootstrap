@@ -224,6 +224,13 @@
     "Notes": "Winget doesn't have a portable package, only CPUID.CPU-Z. The cpu-z.portable package didn't work for some reason. The non-portable chocolatey CPU-Z package name is cpu-z.install or just cpu-z"
   },
   {
+    "Name": "Creative App",
+    "ChocolateyName": "",
+    "WingetName": "CreativeTechnology.CreativeApp",
+    "Groups": ["PC"],
+    "Notes": ""
+  },
+  {
     "Name": "CrystalDiskInfo",
     "ChocolateyName": "crystaldiskinfo.portable",
     "WingetName": "CrystalDewWorld.CrystalDiskInfo",
