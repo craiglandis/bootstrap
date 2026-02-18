@@ -586,7 +586,7 @@ process
     if ($isWin11)
     {
         # Settings app -> Accessibility -> Visual options -> Always show scrollbars = On
-        Invoke-ExpressionWithLogging "reg add 'HKCU\Control Panel\Accessibility' /v DynamicScrollbars /t REG_DWORD /d 0 /f"
+        Invoke-ExpressionWithLogging "New-ItemProperty -Path 'HKCU:\Control Panel\Accessibility' -Name 'DynamicScrollbars' -PropertyType 'DWord' -Value 0 -Force | Out-Null"
         # Enable classic context menu
         # Invoke-ExpressionWithLogging "reg add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve | Out-Null"
         # Disable classic context menu (restores Win11 default context menu)
