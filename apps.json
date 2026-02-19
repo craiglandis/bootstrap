@@ -475,6 +475,27 @@
     "Notes": ""
   },
   {
+    "Name": "Intel Driver And Support Assistant",
+    "ChocolateyName": "",
+    "WingetName": "Intel.IntelDriverAndSupportAssistant",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
+    "Name": "Intel System Support Utility",
+    "ChocolateyName": "",
+    "WingetName": "Intel.SystemSupportUtility",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
+    "Name": "iPerf3",
+    "ChocolateyName": "iperf3",
+    "WingetName": "",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "iPerf3",
     "ChocolateyName": "iperf3",
     "WingetName": "",
