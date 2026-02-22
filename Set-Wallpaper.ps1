@@ -11,7 +11,7 @@ param(
 	#[string]$path = 'C:\my',
     [string]$outputPath = 'C:\my\Set-Wallpaper',
 	[int]$fontSize,
-	[ValidateSet('left', 'right')]
+	[ValidateSet('left','right')]
 	[string]$justify,
 	[switch]$show,
 	[switch]$weather,
@@ -2620,7 +2620,7 @@ if (Test-Path -Path $xlsxPath -PathType Leaf)
 	Invoke-Item	-Path $xlsxPath
 }
 
-$device | Export-Excel -Path $xlsxPath -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -Append -ErrorAction Stop 
+$device | Export-Excel -Path $xlsxPath -TableStyle Medium12 -FreezeTopRow -AutoSize -MaxAutoSizeRows 3 -AutoFilter -NoNumberConversion * -Append -ErrorAction Stop
 if (Test-Path -Path $xlsxPath -PathType Leaf)
 {
 	Out-Log $xlsxPath -raw
