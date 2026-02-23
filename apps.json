@@ -196,18 +196,11 @@
     "Notes": "Windows versions with winget can you it to install Chocolatey. As of Aug 2025 some things still aren't available on winget but are on chocolatey, or the chocolatey package is more current than the winget package."
   },
   {
-    "Name": "Cinebench 2024",
-    "ChocolateyName": "cinebench",
+    "Name": "Cinebench 2026",
+    "ChocolateyName": "",
     "WingetName": "",
     "Groups": [],
-    "Notes": "Cinebench is a commonly used CPU benchmarking tool. 2024 is newer than R23 but R23 is still used more because people are familiar with the scores and the numbers are higer. Did not find a 2024 winget package as of Feb 2025."
-  },
-  {
-    "Name": "Cinebench R23",
-    "ChocolateyName": "",
-    "WingetName": "Maxon.CinebenchR23",
-    "Groups": [],
-    "Notes": "Cinebench is a commonly used CPU benchmarking tool. R23 is older than 2024 but R23 is still used more because people are familiar with the scores and the numbers are higer. Did not find an R23 chocolatey package as of Feb 2025."
+    "Notes": ""
   },
   {
     "Name": "CoreTemp",
@@ -389,6 +382,13 @@
     "ChocolateyName": "foobar2000",
     "WingetName": "PeterPawlowski.foobar2000",
     "Groups": ["Media"],
+    "Notes": ""
+  },
+  {
+    "Name": "Geekbench",
+    "ChocolateyName": "geekbench",
+    "WingetName": "",
+    "Groups": [],
     "Notes": ""
   },
   {
@@ -809,6 +809,13 @@
     "WingetName": "BitSum.ParkControl",
     "Groups": [],
     "Notes": "Display and change CPU core parking settings in real-time, as of Jan 2025 could not find an equivalent chocolatey package for it"
+  },
+  {
+    "Name": "Passmark PerformanceTest",
+    "ChocolateyName": "",
+    "WingetName": "PassMark.PerformanceTest",
+    "Groups": [],
+    "Notes": "Passmark PerformanceTest is a benchmarking tool that includes CPU, GPU, RAM, and disk benchmarks"
   },
   {
     "Name": "PC Manager",
