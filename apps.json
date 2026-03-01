@@ -1,8 +1,8 @@
 [
   {
-    "Name": ".NET 7.0 SDK",
-    "ChocolateyName": "dotnet-7.0-sdk",
-    "WingetName": "Microsoft.DotNet.SDK.7",
+    "Name": ".NET SDK 10.0",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.DotNet.SDK.10",
     "Groups": ["HV","PC","VM"],
     "Notes": ""
   },
