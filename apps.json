@@ -1,5 +1,12 @@
 [
   {
+    "Name": ".NET Windows Desktop Runtime 10.0",
+    "ChocolateyName": "",
+    "WingetName": "Microsoft.DotNet.DesktopRuntime.10",
+    "Groups": ["HV","PC","VM"],
+    "Notes": ""
+  },
+  {
     "Name": ".NET SDK 10.0",
     "ChocolateyName": "",
     "WingetName": "Microsoft.DotNet.SDK.10",
