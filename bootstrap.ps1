@@ -1718,6 +1718,9 @@ else
     $activePowerPlan = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerPlan -Filter "IsActive = $true"
     Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
+    # Remove desktop shortcuts
+    Get-ChildItem -Path $env:USERPROFILE\Desktop\* -Include *.lnk,*.url | Remove-Item # -WhatIf
+
     $desiredMaximumSizeInBytes = 100MB
     'Application','System','Security' | ForEach-Object {
         $logName = $_
