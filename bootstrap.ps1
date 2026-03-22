@@ -1719,8 +1719,23 @@ else
     Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
     # Remove desktop shortcuts
-    Get-ChildItem -Path $env:USERPROFILE\Desktop\* -Include *.lnk,*.url | Remove-Item # -WhatIf
-    Get-ChildItem -Path $env:PUBLIC\Desktop\* -Include *.lnk,*.url | Remove-Item # -WhatIf
+    if (Test-Path -Path $env:USERPROFILE\Desktop -PathType Container)
+    {
+        Get-ChildItem -Path $env:USERPROFILE\Desktop\* -Include *.lnk,*.url | Remove-Item -WhatIf:$whatif
+    }
+    else
+    {
+        Write-Error "Folder not found: $env:USERPROFILE\Desktop"
+    }
+
+    if (Test-Path -Path $env:PUBLIC\Desktop -PathType Container)
+    {
+        Get-ChildItem -Path $env:PUBLIC\Desktop\* -Include *.lnk,*.url | Remove-Item -WhatIf:$whatif
+    }
+    else
+    {
+        Write-Host "Folder not found: $env:USERPROFILE\Desktop"
+    }
 
     $desiredMaximumSizeInBytes = 100MB
     'Application','System','Security' | ForEach-Object {
