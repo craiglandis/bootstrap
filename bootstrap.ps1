@@ -1719,6 +1719,7 @@ else
     Out-Log "Active power plan: $($activePowerPlan.ElementName) $($activePowerPlan.InstanceID.Replace('Microsoft:PowerPlan\',''))"
 
     # Remove desktop shortcuts
+    Out-Log "Checking `$env:USERPROFILE\Desktop ($env:USERPROFILE\Desktop)" -Color Cyan
     if (Test-Path -Path $env:USERPROFILE\Desktop -PathType Container)
     {
         Get-ChildItem -Path $env:USERPROFILE\Desktop\* -Include *.lnk,*.url | Remove-Item -WhatIf:$whatif
@@ -1728,13 +1729,24 @@ else
         Write-Error "Folder not found: $env:USERPROFILE\Desktop"
     }
 
+    Out-Log "Checking `$env:OneDrive\Desktop ($env:OneDrive\Desktop)" -Color Cyan
+    if (Test-Path -Path $env:OneDrive\Desktop -PathType Container)
+    {
+        Get-ChildItem -Path $env:OneDrive\Desktop\* -Include *.lnk,*.url | Remove-Item -WhatIf:$whatif
+    }
+    else
+    {
+        Write-Error "Folder not found: $env:OneDrive\Desktop"
+    }
+
+    Out-Log "Checking `$env:PUBLIC\Desktop ($env:PUBLIC\Desktop)" -Color Cyan
     if (Test-Path -Path $env:PUBLIC\Desktop -PathType Container)
     {
         Get-ChildItem -Path $env:PUBLIC\Desktop\* -Include *.lnk,*.url | Remove-Item -WhatIf:$whatif
     }
     else
     {
-        Write-Host "Folder not found: $env:USERPROFILE\Desktop"
+        Write-Host "Folder not found: $env:PUBLIC\Desktop"
     }
 
     $desiredMaximumSizeInBytes = 100MB
