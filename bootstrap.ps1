@@ -1720,6 +1720,7 @@ else
 
     # Remove desktop shortcuts
     Get-ChildItem -Path $env:USERPROFILE\Desktop\* -Include *.lnk,*.url | Remove-Item # -WhatIf
+    Get-ChildItem -Path $env:PUBLIC\Desktop\* -Include *.lnk,*.url | Remove-Item # -WhatIf
 
     $desiredMaximumSizeInBytes = 100MB
     'Application','System','Security' | ForEach-Object {
