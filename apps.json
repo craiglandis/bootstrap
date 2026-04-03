@@ -350,6 +350,13 @@
     "Notes": ""
   },
   {
+    "Name": "FastCopy",
+    "ChocolateyName": "",
+    "WingetName": "FastCopy.FastCopy",
+    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": "fastcopy.jp"
+  },
+  {
     "Name": "Fawesome",
     "ChocolateyName": "",
     "WingetName": "9P55DW09XK2D",
