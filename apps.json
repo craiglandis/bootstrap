@@ -853,6 +853,13 @@
     "Notes": ""
   },
   {
+    "Name": "Plex Media Server",
+    "ChocolateyName": "",
+    "WingetName": "Plex.PlexMediaServer",
+    "Groups": ["Media"],
+    "Notes": ""
+  },
+  {
     "Name": "Pluto",
     "ChocolateyName": "",
     "WingetName": "9P9LV240KQ9R",
