@@ -853,6 +853,13 @@
     "Notes": ""
   },
   {
+    "Name": "Plexamp",
+    "ChocolateyName": "",
+    "WingetName": "Plex.Plexamp",
+    "Groups": ["Media"],
+    "Notes": ""
+  },
+  {
     "Name": "Plex Media Server",
     "ChocolateyName": "",
     "WingetName": "Plex.PlexMediaServer",
