@@ -503,13 +503,6 @@
     "Notes": ""
   },
   {
-    "Name": "iPerf3",
-    "ChocolateyName": "iperf3",
-    "WingetName": "",
-    "Groups": [],
-    "Notes": ""
-  },
-  {
     "Name": "iCloud",
     "ChocolateyName": "",
     "WingetName": "9PKTQ5699M62",
