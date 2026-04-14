@@ -538,6 +538,13 @@
     "Notes": ""
   },
   {
+    "Name": "Latency Tester",
+    "ChocolateyName": "",
+    "WingetName": "9P7NKPXPR5FN",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "Lenovo System Update",
     "ChocolateyName": "lenovo-thinkvantage-system-update",
     "WingetName": "Lenovo.SystemUpdate",
