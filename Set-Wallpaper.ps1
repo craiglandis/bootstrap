@@ -1828,6 +1828,7 @@ public class NetAPI32{
 		$board = "$baseBoardManufacturer $baseBoardProduct BIOS $bios"
 	#}
 
+    Import-Module -Name DISM -UseWindowsPowerShell
 	$hyperVEnabled = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | Select-Object -ExpandProperty State
 
 	$logicalDisks = Get-CimInstance -Query 'SELECT DeviceID,Size,FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3'
