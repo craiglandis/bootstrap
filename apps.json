@@ -350,6 +350,13 @@
     "Notes": ""
   },
   {
+    "Name": "FastCopy",
+    "ChocolateyName": "fastcopy.portable",
+    "WingetName": "",
+    "Groups": [""],
+    "Notes": "There is a FastCopy.FastCopy winget package but that is not a portable install, the choco package fastcopy.portable is portable and because of how chocolatey does shims, it is available from any directory. https://fastcopy.jp/help/fastcopy_eng.htm#cmdline"
+  },
+  {
     "Name": "Fawesome",
     "ChocolateyName": "",
     "WingetName": "9P55DW09XK2D",
