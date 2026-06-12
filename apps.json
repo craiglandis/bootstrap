@@ -952,6 +952,13 @@
     "Notes": "See also https://github.com/NickeManarin/ScreenToGif/releases, ScreenToGif requires .NET Desktop Runtime 6.0.1+"
   },
   {
+    "Name": "Seagate SeaTools",
+    "ChocolateyName": "",
+    "WingetName": "Seagate.SeaTools",
+    "Groups": [],
+    "Notes": "https://www.seagate.com/support/downloads/seatools/"
+  },
+  {
     "Name": "SetUserFTA",
     "ChocolateyName": "setuserfta",
     "WingetName": "",
