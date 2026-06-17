@@ -931,6 +931,13 @@
     "Notes": "After Python.PythonInstallManager is installed, run: & 'C:\\Program Files\\PyManager\\py.exe' install 3"
   },
   {
+    "Name": "Raspberry Pi Imager",
+    "ChocolateyName": "",
+    "WingetName": "RaspberryPiFoundation.RaspberryPiImager",
+    "Groups": ["PC"],
+    "Notes": "Tool that will pull down the latest RPi OS and write it to SD card https://www.raspberrypi.com/software/"
+  },
+  {
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
