@@ -1061,6 +1061,13 @@
     "Notes": "By default installs the module in the AllUsers scope for Windows PowerShell (i.e. Desktop Edition). Terminal-Icons is a PowerShell module that adds file and folder icons when displaying items in the terminal. You must be using one of the fonts provided by Nerd Fonts for this module to work as these fonts include tons of custom glyphs/icons that are referenced by their unicode number. Not using this for PC since PC will have them in C:\\ODM\\Modules"
   },
   {
+    "Name": "Tiger VNC",
+    "ChocolateyName": "",
+    "WingetName": "TigerVNC.TigerVNC",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "Tubi",
     "ChocolateyName": "",
     "WingetName": "9N1SV6841F0B",
