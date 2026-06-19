@@ -741,7 +741,7 @@
     "Notes": "Nerd fonts have additional glyphs, icons, and ligatures that regular fonts do not"
   },
   {
-    "Name": "nodejs",
+    "Name": "Node.js",
     "ChocolateyName": "",
     "WingetName": "OpenJS.NodeJS",
     "Groups": [],
