@@ -252,6 +252,14 @@
     "Notes": "Win11 22H2 includes curl 8.01 but chocolatey and winget have latest which is 8.2.1 as of 2023-08-27 https://curl.se/download.html, (WS25 RTM has curl.exe 8.8.0)"
   },
   {
+    "Name": "CyberPower PowerPanel",
+    "ChocolateyName": "",
+    "WingetName": "CyberPowerSystemsInc.PowerPanelPersonal",
+    "Groups": [],
+    "Notes": ""
+  },
+
+  {
     "Name": "DevToys",
     "ChocolateyName": "",
     "WingetName": "9PGCV4V3BK4W",
