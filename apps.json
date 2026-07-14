@@ -315,6 +315,14 @@
     "Notes": "msstore 9MVVSZK43QQW, note that draw.io was rebranded to diagrams.net, so all three of these install the same app - JGraph.Draw, draw.io, diagrams.net"
   },
   {
+    "Name": "DuckDB",
+    "ChocolateyName": "",
+    "WingetName": "DuckDB.cli",
+    "Groups": [],
+    "Notes": "DuckDB is like a more modern and faster SQLLite https://github.com/duckdb/duckdb"
+  },
+
+  {
     "Name": "EA Desktop",
     "ChocolateyName": "",
     "WingetName": "ElectronicArts.EADesktop",
