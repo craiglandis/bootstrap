@@ -735,6 +735,13 @@
     "Notes": ""
   },
   {
+    "Name": "NanaZip",
+    "ChocolateyName": "",
+    "WingetName": "M2Team.NanaZip.Preview",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "Nmap",
     "ChocolateyName": "",
     "WingetName": "Insecure.Nmap",
