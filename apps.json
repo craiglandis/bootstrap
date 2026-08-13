@@ -770,6 +770,13 @@
     "Notes": ""
   },
   {
+    "Name": "Notepad3",
+    "ChocolateyName": "",
+    "WingetName": "Rizonesoft.Notepad3",
+    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": ""
+  },
+  {
     "Name": "Nuget CLI",
     "ChocolateyName": "NuGet.CommandLine",
     "WingetName": "Microsoft.NuGet",
