@@ -742,6 +742,13 @@
     "Notes": ""
   },
   {
+    "Name": "MusicBee",
+    "ChocolateyName": "",
+    "WingetName": "9P4CLT2RJ1RS",
+    "Groups": ["PC","Media"],
+    "Notes": "getmusicbee.com"
+  },
+  {
     "Name": "NanaZip",
     "ChocolateyName": "",
     "WingetName": "M2Team.NanaZip.Preview",
