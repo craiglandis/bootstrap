@@ -714,6 +714,13 @@
     "Notes": "Tools for working with MKV files. Includes MKVExtract for extracting audio from .MKV video file."
   },
   {
+    "Name": "mpv.net",
+    "ChocolateyName": "",
+    "WingetName": "mpv.net",
+    "Groups": ["PC","Media"],
+    "Notes": "github.com//mpvnet-player//mpv.net"
+  },
+  {
     "Name": "mpvio",
     "ChocolateyName": "mpvio",
     "WingetName": "",
