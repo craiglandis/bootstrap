@@ -784,6 +784,13 @@
     "Notes": "Winget package appears to be more current, on 2022-05-24, chocolatey (package 'nodejs') had 17.9.0, winget (package 'OpenJS.NodeJS') had 18.2.0, which at that time was the latest on https://github.com/nodejs/node/releases"
   },
   {
+    "Name": "NordVPN",
+    "ChocolateyName": "",
+    "WingetName": "NordSecurity.NordVPN",
+    "Groups": ["HV","PC","QUICKVM","VM"],
+    "Notes": ""
+  },
+  {
     "Name": "Notepad++",
     "ChocolateyName": "notepadplusplus",
     "WingetName": "Notepad++.Notepad++",
