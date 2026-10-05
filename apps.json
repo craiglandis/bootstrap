@@ -868,13 +868,6 @@
     "Notes": "https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release, Microsoft.OpenSSH.Preview is the bleeding edge, newer than Microsoft.OpenSSH.Beta"
   },
   {
-    "Name": "Paramount",
-    "ChocolateyName": "",
-    "WingetName": "9WZDNCRFJ0WK",
-    "Groups": ["Streaming"],
-    "Notes": ""
-  },
-  {
     "Name": "ParkControl",
     "ChocolateyName": "",
     "WingetName": "BitSum.ParkControl",
@@ -979,6 +972,13 @@
     "WingetName": "Python.PythonInstallManager",
     "Groups": ["HV","VM"],
     "Notes": "After Python.PythonInstallManager is installed, run: & 'C:\\Program Files\\PyManager\\py.exe' install 3"
+  },
+  {
+    "Name": "qBittorrent",
+    "ChocolateyName": "",
+    "WingetName": "qBittorrent.qBittorrent",
+    "Groups": ["PC"],
+    "Notes": "https://github.com/qbittorrent/qBittorrent/wiki"
   },
   {
     "Name": "Raspberry Pi Imager",
