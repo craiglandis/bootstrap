@@ -518,6 +518,13 @@
     "Notes": ""
   },
   {
+    "Name": "Internet Download Manager (IDM)",
+    "ChocolateyName": "",
+    "WingetName": "Tonec.InternetDownloadManager",
+    "Groups": [],
+    "Notes": ""
+  },
+  {
     "Name": "iPerf3",
     "ChocolateyName": "iperf3",
     "WingetName": "",
