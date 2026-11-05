@@ -861,6 +861,13 @@
     "Notes": "OneNote for Windows 10 is still installable via winget though doesn't show up when searching for it."
   },
   {
+    "Name": "Open Video Downloader",
+    "ChocolateyName": "",
+    "WingetName": "jely2002.youtube-dl-gui",
+    "Groups": ["PC","Media"],
+    "Notes": ""
+  },
+  {
     "Name": "Outlook for Windows",
     "ChocolateyName": "",
     "WingetName": "9NRX63209R7B",
