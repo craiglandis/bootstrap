@@ -1149,9 +1149,9 @@
     "Name": "Visual Studio Code",
     "ChocolateyName": "vscode",
     "WingetName": "Microsoft.VisualStudioCode",
-    "WingetScope": "machine",
+    "WingetScope": "",
     "Groups": ["HV","PC","QUICKVM","VM"],
-    "Notes": "msstore version is XP9KHM4BK9FZ7Q This defaults to a system install, not user, so it installs to Program Files, not LOCALAPPDATA, not sure how to specify a user install for this package."
+    "Notes": "'winget install --id Microsoft.VisualStudioCode --exact --scope user' works for per user install even run from elevated, point of user install is that I do not get bothered by vscode prompting for updates but instead handle the updates like my other stuff with winget"
   },
   {
     "Name": "Visual Studio Code CLI",
