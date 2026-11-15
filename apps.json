@@ -560,6 +560,13 @@
     "Notes": ""
   },
   {
+    "Name": "Jellyfin",
+    "ChocolateyName": "",
+    "WingetName": "Jellyfin.Server",
+    "Groups": ["Media"],
+    "Notes": ""
+  },
+  {
     "Name": "kubectl",
     "ChocolateyName": "kubernetes-cli",
     "WingetName": "",
