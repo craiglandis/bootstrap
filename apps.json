@@ -1009,6 +1009,13 @@
     "Notes": "Tool that will pull down the latest RPi OS and write it to SD card https://www.raspberrypi.com/software/"
   },
   {
+    "Name": "Razer Synapse 4",
+    "ChocolateyName": "",
+    "WingetName": "RazerInc.RazerInstaller.Synapse4",
+    "Groups": ["PC"],
+    "Notes": "For Razer mice config/firmware"
+  },
+  {
     "Name": "Rufus",
     "ChocolateyName": "rufus.portable",
     "WingetName": "",
